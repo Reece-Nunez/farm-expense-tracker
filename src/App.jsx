@@ -3,6 +3,8 @@ import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseTable from "@/components/ExpenseTable";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { toast } from "react-hot-toast";
+import "./index.css";
+
 
 export default function App() {
   const [expenses, setExpenses] = useState([]);
