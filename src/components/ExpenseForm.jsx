@@ -117,7 +117,9 @@ export default function ExpenseForm({
               onChange={handleDateChange}
               placeholderText="Select Date"
               dateFormat="yyyy-MM-dd"
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
               isClearable
             />
             {errors.date && (
@@ -136,7 +138,9 @@ export default function ExpenseForm({
               decimalScale={2}
               allowNegativeValue={false}
               placeholder="Unit Cost"
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
               value={watchUnitCost}
               onValueChange={handleUnitCostChange}
             />
@@ -154,7 +158,9 @@ export default function ExpenseForm({
               type="number"
               placeholder="Quantity"
               {...register("quantity")}
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
             />
             {errors.quantity && (
               <p className="text-red-500 text-sm">{errors.quantity.message}</p>
@@ -178,7 +184,9 @@ export default function ExpenseForm({
             </label>
             <Select
               {...register("category")}
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
             >
               <option value="">Select Category</option>
               {categories.map((cat) => (
@@ -200,7 +208,9 @@ export default function ExpenseForm({
             <Input
               placeholder="Item"
               {...register("item")}
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
             />
             {errors.item && (
               <p className="text-red-500 text-sm">{errors.item.message}</p>
@@ -215,7 +225,9 @@ export default function ExpenseForm({
             <Input
               placeholder="Vendor"
               {...register("vendor")}
-              className="w-full border rounded px-3 py-2"
+              className={`w-full border rounded px-3 py-2 ${
+                errors.quantity ? "animate-shake border-red-500" : ""
+              }`}
             />
             {errors.vendor && (
               <p className="text-red-500 text-sm">{errors.vendor.message}</p>
