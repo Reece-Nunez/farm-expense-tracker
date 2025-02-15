@@ -1,6 +1,6 @@
 export function Card({ children, className = "", ...props }) {
   return (
-    <div className={`rounded-2xl shadow p-4 bg-white ${className}`} {...props}>
+    <div className={`rounded-2xl shadow p-4 bg-gray-300 mt-4 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -8,7 +8,7 @@ export function Card({ children, className = "", ...props }) {
 
 export function CardHeader({ children, className = "", ...props }) {
   return (
-    <div className={`text-xl font-bold mb-2 ${className}`} {...props}>
+    <div className={`text-3xl font-bold mb-2 ${className}`} {...props}>
       {children}
     </div>
   );

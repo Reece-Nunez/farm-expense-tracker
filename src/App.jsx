@@ -1,53 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import AuthPage from "@/components/AuthPage";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseTable from "@/components/ExpenseTable";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { toast } from "react-hot-toast";
+import Modal from 'react-modal';
 import "./index.css";
 
+export const AuthContext = React.createContext();
 
-export default function App() {
-  const [expenses, setExpenses] = useState([]);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [pendingData, setPendingData] = useState(null);
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Called by ExpenseForm when the form is valid
-  const handleValidSubmit = (formData) => {
-    // We have valid data, open the confirm modal
-    setPendingData(formData);
-    setIsConfirmOpen(true);
+  const login = (credentials) => {
+    const userExists = registeredUsers.find(
+      (user) => user.username === credentials.username && user.password === credentials.password
+    );
+    if (userExists) setUser(credentials);
+    else throw new Error("Invalid username or password");
   };
 
-  // Actually finalize the submission after confirm
-  const confirmSubmit = () => {
-    if (!pendingData) return;
-    // Add to local array
-    setExpenses((prev) => [...prev, pendingData]);
-    toast.success("Expense submitted!");
-    // close modal
-    setIsConfirmOpen(false);
-    setPendingData(null);
-  };
-
-  const cancelSubmit = () => {
-    setIsConfirmOpen(false);
-    setPendingData(null);
+  const register = (credentials) => {
+    setRegisteredUsers((prev) => [...prev, credentials]);
+    setIsModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      {/* FORM */}
-      <ExpenseForm onValidSubmit={handleValidSubmit} />
+    <AuthContext.Provider value={{ user, login, register }}>
+      {children}
+      <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)}>
+        <h2>Registration Successful!</h2>
+        <p>You have been registered successfully.</p>
+        <button onClick={() => setIsModalOpen(false)}>Close</button>
+      </Modal>
+    </AuthContext.Provider>
+  );
+};
 
-      {/* TABLE */}
-      <ExpenseTable expenses={expenses} />
-
-      {/* CONFIRMATION MODAL */}
-      <ConfirmationModal
-        isOpen={isConfirmOpen}
-        onRequestClose={cancelSubmit}
-        onConfirm={confirmSubmit}
-      />
-    </div>
+export default function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/dashboard" element={<AuthPage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }

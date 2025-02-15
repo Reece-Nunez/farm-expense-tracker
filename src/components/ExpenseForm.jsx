@@ -103,7 +103,7 @@ export default function ExpenseForm({
   return (
     <Card className="max-w-4xl mx-auto p-6 mb-6">
       <CardHeader className="text-2xl font-bold flex items-center justify-center">
-        Farm Expense Tracker
+        Expense Form
       </CardHeader>
       <CardContent className="mt-4 space-y-4">
         <form onSubmit={handleSubmit(onValid, onInvalid)}>
@@ -251,7 +251,7 @@ export default function ExpenseForm({
             <Button
               type="button"
               onClick={() => reset()}
-              className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+              className="bg-slate-700 hover:bg-gray-600 text-black px-4 py-2 rounded"
             >
               Clear
             </Button>
