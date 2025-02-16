@@ -1,52 +1,51 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { incomeSchema } from "@/schemas/incomeSchema";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { incomeSchema } from "@/schemas/incomeSchema";
 
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
 
 export default function IncomeForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(incomeSchema)
   });
 
-  const onSubmit = (data) => {
-    console.log("Income data submitted:", data);
-  };
+  const item = watch("itemSold");
+  const price = watch("pricePerUnit");
+  const quantity = watch("weightOrQuantity");
+  const total = price && quantity ? (price * quantity).toFixed(2) : "";
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 mb-6">
-      <CardHeader className="text-2xl font-bold text-center">Income Form</CardHeader>
+    <Card className="max-w-4xl mx-auto p-6">
+      <CardHeader className="text-2xl font-bold mb-4">Income Form</CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label>Payment Method</label>
-            <Select {...register("paymentMethod")}> 
-              {paymentMethods.map((method) => <option key={method} value={method}>{method}</option>)}
-            </Select>
-            {errors.paymentMethod && <p className="text-red-500">{errors.paymentMethod.message}</p>}
-          </div>
-
-          <div>
-            <label>Item Sold</label>
-            <Select {...register("itemSold")}>
-              {itemsSold.map((item) => <option key={item} value={item}>{item}</option>)}
-            </Select>
-            {errors.itemSold && <p className="text-red-500">{errors.itemSold.message}</p>}
-          </div>
-
-          <div>
-            <label>Amount</label>
-            <Input type="number" {...register("amount")} />
-            {errors.amount && <p className="text-red-500">{errors.amount.message}</p>}
-          </div>
-
-          <Button type="submit" className="w-full bg-green-500">Submit</Button>
+        <form onSubmit={handleSubmit((data) => console.log(data))}>
+          <Select {...register("paymentMethod")}>
+            <option value="">Select Payment Method</option>
+            {paymentMethods.map((method) => <option key={method}>{method}</option>)}
+          </Select>
+          <Select {...register("itemSold")}>
+            <option value="">Select Item Sold</option>
+            {itemsSold.map((item) => <option key={item}>{item}</option>)}
+          </Select>
+          {item && item !== "Other" && (
+            <Input
+              {...register("weightOrQuantity")}
+              placeholder={item === "Eggs" ? "Enter dozens (e.g., 1 or 0.5)" : "Enter weight in pounds"}
+              type="number"
+              step="0.01"
+            />
+          )}
+          <Input {...register("pricePerUnit")} placeholder="Price per unit" type="number" step="0.01" />
+          <Input readOnly value={total ? `$${total}` : ""} placeholder="Total" />
+          <Input {...register("date")} type="date" />
+          <Input {...register("description")} placeholder="Description (optional)" />
+          <Button type="submit" className="mt-4">Submit</Button>
         </form>
       </CardContent>
     </Card>
