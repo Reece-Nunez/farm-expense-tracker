@@ -42,9 +42,11 @@ export default function IncomeForm({ onValidSubmit }) {
   const item = watch("itemSold");
   const navigate = useNavigate();
 
-  const price = parseFloat(watch("pricePerUnit")) || 0;
-  const quantity = parseFloat(watch("weightOrQuantity")) || 0;
-  const total = (price * quantity).toFixed(2);
+  const watchPricePerUnit = watch("pricePerUnit");
+  const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
+  const total =
+    parseFloat(watchPricePerUnit || 0) *
+      parseFloat(watchWeightOrQuantity || 0) || 0;
 
   const onValid = (data) => {
     onValidSubmit({
@@ -65,7 +67,7 @@ export default function IncomeForm({ onValidSubmit }) {
         Income Form
       </CardHeader>
       <CardContent className="mt-4 space-y-6">
-        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-4">
+        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-6">
           <DatePicker
             selected={watchDate ? new Date(watchDate) : null}
             onChange={handleDateChange}
@@ -98,38 +100,49 @@ export default function IncomeForm({ onValidSubmit }) {
           </Select>
 
           {item && item !== "Other" && (
-            <Input
-              type="number"
-              step="0.01"
-              placeholder={
-                item === "Eggs"
-                  ? "Enter dozens (e.g., 1 or 0.5)"
-                  : "Enter weight in pounds"
-              }
-              {...register("weightOrQuantity")}
-              className={`w-full border rounded px-3 py-2 ${
-                errors.weightOrQuantity ? "animate-shake border-red-500" : ""
-              }`}
-            />
+            <div className="flex items-center space-x-2">
+              <Input
+                type="number"
+                step="any"
+                placeholder={
+                  item === "Eggs"
+                    ? "Enter dozens (e.g., 1 or 0.5)"
+                    : "Enter weight"
+                }
+                {...register("weightOrQuantity")}
+                className={`w-full border rounded px-3 py-2 ${
+                  errors.weightOrQuantity ? "animate-shake border-red-500" : ""
+                }`}
+              />
+              <span className="text-gray-700 font-medium">
+                {item === "Eggs" ? "dozen" : "lb"}
+              </span>
+            </div>
           )}
 
-          <CurrencyInput
-            prefix="$"
-            decimalsLimit={2}
-            decimalScale={2}
-            allowNegativeValue={false}
-            placeholder="Price per unit"
-            value={price}
-            onValueChange={handlePriceChange}
-            className={`w-full border rounded px-3 py-2 ${
-              errors.pricePerUnit ? "animate-shake border-red-500" : ""
-            }`}
-          />
+          <div className="flex items-center space-x-2">
+            <CurrencyInput
+              prefix="$"
+              decimalsLimit={2}
+              decimalScale={2}
+              allowNegativeValue={false}
+              placeholder="Price per dozen or pound"
+              value={watchPricePerUnit}
+              onValueChange={handlePriceChange}
+              className={`w-full border rounded px-3 py-2 ${
+                errors.pricePerUnit ? "animate-shake border-red-500" : ""
+              }`}
+            />
+            <span className="text-gray-700 font-medium">
+              {item === "Eggs" ? "dozen" : "lb"}
+            </span>
+          </div>
 
           <Input
             readOnly
-            value={total > 0 ? `$${total}` : ""}
+            value={total > 0 ? `$${total.toFixed(2)}` : ""}
             className="w-full border rounded px-3 py-2 bg-gray-100"
+            placeholder="Total"
           />
 
           <Textarea
@@ -138,7 +151,7 @@ export default function IncomeForm({ onValidSubmit }) {
             className="w-full border rounded px-3 py-2"
           />
 
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-around mt-4 space-x-4">
             <Button
               type="button"
               onClick={() => reset()}

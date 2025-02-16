@@ -72,7 +72,6 @@ export default function ExpenseForm({
   const watchQuantity = watch("quantity");
   const navigate = useNavigate();
 
-
   // Calculate total cost
   const totalCost =
     parseFloat(watchUnitCost || 0) * parseFloat(watchQuantity || 0) || 0;
@@ -250,7 +249,7 @@ export default function ExpenseForm({
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-around mt-4">
             <Button
               type="button"
               onClick={() => reset()}
