@@ -1,0 +1,32 @@
+input AMPLIFY {
+  globalAuthRule: AuthRule = { allow: public }
+} # FOR TESTING ONLY!
+type User @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  username: String!
+  email: String!
+  expenses: [Expense] @hasMany
+  income: [Income] @hasMany
+}
+
+type Expense @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: ID!
+  date: AWSDate!
+  category: String!
+  item: String!
+  vendor: String!
+  unitCost: Float!
+  quantity: Int!
+  totalCost: Float!
+  description: String
+}
+
+type Income @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: ID!
+  date: AWSDate!
+  source: String!
+  amount: Float!
+  notes: String
+}

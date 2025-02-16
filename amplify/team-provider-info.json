@@ -10,6 +10,14 @@
       "StackName": "amplify-farmexpensetracker-dev-3b0d2",
       "StackId": "arn:aws:cloudformation:us-east-1:730335638958:stack/amplify-farmexpensetracker-dev-3b0d2/0302c5d0-ebeb-11ef-931b-0affe30c0943",
       "AmplifyAppId": "d1vmyzw49srl6b"
+    },
+    "categories": {
+      "auth": {
+        "farmexpensetracker1da593af": {}
+      },
+      "api": {
+        "farmexpensetracker": {}
+      }
     }
   }
 }
