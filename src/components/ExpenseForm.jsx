@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CurrencyInput from "react-currency-input-field";
+import { useNavigate } from "react-router-dom";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,8 @@ export default function ExpenseForm({
   const watchDate = watch("date");
   const watchUnitCost = watch("unitCost");
   const watchQuantity = watch("quantity");
+  const navigate = useNavigate();
+
 
   // Calculate total cost
   const totalCost =
@@ -260,6 +263,13 @@ export default function ExpenseForm({
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
             >
               Submit
+            </Button>
+            <Button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
+            >
+              Back to Dashboard
             </Button>
           </div>
         </form>
