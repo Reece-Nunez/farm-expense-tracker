@@ -15,7 +15,8 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { DataStore } from "aws-amplify";
-import { Expense, Income } from "../models";
+import { Expense } from "../model/Expense";
+import { Income } from "../model/Income";
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();
