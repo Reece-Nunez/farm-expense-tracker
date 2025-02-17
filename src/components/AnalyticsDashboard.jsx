@@ -14,9 +14,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
-import { DataStore } from "aws-amplify";
-import { Expense } from "../model/Expense";
-import { Income } from "../model/Income";
+import { DataStore } from "@aws-amplify/datastore";
+import { Expense, Income } from "../models";
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();

@@ -1,7 +1,15 @@
 input AMPLIFY {
   globalAuthRule: AuthRule = { allow: public }
 } # FOR TESTING ONLY!
-type User @model @auth(rules: [{ allow: owner }]) {
+
+type User
+  @model
+  @auth(
+    rules: [
+      { allow: owner }
+      { allow: private, operations: [create, read, update, delete] }
+    ]
+  ) {
   id: ID!
   username: String!
   email: String!
@@ -9,9 +17,16 @@ type User @model @auth(rules: [{ allow: owner }]) {
   income: [Income] @hasMany
 }
 
-type Expense @model @auth(rules: [{ allow: owner }]) {
+type Expense
+  @model
+  @auth(
+    rules: [
+      { allow: owner }
+      { allow: private, operations: [create, read, update, delete] }
+    ]
+  ) {
   id: ID!
-  userId: ID!
+  userId: ID! @index(name: "byUser")
   date: AWSDate!
   category: String!
   item: String!
@@ -22,9 +37,16 @@ type Expense @model @auth(rules: [{ allow: owner }]) {
   description: String
 }
 
-type Income @model @auth(rules: [{ allow: owner }]) {
+type Income
+  @model
+  @auth(
+    rules: [
+      { allow: owner }
+      { allow: private, operations: [create, read, update, delete] }
+    ]
+  ) {
   id: ID!
-  userId: ID!
+  userId: ID! @index(name: "byUser")
   date: AWSDate!
   source: String!
   amount: Float!

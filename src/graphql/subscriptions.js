@@ -12,14 +12,19 @@ export const onCreateUser = /* GraphQL */ `
       email
       expenses {
         nextToken
+        startedAt
         __typename
       }
       income {
         nextToken
+        startedAt
         __typename
       }
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       owner
       __typename
     }
@@ -36,14 +41,19 @@ export const onUpdateUser = /* GraphQL */ `
       email
       expenses {
         nextToken
+        startedAt
         __typename
       }
       income {
         nextToken
+        startedAt
         __typename
       }
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       owner
       __typename
     }
@@ -60,14 +70,19 @@ export const onDeleteUser = /* GraphQL */ `
       email
       expenses {
         nextToken
+        startedAt
         __typename
       }
       income {
         nextToken
+        startedAt
         __typename
       }
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       owner
       __typename
     }
@@ -91,6 +106,9 @@ export const onCreateExpense = /* GraphQL */ `
       description
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userExpensesId
       owner
       __typename
@@ -115,6 +133,9 @@ export const onUpdateExpense = /* GraphQL */ `
       description
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userExpensesId
       owner
       __typename
@@ -139,6 +160,9 @@ export const onDeleteExpense = /* GraphQL */ `
       description
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userExpensesId
       owner
       __typename
@@ -159,6 +183,9 @@ export const onCreateIncome = /* GraphQL */ `
       notes
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userIncomeId
       owner
       __typename
@@ -179,6 +206,9 @@ export const onUpdateIncome = /* GraphQL */ `
       notes
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userIncomeId
       owner
       __typename
@@ -199,6 +229,9 @@ export const onDeleteIncome = /* GraphQL */ `
       notes
       createdAt
       updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       userIncomeId
       owner
       __typename
