@@ -179,47 +179,6 @@ export const syncExpenses = /* GraphQL */ `
     }
   }
 `;
-export const expensesByUserId = /* GraphQL */ `
-  query ExpensesByUserId(
-    $userId: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelExpenseFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    expensesByUserId(
-      userId: $userId
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        userId
-        date
-        category
-        item
-        vendor
-        unitCost
-        quantity
-        totalCost
-        description
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userExpensesId
-        owner
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
 export const getIncome = /* GraphQL */ `
   query GetIncome($id: ID!) {
     getIncome(id: $id) {
@@ -295,6 +254,47 @@ export const syncIncomes = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userIncomeId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const expensesByUserId = /* GraphQL */ `
+  query ExpensesByUserId(
+    $userId: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelExpenseFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    expensesByUserId(
+      userId: $userId
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        userId
+        date
+        category
+        item
+        vendor
+        unitCost
+        quantity
+        totalCost
+        description
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        userExpensesId
         owner
         __typename
       }

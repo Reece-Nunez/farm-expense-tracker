@@ -17,6 +17,9 @@ import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import "./index.css";
+import { DataStore } from "@aws-amplify/datastore";
+import { Expense } from "./models";
+import { toast } from 'react-hot-toast';
 
 Amplify.configure({
   ...awsExports,
@@ -51,6 +54,30 @@ function App() {
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }
 
+  const handleExpenseSubmit = async (data) => {
+    try {
+      const newExpense = await DataStore.save(
+        new Expense({
+          userId: data.userId || "currentUserId", // Replace with actual user logic
+          date: data.dateStr,
+          category: data.category,
+          item: data.item,
+          vendor: data.vendor,
+          unitCost: parseFloat(data.unitCost),
+          quantity: parseInt(data.quantity),
+          totalCost: parseFloat(data.totalCost),
+          description: data.description || "",
+        })
+      );
+
+      console.log("Expense successfully saved:", newExpense);
+      toast.success("Expense successfully added!");
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      toast.error("Failed to save expense.");
+    }
+  };
+
   return (
     <Authenticator>
       {({ signOut, user }) => (
@@ -59,7 +86,10 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/expenses" element={<ExpenseTable />} />
-            <Route path="/add-expense" element={<ExpenseForm />} />
+            <Route
+              path="/add-expense"
+              element={<ExpenseForm onValidSubmit={handleExpenseSubmit} />}
+            />
             <Route path="/add-income" element={<IncomeForm />} />
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/confirm" element={<ConfirmationModal />} />
