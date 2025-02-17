@@ -1,20 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CurrencyInput from "react-currency-input-field";
 import { useNavigate } from "react-router-dom";
-
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-import { toast } from "react-hot-toast"; // for toasts
-
-import { expenseSchema } from "@/schemas/expenseSchema"; // import our Zod schema
+import { toast } from "react-hot-toast";
+import { expenseSchema } from "@/schemas/expenseSchema";
 
 //Typical Farm Expense Categories
 const categories = [
@@ -42,10 +39,7 @@ const categories = [
 ];
 
 //Start form with blank fields
-export default function ExpenseForm({
-  onValidSubmit, // function to call with final data
-}) {
-  // Set up React Hook Form with our Zod schema
+export default function ExpenseForm({ onValidSubmit, editingExpense }) {
   const {
     register,
     handleSubmit,
@@ -56,7 +50,7 @@ export default function ExpenseForm({
   } = useForm({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      date: "", // or null
+      date: "",
       unitCost: "",
       quantity: "",
       category: "",
@@ -65,6 +59,12 @@ export default function ExpenseForm({
       description: "",
     },
   });
+
+  useEffect(() => {
+    if (editingExpense) {
+      reset({ ...editingExpense, date: new Date(editingExpense.date) });
+    }
+  }, [editingExpense, reset]);
 
   // Watch fields for dynamic calculations
   const watchDate = watch("date");

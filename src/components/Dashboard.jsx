@@ -37,6 +37,12 @@ function Dashboard() {
         >
           Analytics Dashboard
         </button>
+        <button
+          className="p-3 bg-yellow-300 text-white rounded w-1/2"
+          onClick={() => navigate("/expenses")}
+        >
+          Expenses
+        </button>
         <Button
           className="p-3 bg-red-500 text-white rounded w-1/2"
           onClick={handleSignOut}

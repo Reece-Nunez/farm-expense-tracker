@@ -1,5 +1,3 @@
-import { ModelInit, MutableModel } from "@aws-amplify/datastore";
-
 export const Expense = {
   name: "Expense",
   fields: {
@@ -12,9 +10,12 @@ export const Expense = {
     unitCost: { type: "Float", required: true },
     totalCost: { type: "Float", required: true },
     description: { type: "String" },
-    userID: { type: "ID", required: true }
+    userID: { type: "ID", required: true },
   },
   syncable: true,
   pluralName: "Expenses",
-  attributes: [{ type: "model" }, { type: "auth", properties: { rules: [{ allow: "owner" }] } }]
+  attributes: [
+    { type: "model" },
+    { type: "auth", properties: { rules: [{ allow: "owner" }] } },
+  ],
 };
