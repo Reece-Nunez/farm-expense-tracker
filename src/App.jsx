@@ -18,7 +18,16 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import "./index.css";
 
-Amplify.configure(awsExports);
+Amplify.configure({
+  ...awsExports,
+  API: {
+    graphql_endpoint: awsExports.aws_appsync_graphqlEndpoint,
+    graphql_endpoint_iam_region: awsExports.aws_project_region,
+    graphql_headers: async () => ({
+      Authorization: (await Auth.currentSession()).getIdToken().getJwtToken(),
+    }),
+  },
+});
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);

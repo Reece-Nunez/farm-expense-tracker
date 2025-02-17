@@ -4,15 +4,10 @@
     "apiName": "farmexpensetracker",
     "serviceName": "AppSync",
     "defaultAuthType": {
-      "mode": "API_KEY",
-      "expirationTime": 7
+      "mode": "AMAZON_COGNITO_USER_POOLS",
+      "cognitoUserPoolId": "authfarmexpensetracker1da593af"
     },
-    "additionalAuthTypes": [
-      {
-        "mode": "AMAZON_COGNITO_USER_POOLS",
-        "cognitoUserPoolId": "authfarmexpensetracker1da593af"
-      }
-    ],
+    "additionalAuthTypes": [],
     "conflictResolution": {
       "defaultResolutionStrategy": {
         "type": "OPTIMISTIC_CONCURRENCY"
