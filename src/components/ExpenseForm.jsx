@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useImperativeHandle, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
@@ -39,7 +39,7 @@ const categories = [
 ];
 
 //Start form with blank fields
-export default function ExpenseForm({ onValidSubmit, editingExpense }) {
+function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
   const {
     register,
     handleSubmit,
@@ -59,6 +59,11 @@ export default function ExpenseForm({ onValidSubmit, editingExpense }) {
       description: "",
     },
   });
+
+  // Expose a method to reset the form to the parent
+  useImperativeHandle(ref, () => ({
+    resetForm: () => reset(),
+  }));
 
   useEffect(() => {
     if (editingExpense) {
@@ -82,7 +87,7 @@ export default function ExpenseForm({ onValidSubmit, editingExpense }) {
     onValidSubmit({
       ...data,
       // Convert date to a standard string
-      dateStr: data.date.toISOString().split("T")[0],
+      date: data.date.toISOString().split("T")[0],
       totalCost,
     });
   };
@@ -276,3 +281,5 @@ export default function ExpenseForm({ onValidSubmit, editingExpense }) {
     </Card>
   );
 }
+
+export default forwardRef(ExpenseForm);

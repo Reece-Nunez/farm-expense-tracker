@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Expense } from "../model/Expense";
@@ -7,6 +8,8 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
   if (!expenses.length) {
     return null;
   }
+
+  const navigate = useNavigate();
 
   return (
     <Card className="max-w-4xl mx-auto p-4 rounded-xl shadow bg-white mt-6">
@@ -59,6 +62,13 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
             ))}
           </tbody>
         </table>
+        <Button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
+        >
+          Back to Dashboard
+        </Button>
       </CardContent>
     </Card>
   );

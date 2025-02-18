@@ -9,6 +9,7 @@ export default function ConfirmationModal({
   isOpen,
   onRequestClose,
   onConfirm,
+  reset, // a function to reset the form state when the modal is closed
 }) {
   return (
     <Modal
