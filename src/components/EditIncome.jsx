@@ -12,6 +12,9 @@ export default function EditIncome() {
   const navigate = useNavigate();
   const incomeFormRef = useRef(null);
   const [currentIncome, setCurrentIncome] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState(() => {});
 
   useEffect(() => {
     const fetchIncomeById = async () => {
@@ -31,19 +34,26 @@ export default function EditIncome() {
     fetchIncomeById();
   }, [id, navigate]);
 
+  // Instead of updating immediately, set confirmation state
   const handleUpdateIncome = async (formData) => {
-    try {
-      const updated = await DataStore.save(
-        Income.copyOf(currentIncome, (updated) => {
-          Object.assign(updated, formData);
-        })
-      );
-      toast.success("Income updated successfully!");
-      navigate("/income");
-    } catch (error) {
-      console.error("[EditIncome] update error:", error);
-      toast.error("Failed to update income.");
-    }
+    setConfirmMessage("Are you sure you want to update this income?");
+    setConfirmAction(() => async () => {
+      try {
+        const updated = await DataStore.save(
+          Income.copyOf(currentIncome, (updated) => {
+            Object.assign(updated, formData);
+          })
+        );
+        toast.success("Income updated successfully!");
+        navigate("/income");
+      } catch (error) {
+        console.error("[EditIncome] update error:", error);
+        toast.error("Failed to update income.");
+      } finally {
+        setShowConfirm(false);
+      }
+    });
+    setShowConfirm(true);
   };
 
   if (!currentIncome) {
@@ -58,6 +68,15 @@ export default function EditIncome() {
         editingIncome={currentIncome}
         onValidSubmit={handleUpdateIncome}
       />
+      {showConfirm && (
+        <GenericModal
+          isOpen={showConfirm}
+          onRequestClose={() => setShowConfirm(false)}
+          onConfirm={confirmAction}
+          title="Confirm Update"
+          message={confirmMessage}
+        />
+      )}
     </div>
   );
 }

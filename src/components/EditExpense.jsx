@@ -5,14 +5,16 @@ import { DataStore } from "@aws-amplify/datastore";
 import { Expense } from "@/models";
 import ExpenseForm from "@/components/ExpenseForm";
 import { toast } from "react-hot-toast";
+import GenericModal from "./GenericModal";
 
 export default function EditExpense() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const expenseFormRef = useRef(null);
-
   const [currentExpense, setCurrentExpense] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState(() => {});
 
   useEffect(() => {
     const fetchExpenseById = async () => {
@@ -32,20 +34,25 @@ export default function EditExpense() {
     fetchExpenseById();
   }, [id, navigate]);
 
-  // Called when the user submits the form
   const handleUpdateExpense = async (formData) => {
-    try {
-      const updated = await DataStore.save(
-        Expense.copyOf(currentExpense, (updated) => {
-          Object.assign(updated, formData);
-        })
-      );
-      toast.success("Expense updated successfully!");
-      navigate("/expenses");
-    } catch (error) {
-      console.error("[EditExpense] update error:", error);
-      toast.error("Failed to update expense.");
-    }
+    setConfirmMessage("Are you sure you want to update this expense?");
+    setConfirmAction(() => async () => {
+      try {
+        const updated = await DataStore.save(
+          Expense.copyOf(currentExpense, (updated) => {
+            Object.assign(updated, formData);
+          })
+        );
+        toast.success("Expense updated successfully!");
+        navigate("/expenses");
+      } catch (error) {
+        console.error("[EditExpense] update error:", error);
+        toast.error("Failed to update expense.");
+      } finally {
+        setShowConfirm(false);
+      }
+    });
+    setShowConfirm(true);
   };
 
   if (!currentExpense) {
@@ -60,6 +67,15 @@ export default function EditExpense() {
         editingExpense={currentExpense}
         onValidSubmit={handleUpdateExpense}
       />
+      {showConfirm && (
+        <GenericModal
+          isOpen={showConfirm}
+          onRequestClose={() => setShowConfirm(false)}
+          onConfirm={confirmAction}
+          title="Confirm Update"
+          message={confirmMessage}
+        />
+      )}
     </div>
   );
 }
