@@ -1,24 +1,24 @@
-import React from "react";
+import React, { useImperativeHandle, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CurrencyInput from "react-currency-input-field";
 import { useNavigate } from "react-router-dom";
-
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
-
 import { incomeSchema } from "@/schemas/incomeSchema";
 
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
 
-export default function IncomeForm({ onValidSubmit }) {
+const IncomeForm = forwardRef((props, ref) => {
+  const { onValidSubmit } = props;
+
   const {
     register,
     handleSubmit,
@@ -32,34 +32,73 @@ export default function IncomeForm({ onValidSubmit }) {
       date: "",
       pricePerUnit: "",
       weightOrQuantity: "",
-      itemSold: "",
+      item: "",
       paymentMethod: "",
       description: "",
     },
   });
 
+  // Expose a method to reset the form to the parent
+  useImperativeHandle(ref, () => ({
+    resetForm: () => reset(),
+  }));
+
   const watchDate = watch("date");
-  const item = watch("itemSold");
+  const item = watch("item");
   const navigate = useNavigate();
 
+  // If your schema expects numeric values for these fields, we keep them as strings in the UI
+  // but parse them as numbers in setValueAs or onValueChange
   const watchPricePerUnit = watch("pricePerUnit");
   const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
-  const total =
+  const amount =
     parseFloat(watchPricePerUnit || 0) *
       parseFloat(watchWeightOrQuantity || 0) || 0;
 
   const onValid = (data) => {
-    onValidSubmit({
+    console.log("[IncomeForm] Raw form data:", data);
+
+    // parse numeric fields
+    const parsedWeightOrQuantity = parseFloat(data.weightOrQuantity || "0");
+    const parsedPricePerUnit = parseFloat(data.pricePerUnit || "0");
+    const computedAmount = parsedWeightOrQuantity * parsedPricePerUnit;
+    const finalAmount = parseFloat(computedAmount.toFixed(2));
+
+    let dateValue = null;
+    if (data.date) {
+      dateValue = new Date(data.date);
+    }
+
+    const finalObj = {
       ...data,
-      dateStr: data.date.toISOString().split("T")[0],
-      total,
-    });
+      weightOrQuantity: parsedWeightOrQuantity,
+      pricePerUnit: parsedPricePerUnit,
+      amount: finalAmount,
+      date: dateValue ? dateValue.toISOString().split("T")[0] : "",
+    };
+
+    console.log("[IncomeForm] Final object passed to onValidSubmit:", finalObj);
+    onValidSubmit(finalObj);
+
+    // Reset the form after successful submit
+    reset();
   };
 
-  const onInvalid = () => toast.error("Please fix errors before submitting.");
+  const onInvalid = (formErrors) => {
+    console.log(
+      "[IncomeForm] Validation errors from React Hook Form:",
+      formErrors
+    );
+    toast.error("Please fix errors before submitting.");
+  };
 
-  const handleDateChange = (date) => setValue("date", date || "");
-  const handlePriceChange = (val) => setValue("pricePerUnit", val || "");
+  const handleDateChange = (date) => {
+    setValue("date", date || "");
+  };
+
+  const handlePriceChange = (val) => {
+    setValue("pricePerUnit", val || "");
+  };
 
   return (
     <Card className="max-w-4xl mx-auto p-6 mb-6">
@@ -81,21 +120,29 @@ export default function IncomeForm({ onValidSubmit }) {
 
           <Select
             {...register("paymentMethod")}
-            className="w-full border rounded px-3 py-2"
+            className={`w-full border rounded px-3 py-2 ${
+              errors.paymentMethod ? "animate-shake border-red-500" : ""
+            }`}
           >
             <option value="">Select Payment Method</option>
             {paymentMethods.map((method) => (
-              <option key={method}>{method}</option>
+              <option key={method} value={method}>
+                {method}
+              </option>
             ))}
           </Select>
 
           <Select
-            {...register("itemSold")}
-            className="w-full border rounded px-3 py-2"
+            {...register("item")}
+            className={`w-full border rounded px-3 py-2 ${
+              errors.item ? "animate-shake border-red-500" : ""
+            }`}
           >
             <option value="">Select Item Sold</option>
-            {itemsSold.map((item) => (
-              <option key={item}>{item}</option>
+            {itemsSold.map((itemOption) => (
+              <option key={itemOption} value={itemOption}>
+                {itemOption}
+              </option>
             ))}
           </Select>
 
@@ -104,12 +151,12 @@ export default function IncomeForm({ onValidSubmit }) {
               <Input
                 type="number"
                 step="any"
-                placeholder={
-                  item === "Eggs"
-                    ? "Enter dozens (e.g., 1 or 0.5)"
-                    : "Enter weight"
-                }
-                {...register("weightOrQuantity")}
+                placeholder={item === "Eggs" ? "Enter dozens" : "Enter weight"}
+                // IMPORTANT: setValueAs to convert from string -> number
+                {...register("weightOrQuantity", {
+                  setValueAs: (val) =>
+                    val === "" ? undefined : parseFloat(val),
+                })}
                 className={`w-full border rounded px-3 py-2 ${
                   errors.weightOrQuantity ? "animate-shake border-red-500" : ""
                 }`}
@@ -140,15 +187,17 @@ export default function IncomeForm({ onValidSubmit }) {
 
           <Input
             readOnly
-            value={total > 0 ? `$${total.toFixed(2)}` : ""}
+            value={amount > 0 ? `$${amount.toFixed(2)}` : ""}
             className="w-full border rounded px-3 py-2 bg-gray-100"
-            placeholder="Total"
+            placeholder="Total Amount"
           />
 
           <Textarea
             placeholder="Description (optional)"
             {...register("description")}
-            className="w-full border rounded px-3 py-2"
+            className={`w-full border rounded px-3 py-2 ${
+              errors.description ? "animate-shake border-red-500" : ""
+            }`}
           />
 
           <div className="flex justify-around mt-4 space-x-4">
@@ -177,4 +226,6 @@ export default function IncomeForm({ onValidSubmit }) {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default IncomeForm;

@@ -43,7 +43,7 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
                       <td className="p-2 border">{exp.quantity}</td>
                       <td className="p-2 border">${exp.totalCost?.toFixed(2)}</td>
                       <td className="p-2 border">{exp.description || ""}</td>
-                      <td className="p-2 border">
+                      <td className="p-2 border flex">
                         <Button
                           onClick={() => onEdit(exp)}
                           className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded mr-2"

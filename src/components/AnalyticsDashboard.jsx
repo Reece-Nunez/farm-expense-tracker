@@ -41,8 +41,8 @@ export default function AnalyticsDashboard() {
     const fetchIncome = async () => {
       const allIncome = await DataStore.query(Income);
       const groupedIncome = allIncome.reduce((acc, curr) => {
-        acc[curr.itemSold] =
-          (acc[curr.itemSold] || 0) + parseFloat(curr.total || 0);
+        acc[curr.item] =
+          (acc[curr.item] || 0) + parseFloat(curr.amount || 0);
         return acc;
       }, {});
       setIncome(

@@ -1,3 +1,4 @@
+// App.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserRouter as Router,
@@ -7,83 +8,112 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import ExpenseForm from "@/components/ExpenseForm";
-import IncomeForm from "./components/IncomeForm";
-import Dashboard from "./components/Dashboard";
-import ExpenseTable from "@/components/ExpenseTable";
-import ConfirmationModal from "@/components/ConfirmationModal";
-import DeleteModal from "@/components/DeleteModal";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import { Amplify } from "aws-amplify";
-import { signOut } from "@aws-amplify/auth";
-import awsExports from "./aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import "./index.css";
+
+import { Amplify } from "aws-amplify";
+import awsExports from "./aws-exports";
+
 import { DataStore } from "@aws-amplify/datastore";
-import { Expense } from "./models/index";
-import { toast } from "react-hot-toast";
-import { Button } from "@/components/ui/button";
-import Modal from "react-modal";
 import { fetchAuthSession } from "@aws-amplify/auth";
+import { signOut } from "@aws-amplify/auth";
+import { toast } from "react-hot-toast";
+import Modal from "react-modal";
+
+import Dashboard from "./components/Dashboard";
+import ExpenseTable from "./components/ExpenseTable";
+import ExpenseForm from "./components/ExpenseForm";
+import IncomeForm from "./components/IncomeForm";
+import ConfirmationModal from "./components/ConfirmationModal";
+import DeleteModal from "./components/DeleteModal";
+import AnalyticsDashboard from "./components/AnalyticsDashboard";
+
+import { Expense, Income } from "./models/index";
 
 Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
 
+/**
+ * The main content component that manages state for Expenses & Incomes.
+ */
 function AppContent() {
-  // State declarations
+  // -------------- State Declarations --------------
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Expense states
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [pendingExpense, setPendingExpense] = useState(null);
 
-  // Create a ref for ExpenseForm (for resetting the form)
+  // Income states
+  const [fetchedIncomes, setFetchedIncomes] = useState([]);
+  const [editingIncome, setEditingIncome] = useState(null);
+
+  // Form refs (to reset the forms from parent if needed)
   const expenseFormRef = useRef(null);
+  const incomeFormRef = useRef(null);
+
+  // Router hooks
   const navigate = useNavigate();
   const location = useLocation();
 
-  // For testing, we disable forced sign-out so that the user stays signed in.
+  // -------------- Effects --------------
+  // 1. On mount, skip forced sign-out, just set authChecked
   useEffect(() => {
     console.log("[AppContent] Mounted. (Force sign-out is disabled for now)");
     setAuthChecked(true);
   }, []);
 
-  // Always fetch expenses from DataStore (remove background check)
+  // 2. Fetch Expenses once on mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchExpenses = async () => {
       try {
         const allExpenses = await DataStore.query(Expense);
-        console.debug("[fetchData] Fetched expenses:", allExpenses);
+        console.debug("[fetchExpenses] Fetched expenses:", allExpenses);
         setFetchedExpenses(allExpenses);
       } catch (error) {
-        console.error("[fetchData] Error fetching expenses:", error);
+        console.error("[fetchExpenses] Error fetching expenses:", error);
       }
     };
-    fetchData();
+    fetchExpenses();
   }, []);
 
-  // When the expense form is submitted, store the data and navigate to /confirm
+  // 3. Fetch Incomes once on mount
+  useEffect(() => {
+    const fetchIncome = async () => {
+      try {
+        const allIncome = await DataStore.query(Income);
+        console.debug("[fetchIncomes] Fetched incomes:", allIncome);
+        setFetchedIncomes(allIncome);
+      } catch (error) {
+        console.error("[fetchIncomes] Error fetching incomes:", error);
+      }
+    };
+    fetchIncome();
+  }, []);
+
+  // -------------- Expense Handlers --------------
+  /** Called when the ExpenseForm is submitted (but before confirmation). */
   const handleExpenseSubmit = (data) => {
     console.debug("[handleExpenseSubmit] Received expense data:", data);
     setPendingExpense(data);
-    console.debug(
-      "[handleExpenseSubmit] Navigating to /confirm with background:",
-      location
-    );
+    console.debug("[handleExpenseSubmit] Navigating to /confirm");
+    // Navigate to the confirm route with background
     navigate("/confirm", { state: { background: location } });
   };
 
-  // Confirm expense submission (from the confirmation modal)
+  /** Actually save the expense to DataStore after confirmation. */
   const confirmExpenseSubmit = async () => {
     console.debug("[confirmExpenseSubmit] Confirming expense submission...", {
       pendingExpense,
       editingExpense,
     });
+    if (!pendingExpense) return;
+
     try {
       const session = await fetchAuthSession();
-      console.debug("[confirmExpenseSubmit] Fetched auth session:", session);
       const userId = session.tokens.idToken.payload.sub;
       let newExpense;
       if (editingExpense) {
@@ -101,6 +131,7 @@ function AppContent() {
         );
       }
       console.debug("[confirmExpenseSubmit] Expense saved:", newExpense);
+      // Update local state
       setFetchedExpenses((prev) =>
         editingExpense
           ? prev.map((exp) => (exp.id === newExpense.id ? newExpense : exp))
@@ -116,52 +147,49 @@ function AppContent() {
       console.error("[confirmExpenseSubmit] Error saving expense:", error);
       toast.error("Failed to save expense.");
     } finally {
-      console.debug(
-        "[confirmExpenseSubmit] Navigating back and clearing pending expense."
-      );
-      // Navigate back to the expense form route
-      if (location.state && location.state.background) {
+      // Clear pendingExpense, reset form, and navigate
+      setPendingExpense(null);
+      expenseFormRef.current?.resetForm();
+
+      if (location.state?.background) {
         navigate(-1);
       } else {
         navigate("/dashboard");
       }
-      setPendingExpense(null);
-      expenseFormRef.current?.resetForm();
     }
   };
 
-  // Edit an expense (opens the form for editing)
+  /** Edit an existing expense (opens the expense form for editing). */
   const handleEdit = (expense) => {
     console.debug("[handleEdit] Editing expense:", expense);
     setEditingExpense(expense);
   };
 
-  // When delete is clicked on an expense row, store its ID and show the delete modal
+  /** Prompt to delete an expense. */
   const handleExpenseDelete = (id) => {
     console.debug("[handleExpenseDelete] Deleting expense with id:", id);
     setExpenseToDelete(id);
     setShowDeleteModal(true);
   };
 
-  // Handle the deletion confirmation from the delete modal
+  /** Actually delete the expense. */
   const handleDelete = async () => {
     console.debug(
-      "[handleDelete] Attempting to delete expense with id:",
+      "[handleDelete] Attempting to delete expense:",
       expenseToDelete
     );
     try {
       const toDelete = await DataStore.query(Expense, expenseToDelete);
-      if (toDelete) {
-        await DataStore.delete(toDelete);
-        console.debug("[handleDelete] Expense deleted:", expenseToDelete);
-        setFetchedExpenses((prev) =>
-          prev.filter((exp) => exp.id !== expenseToDelete)
-        );
-        toast.success("Expense deleted successfully!");
-      } else {
-        console.error("[handleDelete] Expense not found in DataStore.");
+      if (!toDelete) {
         toast.error("Expense not found in DataStore.");
+        return;
       }
+      await DataStore.delete(toDelete);
+      console.debug("[handleDelete] Expense deleted:", expenseToDelete);
+      setFetchedExpenses((prev) =>
+        prev.filter((exp) => exp.id !== expenseToDelete)
+      );
+      toast.success("Expense deleted successfully!");
     } catch (error) {
       console.error("[handleDelete] Error deleting expense:", error);
       toast.error("Failed to delete expense.");
@@ -171,40 +199,79 @@ function AppContent() {
     }
   };
 
+  // -------------- Income Handlers --------------
+  /** Called when the IncomeForm is submitted. */
+  const handleIncomeSubmit = async (incomeData) => {
+    console.log("[AppContent] handleIncomeSubmit received:", incomeData);
+    try {
+      const session = await fetchAuthSession();
+      const userId = session.tokens.idToken.payload.sub;
+
+      let newIncome;
+      if (editingIncome) {
+        // If editing an existing income
+        newIncome = await DataStore.save(
+          Income.copyOf(editingIncome, (updated) => {
+            Object.assign(updated, incomeData);
+            updated.userId = userId;
+          })
+        );
+        toast.success("Income updated successfully!");
+        setEditingIncome(null);
+      } else {
+        // If creating a new income
+        newIncome = await DataStore.save(
+          new Income({ ...incomeData, userId: userId})
+        );
+        toast.success("Income added successfully!");
+      }
+      console.log("[AppContent] Income saved:", newIncome);
+
+      // Update local state
+      setFetchedIncomes((prev) =>
+        editingIncome
+          ? prev.map((inc) => (inc.id === newIncome.id ? newIncome : inc))
+          : [...prev, newIncome]
+      );
+    } catch (error) {
+      console.error("[AppContent] Error saving income:", error);
+      toast.error("Failed to save income.");
+    } finally {
+      // If you want to reset the IncomeForm
+      incomeFormRef.current?.resetForm();
+    }
+  };
+
+  // -------------- Render --------------
   if (!authChecked) {
-    console.debug(
-      "[AppContent] Auth not checked yet, displaying loading screen."
-    );
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }
 
-  console.debug(
-    "[AppContent] Rendering AppRoutes with current location:",
-    location
-  );
+  console.debug("[AppContent] Rendering with location:", location);
+
   return (
     <>
       <AppRoutes
+        // Expense states/handlers
         fetchedExpenses={fetchedExpenses}
+        editingExpense={editingExpense}
         handleEdit={handleEdit}
         handleExpenseDelete={handleExpenseDelete}
-        editingExpense={editingExpense}
         handleExpenseSubmit={handleExpenseSubmit}
         confirmExpenseSubmit={confirmExpenseSubmit}
         expenseFormRef={expenseFormRef}
+        // Income states/handlers
+        fetchedIncomes={fetchedIncomes}
+        editingIncome={editingIncome}
+        incomeFormRef={incomeFormRef}
+        handleIncomeSubmit={handleIncomeSubmit}
       />
-      {/* Render the DeleteModal directly when state indicates */}
+
+      {/* Delete Modal for expenses */}
       {showDeleteModal && (
         <DeleteModal
           isOpen={showDeleteModal}
-          onRequestClose={() => {
-            // If no background exists, navigate to dashboard
-            if (location.state && location.state.background) {
-              setShowDeleteModal(false);
-            } else {
-              navigate("/dashboard");
-            }
-          }}
+          onRequestClose={() => setShowDeleteModal(false)}
           onConfirm={handleDelete}
         />
       )}
@@ -212,31 +279,32 @@ function AppContent() {
   );
 }
 
+/** Defines all routes. Receives the states and handlers as props. */
 function AppRoutes({
   fetchedExpenses,
+  editingExpense,
   handleEdit,
   handleExpenseDelete,
-  editingExpense,
   handleExpenseSubmit,
   confirmExpenseSubmit,
   expenseFormRef,
+
+  fetchedIncomes,
+  editingIncome,
+  handleIncomeSubmit,
+  incomeFormRef,
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const background = location.state && location.state.background;
-
-  console.debug(
-    "[AppRoutes] Current location:",
-    location,
-    "Background:",
-    background
-  );
+  const background = location.state?.background;
 
   return (
     <>
       <Routes location={background || location}>
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Show the table of expenses */}
         <Route
           path="/expenses"
           element={
@@ -247,20 +315,37 @@ function AppRoutes({
             />
           }
         />
+
+        {/* Add or edit an expense */}
         <Route
           path="/add-expense"
           element={
             <ExpenseForm
-              onValidSubmit={handleExpenseSubmit}
-              editingExpense={editingExpense}
               ref={expenseFormRef}
+              editingExpense={editingExpense}
+              onValidSubmit={handleExpenseSubmit}
             />
           }
         />
-        <Route path="/add-income" element={<IncomeForm />} />
+
+        {/* Add or edit an income */}
+        <Route
+          path="/add-income"
+          element={
+            <IncomeForm
+              ref={incomeFormRef}
+              onValidSubmit={handleIncomeSubmit}
+            />
+          }
+        />
+
         <Route path="/analytics" element={<AnalyticsDashboard />} />
+
+        {/* Catch-all: go back to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
+
+      {/* If there's a background, render the confirm modal route on top */}
       {background && (
         <Routes>
           <Route
@@ -270,7 +355,7 @@ function AppRoutes({
                 isOpen={true}
                 onRequestClose={() => {
                   console.debug("[ConfirmationModal] onRequestClose called.");
-                  if (location.state && location.state.background) {
+                  if (background) {
                     navigate(-1);
                   } else {
                     navigate("/dashboard");
@@ -286,6 +371,7 @@ function AppRoutes({
   );
 }
 
+/** The top-level App that wraps everything in Router & Authenticator. */
 function App() {
   return (
     <Router>

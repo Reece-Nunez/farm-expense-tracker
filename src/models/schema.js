@@ -312,7 +312,7 @@ export const schema = {
                     "name": "source",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "amount": {

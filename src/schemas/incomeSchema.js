@@ -1,17 +1,36 @@
 import { z } from "zod";
 
 export const incomeSchema = z.object({
+  // If date is stored as a string, transform it to a JS Date
+  date: z
+    .union([z.string(), z.date()])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      if (val instanceof Date) return val; // already a Date
+      return new Date(val); // convert string -> Date
+    }),
+
   paymentMethod: z.string().min(1, "Payment method is required"),
-  itemSold: z.enum(["Eggs", "Beef", "Pork", "Other"], "Invalid item sold"),
-  amount: z.number().min(0.01, "Amount must be greater than 0"),
-  weightOrQuantity: z
-    .union([
-      z.number().min(0.01, "Weight must be greater than 0").optional(),
-      z.number().min(0.5, "Quantity must be at least half a dozen").optional(),
-    ])
+
+  item: z.enum(["Eggs", "Beef", "Pork", "Other"], {
+    errorMap: () => ({ message: "Invalid item sold" }),
+  }),
+
+  weightOrQuantity: z.number().min(0.01, "Weight must be > 0"),
+
+  pricePerUnit: z
+    .string()
+    // Same transform for currency input
+    .transform((val) => parseFloat(val.replace(/[^\d.-]/g, "")))
+    .refine((num) => !Number.isNaN(num) && num > 0, "Price must be > 0"),
+
+  total: z
+    .string()
+    // Same transform for currency input
+    .transform((val) => parseFloat(val.replace(/[^\d.-]/g, "")))
+    .refine((num) => !Number.isNaN(num) && num > 0, "Total must be > 0")
     .optional(),
-  pricePerUnit: z.number().min(0.01, "Price must be greater than 0"),
-  total: z.number().min(0.01, "Total must be greater than 0"),
-  date: z.date().optional(),
+
   description: z.string().optional(),
 });
