@@ -1,3 +1,4 @@
+// AnalyticsDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,88 +60,105 @@ export default function AnalyticsDashboard() {
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
 
   return (
-    <Card className="max-w-6xl mx-auto p-6 mb-6">
-      <CardHeader className="text-2xl font-bold flex items-center justify-center mb-6">
-        Farm Analytics
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Expenses by Category</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={
-                expenses.length
-                  ? expenses
-                  : [{ category: "No Data", amount: 0 }]
-              }
-            >
-              <XAxis dataKey="category" />
-              <YAxis tickFormatter={(value) => `$${value}`} />
-              <Tooltip formatter={(value) => [`$${value}`, "Amount"]} />
-              <Legend />
-              <Bar dataKey="amount" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+    <div className="min-h-screen bg-gradient-to-r from-indigo-50 to-blue-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">
+          Farm Analytics
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Expense Chart Card */}
+          <Card className="p-6">
+            <CardHeader className="text-2xl font-bold mb-4">
+              Expenses by Category
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={
+                    expenses.length
+                      ? expenses
+                      : [{ category: "No Data", amount: 0 }]
+                  }
+                >
+                  <XAxis dataKey="category" />
+                  <YAxis tickFormatter={(value) => `$${value}`} />
+                  <Tooltip formatter={(value) => [`$${value}`, "Amount"]} />
+                  <Legend />
+                  <Bar dataKey="amount" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Income Breakdown</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={income.length ? income : [{ item: "No Data", amount: 0 }]}
-                dataKey="amount"
-                nameKey="item"
-                outerRadius={100}
-                fill="#8884d8"
-                // Use a custom label function to prefix "$" to each label
-                label={(props) => {
-                  const { cx, cy, midAngle, innerRadius, outerRadius, value } =
-                    props;
-                  const RADIAN = Math.PI / 180;
-                  const radius =
-                    innerRadius + (outerRadius - innerRadius) * 0.5;
-                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                  return (
-                    <text
-                      x={x}
-                      y={y}
-                      fill="black"
-                      textAnchor={x > cx ? "start" : "end"}
-                      dominantBaseline="central"
-                    >
-                      {`$${value}`}
-                    </text>
-                  );
-                }}
-              >
-                {(income.length
-                  ? income
-                  : [{ item: "No Data", amount: 0 }]
-                ).map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              {/* Format tooltip values with a "$" */}
-              <Tooltip formatter={(value) => `$${value}`} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          {/* Income Chart Card */}
+          <Card className="p-6">
+            <CardHeader className="text-2xl font-bold mb-4">
+              Income Breakdown
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={
+                      income.length ? income : [{ item: "No Data", amount: 0 }]
+                    }
+                    dataKey="amount"
+                    nameKey="item"
+                    outerRadius={100}
+                    fill="#8884d8"
+                    label={(props) => {
+                      const {
+                        cx,
+                        cy,
+                        midAngle,
+                        innerRadius,
+                        outerRadius,
+                        value,
+                      } = props;
+                      const RADIAN = Math.PI / 180;
+                      const radius =
+                        innerRadius + (outerRadius - innerRadius) * 0.5;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill="black"
+                          textAnchor={x > cx ? "start" : "end"}
+                          dominantBaseline="central"
+                        >
+                          {`$${value}`}
+                        </text>
+                      );
+                    }}
+                  >
+                    {(income.length
+                      ? income
+                      : [{ item: "No Data", amount: 0 }]
+                    ).map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </div>
-
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-8">
           <Button
             onClick={() => navigate("/dashboard")}
-            className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg"
           >
             Back to Dashboard
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
