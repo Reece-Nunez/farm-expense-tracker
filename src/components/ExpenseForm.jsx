@@ -122,7 +122,7 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
         <form onSubmit={handleSubmit(onValid, onInvalid)}>
           {/* Date Field */}
           <div>
-            <label className="block font-medium mb-1 flex items-center gap-1">
+            <label className="font-medium mb-1 flex items-center gap-1">
               <CalendarIcon className="w-5 h-5 text-blue-500" />
               Date <span className="text-red-500">*</span>
             </label>
@@ -143,7 +143,7 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
           {/* Unit Cost Field */}
           <div>
-            <label className="block font-medium mb-1 flex items-center gap-1">
+            <label className="font-medium mb-1 flex items-center gap-1">
               <CurrencyDollarIcon className="w-5 h-5 text-blue-500" />
               Unit Cost <span className="text-red-500">*</span>
             </label>
