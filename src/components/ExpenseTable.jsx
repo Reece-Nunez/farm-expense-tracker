@@ -1,9 +1,10 @@
+// ExpenseTable.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
+export default function ExpenseTable({ expenses = [], onDelete }) {
   const navigate = useNavigate();
 
   return (
@@ -30,7 +31,6 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
               </thead>
               <tbody>
                 {expenses.map((exp, idx) => {
-                  console.log(`[ExpenseTable] Expense row #${idx}:`, exp);
                   return (
                     <tr key={exp.id ?? idx}>
                       <td className="p-2 border">
@@ -45,26 +45,18 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
                         ${exp.totalCost?.toFixed(2)}
                       </td>
                       <td className="p-2 border">{exp.description || ""}</td>
-                      <td className="p-2 border flex">
+                      <td className="p-2 border flex gap-2">
                         <Button
                           onClick={() => {
-                            onEdit(exp);
-                            navigate("/expenses/edit", {
-                              state: { background: location },
-                            });
+                            // Navigate to /edit-expense/:id
+                            navigate(`/edit-expense/${exp.id}`);
                           }}
-                          className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded mr-2"
+                          className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded"
                         >
                           Edit
                         </Button>
                         <Button
-                          onClick={() => {
-                            console.log(
-                              "[ExpenseTable] Deleting item with ID:",
-                              exp.id
-                            );
-                            onDelete(exp.id);
-                          }}
+                          onClick={() => onDelete(exp.id)}
                           className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded"
                         >
                           Delete

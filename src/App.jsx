@@ -27,6 +27,7 @@ import IncomeForm from "./components/IncomeForm";
 import ConfirmationModal from "./components/ConfirmationModal";
 import DeleteModal from "./components/DeleteModal";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import EditExpense from "./components/EditExpense";
 
 import { Expense, Income } from "./models/index";
 
@@ -78,6 +79,19 @@ function AppContent() {
       }
     };
     fetchExpenses();
+    const subscription = DataStore.observe(Expense).subscribe((msg) => {
+      if (
+        msg.opType === "INSERT" ||
+        msg.opType === "UPDATE" ||
+        msg.opType === "DELETE"
+      ) {
+        // re-fetch the entire list
+        console.debug("[DataStore.observe] Expense changed, re-fetching...");
+        fetchExpenses();
+      }
+    });
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
   }, []);
 
   // 3. Fetch Incomes once on mount
@@ -221,7 +235,7 @@ function AppContent() {
       } else {
         // If creating a new income
         newIncome = await DataStore.save(
-          new Income({ ...incomeData, userId: userId})
+          new Income({ ...incomeData, userId: userId })
         );
         toast.success("Income added successfully!");
       }
@@ -315,6 +329,9 @@ function AppRoutes({
             />
           }
         />
+
+        {/* Edit Expenses */}
+        <Route path="/edit-expense/:id" element={<EditExpense />} />
 
         {/* Add or edit an expense */}
         <Route
