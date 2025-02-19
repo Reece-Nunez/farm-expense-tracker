@@ -13,6 +13,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { incomeSchema } from "@/schemas/incomeSchema";
 
+import {
+  CalendarIcon,
+  CurrencyDollarIcon,
+  CollectionIcon,
+} from "@heroicons/react/outline";
+
 // Define options
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
@@ -115,6 +121,7 @@ const IncomeForm = forwardRef((props, ref) => {
           {/* Date */}
           <div>
             <label className="block font-medium mb-1">
+            <CalendarIcon className="w-5 h-5 text-blue-500" />
               Date <span className="text-red-500">*</span>
             </label>
             <DatePicker

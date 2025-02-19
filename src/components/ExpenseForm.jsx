@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { expenseSchema } from "@/schemas/expenseSchema";
 
-// Optionally, import some icons from Heroicons
 import {
   CalendarIcon,
   CurrencyDollarIcon,
