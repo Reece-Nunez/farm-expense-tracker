@@ -109,41 +109,46 @@ function AppContent() {
   }, []);
 
   // -------------- Expense Handlers --------------
-  const handleExpenseSubmit = (data) => {
-    // Set the confirmation message
-    setConfirmMessage("Are you sure you want to accept this expense?");
+  const handleExpenseSubmit = (formattedExpenses) => {
+    setConfirmMessage("Are you sure you want to accept these expenses?");
 
-    // Set the confirm action to a function that saves the expense
     setConfirmAction(() => async () => {
       try {
         const session = await fetchAuthSession();
         const userId = session.tokens.idToken.payload.sub;
-        let newExpense;
+
         if (editingExpense) {
-          newExpense = await DataStore.save(
+          // -- Editing a single expense --
+          const updatedExpense = await DataStore.save(
             Expense.copyOf(editingExpense, (updated) => {
-              Object.assign(updated, data);
+              Object.assign(updated, formattedExpenses[0]);
               updated.userId = userId;
             })
           );
+
+          // Update local state with the updated record
+          setFetchedExpenses((prev) =>
+            prev.map((exp) =>
+              exp.id === updatedExpense.id ? updatedExpense : exp
+            )
+          );
+          toast.success("Expense updated successfully!");
+          setEditingExpense(null);
         } else {
-          newExpense = await DataStore.save(new Expense({ ...data, userId }));
+          // -- Creating new expense(s) --
+          const savedExpenses = await Promise.all(
+            formattedExpenses.map((expense) =>
+              DataStore.save(new Expense({ ...expense, userId }))
+            )
+          );
+
+          // Update local state with the newly created records
+          setFetchedExpenses((prev) => [...prev, ...savedExpenses]);
+          toast.success("Expenses successfully added!");
         }
-        // Update local state
-        setFetchedExpenses((prev) =>
-          editingExpense
-            ? prev.map((exp) => (exp.id === newExpense.id ? newExpense : exp))
-            : [...prev, newExpense]
-        );
-        toast.success(
-          editingExpense
-            ? "Expense updated successfully!"
-            : "Expense successfully added!"
-        );
-        setEditingExpense(null);
       } catch (error) {
-        console.error("[handleExpenseSubmit] Error saving expense:", error);
-        toast.error("Failed to save expense.");
+        console.error("[handleExpenseSubmit] Error saving expense(s):", error);
+        toast.error("Failed to save expense(s).");
       } finally {
         setConfirmMessage("");
         setConfirmAction(() => {});
@@ -152,7 +157,6 @@ function AppContent() {
       }
     });
 
-    // Show the confirmation modal
     setShowConfirmModal(true);
   };
 

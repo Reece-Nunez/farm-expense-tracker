@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { expenseSchema } from "@/schemas/expenseSchema";
+
 export const Expense = {
   name: "Expense",
   fields: {
