@@ -99,6 +99,13 @@ function AppContent() {
       }
     };
     fetchIncome();
+
+    const incomeSub = DataStore.observe(Income).subscribe((msg) => {
+      if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
+        fetchIncome();
+      }
+    });
+    return () => incomeSub.unsubscribe();
   }, []);
 
   // -------------- Expense Handlers --------------
