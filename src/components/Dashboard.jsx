@@ -43,6 +43,12 @@ function Dashboard() {
         >
           Expenses
         </button>
+        <button
+        className="p-3 bg-black text-white rounded w-1/2"
+        onClick={() => navigate("/income")}
+        >
+          Income
+        </button>
         <Button
           className="p-3 bg-red-500 text-white rounded w-1/2"
           onClick={handleSignOut}

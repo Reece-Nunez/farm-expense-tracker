@@ -47,8 +47,6 @@ const IncomeForm = forwardRef((props, ref) => {
   const item = watch("item");
   const navigate = useNavigate();
 
-  // If your schema expects numeric values for these fields, we keep them as strings in the UI
-  // but parse them as numbers in setValueAs or onValueChange
   const watchPricePerUnit = watch("pricePerUnit");
   const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
   const amount =

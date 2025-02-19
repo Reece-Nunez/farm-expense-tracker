@@ -28,6 +28,8 @@ import ConfirmationModal from "./components/ConfirmationModal";
 import DeleteModal from "./components/DeleteModal";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import EditExpense from "./components/EditExpense";
+import IncomeTable from "./components/IncomeTable";
+import EditIncome from "./components/EditIncome";
 
 import { Expense, Income } from "./models/index";
 
@@ -107,6 +109,28 @@ function AppContent() {
     };
     fetchIncome();
   }, []);
+
+  // Income delete/edit handlers (similar to expenses)
+  const handleIncomeEdit = (income) => {
+    navigate(`/edit-income/${income.id}`);
+  };
+
+  const handleIncomeDelete = async (id) => {
+    try {
+      const record = await DataStore.query(Income, id);
+      if (!record) {
+        toast.error("Income record not found.");
+        return;
+      }
+      await DataStore.delete(record);
+      toast.success("Income record deleted successfully!");
+      const allIncome = await DataStore.query(Income);
+      setFetchedIncomes(allIncome);
+    } catch (error) {
+      console.error("Error deleting income:", error);
+      toast.error("Failed to delete income.");
+    }
+  };
 
   // -------------- Expense Handlers --------------
   /** Called when the ExpenseForm is submitted (but before confirmation). */
@@ -279,6 +303,8 @@ function AppContent() {
         editingIncome={editingIncome}
         incomeFormRef={incomeFormRef}
         handleIncomeSubmit={handleIncomeSubmit}
+        handleIncomeEdit={handleIncomeEdit}
+        handleIncomeDelete={handleIncomeDelete}
       />
 
       {/* Delete Modal for expenses */}
@@ -304,7 +330,8 @@ function AppRoutes({
   expenseFormRef,
 
   fetchedIncomes,
-  editingIncome,
+  handleIncomeDelete,
+  handleIncomeEdit,
   handleIncomeSubmit,
   incomeFormRef,
 }) {
@@ -344,6 +371,30 @@ function AppRoutes({
             />
           }
         />
+
+        {/* Income routes */}
+        <Route
+          path="/income"
+          element={
+            <IncomeTable
+              incomes={fetchedIncomes}
+              onEdit={handleIncomeEdit}
+              onDelete={handleIncomeDelete}
+            />
+          }
+        />
+        <Route
+          path="/add-income"
+          element={
+            <IncomeForm
+              ref={incomeFormRef}
+              onValidSubmit={(data) => {
+                // your income submit logic here
+              }}
+            />
+          }
+        />
+        <Route path="/edit-income/:id" element={<EditIncome />} />
 
         {/* Add or edit an income */}
         <Route

@@ -9,7 +9,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
   return (
     <Card className="max-w-4xl mx-auto p-4 rounded-xl shadow bg-white mt-6">
-      <CardHeader className="text-xl font-bold mb-2">
+      <CardHeader className="text-xl font-bold mb-2 flex justify-center">
         Submitted Expenses
       </CardHeader>
       <CardContent>
