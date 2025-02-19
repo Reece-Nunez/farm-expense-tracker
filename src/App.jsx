@@ -116,19 +116,34 @@ function AppContent() {
   };
 
   const handleIncomeDelete = async (id) => {
+    console.debut("[handleIncome Deleting income with id:", id);
+    setIncomeToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmIncomeDelete = async () => {
+    console.debug(
+      "[handleDelete] Attempting to delete expense: ",
+      incomeToDelete
+    );
     try {
-      const record = await DataStore.query(Income, id);
-      if (!record) {
+      const toDeleteIncome = await DataStore.query(Income, incomeToDelete);
+      if (!toDeleteIncome) {
         toast.error("Income record not found.");
         return;
       }
-      await DataStore.delete(record);
-      toast.success("Income record deleted successfully!");
-      const allIncome = await DataStore.query(Income);
-      setFetchedIncomes(allIncome);
+      await DataStore.delete(toDeleteIncome);
+      console.debug("[handleDelete] Successfully deleted:", incomeToDelete);
+      setFetchedIncomes((prev) =>
+        prev.filter((income) => income.id!== incomeToDelete)
+      );
+      toast.success("Income deleted successfully!");
     } catch (error) {
-      console.error("Error deleting income:", error);
+      console.error("[hanldeDelete] Error deleting income:", error);
       toast.error("Failed to delete income.");
+    } finally {
+      setShowDeleteModal(false);
+      setIncomeToDelete(null);
     }
   };
 
@@ -198,7 +213,7 @@ function AppContent() {
   };
 
   /** Edit an existing expense (opens the expense form for editing). */
-  const handleEdit = (expense) => {
+  const handleExpenseEdit = (expense) => {
     console.debug("[handleEdit] Editing expense:", expense);
     setEditingExpense(expense);
   };
@@ -211,18 +226,18 @@ function AppContent() {
   };
 
   /** Actually delete the expense. */
-  const handleDelete = async () => {
+  const handleConfirmDeleteExpense = async () => {
     console.debug(
       "[handleDelete] Attempting to delete expense:",
       expenseToDelete
     );
     try {
-      const toDelete = await DataStore.query(Expense, expenseToDelete);
-      if (!toDelete) {
+      const toDeleteExpense = await DataStore.query(Expense, expenseToDelete);
+      if (!toDeleteExpense) {
         toast.error("Expense not found in DataStore.");
         return;
       }
-      await DataStore.delete(toDelete);
+      await DataStore.delete(toDeleteExpense);
       console.debug("[handleDelete] Expense deleted:", expenseToDelete);
       setFetchedExpenses((prev) =>
         prev.filter((exp) => exp.id !== expenseToDelete)
@@ -293,7 +308,7 @@ function AppContent() {
         // Expense states/handlers
         fetchedExpenses={fetchedExpenses}
         editingExpense={editingExpense}
-        handleEdit={handleEdit}
+        handleExpenseEdit={handleExpenseEdit}
         handleExpenseDelete={handleExpenseDelete}
         handleExpenseSubmit={handleExpenseSubmit}
         confirmExpenseSubmit={confirmExpenseSubmit}
@@ -305,6 +320,7 @@ function AppContent() {
         handleIncomeSubmit={handleIncomeSubmit}
         handleIncomeEdit={handleIncomeEdit}
         handleIncomeDelete={handleIncomeDelete}
+        confirmIncomeSubmit={confirmIncomeSubmit}
       />
 
       {/* Delete Modal for expenses */}
@@ -323,10 +339,10 @@ function AppContent() {
 function AppRoutes({
   fetchedExpenses,
   editingExpense,
-  handleEdit,
+  handleExpenseEdit,
   handleExpenseDelete,
   handleExpenseSubmit,
-  confirmExpenseSubmit,
+  confirmSubmit,
   expenseFormRef,
 
   fetchedIncomes,
@@ -429,7 +445,7 @@ function AppRoutes({
                     navigate("/dashboard");
                   }
                 }}
-                onConfirm={confirmExpenseSubmit}
+                onConfirm={confirmSubmit}
               />
             }
           />
