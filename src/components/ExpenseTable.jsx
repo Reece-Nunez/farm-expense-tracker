@@ -2,13 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Expense } from "../model/Expense";
 
 export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
-  if (!expenses.length) {
-    return null;
-  }
-
   const navigate = useNavigate();
 
   return (
@@ -17,58 +12,84 @@ export default function ExpenseTable({ expenses = [], onEdit, onDelete }) {
         Submitted Expenses
       </CardHeader>
       <CardContent>
-        <table className="w-full border text-left">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 border">Date</th>
-              <th className="p-2 border">Category</th>
-              <th className="p-2 border">Item</th>
-              <th className="p-2 border">Vendor</th>
-              <th className="p-2 border">Cost</th>
-              <th className="p-2 border">Quantity</th>
-              <th className="p-2 border">Total</th>
-              <th className="p-2 border">Notes</th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((exp, idx) => (
-              <tr key={idx}>
-                <td className="p-2 border">
-                  {new Date(exp.date).toLocaleDateString()}
-                </td>
-                <td className="p-2 border">{exp.category}</td>
-                <td className="p-2 border">{exp.item}</td>
-                <td className="p-2 border">{exp.vendor}</td>
-                <td className="p-2 border">${exp.unitCost}</td>
-                <td className="p-2 border">{exp.quantity}</td>
-                <td className="p-2 border">${exp.totalCost.toFixed(2)}</td>
-                <td className="p-2 border">{exp.description || ""}</td>
-                <td className="p-2 border">
-                  <Button
-                    onClick={() => onEdit(exp)}
-                    className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded mr-2"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => onDelete(Expense.id)}
-                    className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded"
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Button
-          type="button"
-          onClick={() => navigate("/dashboard")}
-          className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
-        >
-          Back to Dashboard
-        </Button>
+        {expenses.length ? (
+          <>
+            <table className="w-full border text-left">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">Date</th>
+                  <th className="p-2 border">Category</th>
+                  <th className="p-2 border">Item</th>
+                  <th className="p-2 border">Vendor</th>
+                  <th className="p-2 border">Cost</th>
+                  <th className="p-2 border">Quantity</th>
+                  <th className="p-2 border">Total</th>
+                  <th className="p-2 border">Notes</th>
+                  <th className="p-2 border">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp, idx) => {
+                  console.log(`[ExpenseTable] Expense row #${idx}:`, exp);
+                  return (
+                    <tr key={exp.id ?? idx}>
+                      <td className="p-2 border">
+                        {new Date(exp.date).toLocaleDateString()}
+                      </td>
+                      <td className="p-2 border">{exp.category}</td>
+                      <td className="p-2 border">{exp.item}</td>
+                      <td className="p-2 border">{exp.vendor}</td>
+                      <td className="p-2 border">${exp.unitCost}</td>
+                      <td className="p-2 border">{exp.quantity}</td>
+                      <td className="p-2 border">${exp.totalCost?.toFixed(2)}</td>
+                      <td className="p-2 border">{exp.description || ""}</td>
+                      <td className="p-2 border">
+                        <Button
+                          onClick={() => onEdit(exp)}
+                          className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded mr-2"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            console.log(
+                              "[ExpenseTable] Deleting item with ID:",
+                              exp.id
+                            );
+                            onDelete(exp.id);
+                          }}
+                          className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded"
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <div className="flex justify-center m-6">
+              <Button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-4">
+            <p className="mb-4">No expenses found.</p>
+            <Button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
+            >
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserRouter as Router,
@@ -32,6 +31,7 @@ Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
 
 function AppContent() {
+  // State declarations
   const [authChecked, setAuthChecked] = useState(false);
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
@@ -39,35 +39,19 @@ function AppContent() {
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [pendingExpense, setPendingExpense] = useState(null);
 
+  // Create a ref for ExpenseForm (for resetting the form)
   const expenseFormRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // For testing, we disable forced sign-out so that the user stays signed in.
   useEffect(() => {
     console.log("[AppContent] Mounted. (Force sign-out is disabled for now)");
-    /*
-    const forceSignOut = async () => {
-      try {
-        console.log("[forceSignOut] Calling signOut()...");
-        await signOut();
-        console.log("[forceSignOut] Sign out successful. Clearing storage...");
-        sessionStorage.clear();
-        localStorage.clear();
-      } catch (error) {
-        console.error("[forceSignOut] Error signing out:", error);
-      } finally {
-        console.log("[forceSignOut] Setting authChecked to true.");
-        setAuthChecked(true);
-      }
-    };
-    forceSignOut();
-    */
-    // Set authChecked to true immediately for testing
     setAuthChecked(true);
   }, []);
 
+  // Always fetch expenses from DataStore (remove background check)
   useEffect(() => {
-    console.debug("[AppContent] Fetching expenses from DataStore...");
     const fetchData = async () => {
       try {
         const allExpenses = await DataStore.query(Expense);
@@ -80,10 +64,10 @@ function AppContent() {
     fetchData();
   }, []);
 
+  // When the expense form is submitted, store the data and navigate to /confirm
   const handleExpenseSubmit = (data) => {
     console.debug("[handleExpenseSubmit] Received expense data:", data);
     setPendingExpense(data);
-    // Navigate to /confirm with the current location as background
     console.debug(
       "[handleExpenseSubmit] Navigating to /confirm with background:",
       location
@@ -91,6 +75,7 @@ function AppContent() {
     navigate("/confirm", { state: { background: location } });
   };
 
+  // Confirm expense submission (from the confirmation modal)
   const confirmExpenseSubmit = async () => {
     console.debug("[confirmExpenseSubmit] Confirming expense submission...", {
       pendingExpense,
@@ -132,27 +117,33 @@ function AppContent() {
       toast.error("Failed to save expense.");
     } finally {
       console.debug(
-        "[confirmExpenseSubmit] Navigating back (-1) and clearing pending expense."
+        "[confirmExpenseSubmit] Navigating back and clearing pending expense."
       );
-      // Navigate back to the background location (expense form)
-      navigate(-1);
+      // Navigate back to the expense form route
+      if (location.state && location.state.background) {
+        navigate(-1);
+      } else {
+        navigate("/dashboard");
+      }
       setPendingExpense(null);
-      // Call the reset method on the form via the ref
       expenseFormRef.current?.resetForm();
     }
   };
 
+  // Edit an expense (opens the form for editing)
   const handleEdit = (expense) => {
     console.debug("[handleEdit] Editing expense:", expense);
     setEditingExpense(expense);
   };
 
+  // When delete is clicked on an expense row, store its ID and show the delete modal
   const handleExpenseDelete = (id) => {
     console.debug("[handleExpenseDelete] Deleting expense with id:", id);
-    setShowDeleteModal(true);
     setExpenseToDelete(id);
+    setShowDeleteModal(true);
   };
 
+  // Handle the deletion confirmation from the delete modal
   const handleDelete = async () => {
     console.debug(
       "[handleDelete] Attempting to delete expense with id:",
@@ -202,6 +193,21 @@ function AppContent() {
         confirmExpenseSubmit={confirmExpenseSubmit}
         expenseFormRef={expenseFormRef}
       />
+      {/* Render the DeleteModal directly when state indicates */}
+      {showDeleteModal && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onRequestClose={() => {
+            // If no background exists, navigate to dashboard
+            if (location.state && location.state.background) {
+              setShowDeleteModal(false);
+            } else {
+              navigate("/dashboard");
+            }
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
     </>
   );
 }
@@ -253,11 +259,8 @@ function AppRoutes({
         />
         <Route path="/add-income" element={<IncomeForm />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
-        <Route path="/delete" element={<DeleteModal />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-
-      {/* Render the confirmation modal as a modal route */}
       {background && (
         <Routes>
           <Route
@@ -266,10 +269,12 @@ function AppRoutes({
               <ConfirmationModal
                 isOpen={true}
                 onRequestClose={() => {
-                  console.debug(
-                    "[ConfirmationModal] onRequestClose called, navigating back."
-                  );
-                  navigate(-1);
+                  console.debug("[ConfirmationModal] onRequestClose called.");
+                  if (location.state && location.state.background) {
+                    navigate(-1);
+                  } else {
+                    navigate("/dashboard");
+                  }
                 }}
                 onConfirm={confirmExpenseSubmit}
               />
