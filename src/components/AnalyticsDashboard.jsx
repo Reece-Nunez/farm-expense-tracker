@@ -41,8 +41,7 @@ export default function AnalyticsDashboard() {
     const fetchIncome = async () => {
       const allIncome = await DataStore.query(Income);
       const groupedIncome = allIncome.reduce((acc, curr) => {
-        acc[curr.item] =
-          (acc[curr.item] || 0) + parseFloat(curr.amount || 0);
+        acc[curr.item] = (acc[curr.item] || 0) + parseFloat(curr.amount || 0);
         return acc;
       }, {});
       setIncome(
@@ -76,8 +75,8 @@ export default function AnalyticsDashboard() {
               }
             >
               <XAxis dataKey="category" />
-              <YAxis />
-              <Tooltip />
+              <YAxis tickFormatter={(value) => `$${value}`} />
+              <Tooltip formatter={(value) => [`$${value}`, "Amount"]} />
               <Legend />
               <Bar dataKey="amount" fill="#82ca9d" />
             </BarChart>
@@ -94,7 +93,27 @@ export default function AnalyticsDashboard() {
                 nameKey="item"
                 outerRadius={100}
                 fill="#8884d8"
-                label
+                // Use a custom label function to prefix "$" to each label
+                label={(props) => {
+                  const { cx, cy, midAngle, innerRadius, outerRadius, value } =
+                    props;
+                  const RADIAN = Math.PI / 180;
+                  const radius =
+                    innerRadius + (outerRadius - innerRadius) * 0.5;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      fill="black"
+                      textAnchor={x > cx ? "start" : "end"}
+                      dominantBaseline="central"
+                    >
+                      {`$${value}`}
+                    </text>
+                  );
+                }}
               >
                 {(income.length
                   ? income
@@ -106,7 +125,8 @@ export default function AnalyticsDashboard() {
                   />
                 ))}
               </Pie>
-              <Tooltip />
+              {/* Format tooltip values with a "$" */}
+              <Tooltip formatter={(value) => `$${value}`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
