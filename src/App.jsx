@@ -16,7 +16,6 @@ import awsExports from "./aws-exports";
 
 import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
-import { signOut } from "@aws-amplify/auth";
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
 
@@ -24,21 +23,17 @@ import Dashboard from "./components/Dashboard";
 import ExpenseTable from "./components/ExpenseTable";
 import ExpenseForm from "./components/ExpenseForm";
 import IncomeForm from "./components/IncomeForm";
-import ConfirmationModal from "./components/ConfirmationModal";
-import DeleteModal from "./components/DeleteModal";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import EditExpense from "./components/EditExpense";
 import IncomeTable from "./components/IncomeTable";
 import EditIncome from "./components/EditIncome";
+import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import GenericModal from "./components/GenericModal";
 
-import { Expense, Income } from "./models/index";
+import { Expense, Income } from "./models";
 
 Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
 
-/**
- * The main content component that manages state for Expenses & Incomes.
- */
 function AppContent() {
   // -------------- State Declarations --------------
   const [authChecked, setAuthChecked] = useState(false);
@@ -46,253 +41,213 @@ function AppContent() {
   // Expense states
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [pendingExpense, setPendingExpense] = useState(null);
 
   // Income states
   const [fetchedIncomes, setFetchedIncomes] = useState([]);
   const [editingIncome, setEditingIncome] = useState(null);
 
-  // Form refs (to reset the forms from parent if needed)
+  // Generic modal state for confirmations (can be used for expense or income actions)
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(() => {}); // function to run on confirm
+  const [confirmMessage, setConfirmMessage] = useState("");
+
+  // Generic modal state for deletions (can be used for expense or income deletions)
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAction, setDeleteAction] = useState(() => {}); // function to run on deletion confirm
+  const [deleteMessage, setDeleteMessage] = useState("");
+
+  // Form refs
   const expenseFormRef = useRef(null);
   const incomeFormRef = useRef(null);
 
-  // Router hooks
   const navigate = useNavigate();
   const location = useLocation();
 
   // -------------- Effects --------------
-  // 1. On mount, skip forced sign-out, just set authChecked
   useEffect(() => {
-    console.log("[AppContent] Mounted. (Force sign-out is disabled for now)");
+    console.log("[AppContent] Mounted. (Force sign-out is disabled)");
     setAuthChecked(true);
   }, []);
 
-  // 2. Fetch Expenses once on mount
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
         const allExpenses = await DataStore.query(Expense);
-        console.debug("[fetchExpenses] Fetched expenses:", allExpenses);
         setFetchedExpenses(allExpenses);
       } catch (error) {
-        console.error("[fetchExpenses] Error fetching expenses:", error);
+        console.error("[fetchExpenses] Error:", error);
       }
     };
     fetchExpenses();
-    const subscription = DataStore.observe(Expense).subscribe((msg) => {
-      if (
-        msg.opType === "INSERT" ||
-        msg.opType === "UPDATE" ||
-        msg.opType === "DELETE"
-      ) {
-        // re-fetch the entire list
-        console.debug("[DataStore.observe] Expense changed, re-fetching...");
+
+    const expenseSub = DataStore.observe(Expense).subscribe((msg) => {
+      if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
         fetchExpenses();
       }
     });
-    // Cleanup subscription on unmount
-    return () => subscription.unsubscribe();
+    return () => expenseSub.unsubscribe();
   }, []);
 
-  // 3. Fetch Incomes once on mount
   useEffect(() => {
     const fetchIncome = async () => {
       try {
         const allIncome = await DataStore.query(Income);
-        console.debug("[fetchIncomes] Fetched incomes:", allIncome);
         setFetchedIncomes(allIncome);
       } catch (error) {
-        console.error("[fetchIncomes] Error fetching incomes:", error);
+        console.error("[fetchIncome] Error:", error);
       }
     };
     fetchIncome();
   }, []);
 
-  // Income delete/edit handlers (similar to expenses)
+  // -------------- Expense Handlers --------------
+  const handleExpenseSubmit = (data) => {
+    // Set the confirmation message
+    setConfirmMessage("Are you sure you want to accept this expense?");
+
+    // Set the confirm action to a function that saves the expense
+    setConfirmAction(() => async () => {
+      try {
+        const session = await fetchAuthSession();
+        const userId = session.tokens.idToken.payload.sub;
+        let newExpense;
+        if (editingExpense) {
+          newExpense = await DataStore.save(
+            Expense.copyOf(editingExpense, (updated) => {
+              Object.assign(updated, data);
+              updated.userId = userId;
+            })
+          );
+        } else {
+          newExpense = await DataStore.save(new Expense({ ...data, userId }));
+        }
+        // Update local state
+        setFetchedExpenses((prev) =>
+          editingExpense
+            ? prev.map((exp) => (exp.id === newExpense.id ? newExpense : exp))
+            : [...prev, newExpense]
+        );
+        toast.success(
+          editingExpense
+            ? "Expense updated successfully!"
+            : "Expense successfully added!"
+        );
+        setEditingExpense(null);
+      } catch (error) {
+        console.error("[handleExpenseSubmit] Error saving expense:", error);
+        toast.error("Failed to save expense.");
+      } finally {
+        setConfirmMessage("");
+        setConfirmAction(() => {});
+        setShowConfirmModal(false);
+        expenseFormRef.current?.resetForm();
+      }
+    });
+
+    // Show the confirmation modal
+    setShowConfirmModal(true);
+  };
+
+  const handleExpenseEdit = (expense) => {
+    // For editing, navigate to a dedicated edit page (or open a modal)
+    navigate(`/edit-expense/${expense.id}`);
+  };
+
+  const handleExpenseDelete = (id) => {
+    // Set up a generic delete confirmation
+    setDeleteMessage("Are you sure you want to delete this expense?");
+    setDeleteAction(() => async () => {
+      try {
+        const record = await DataStore.query(Expense, id);
+        if (!record) {
+          toast.error("Expense not found.");
+          return;
+        }
+        await DataStore.delete(record);
+        setFetchedExpenses((prev) => prev.filter((exp) => exp.id !== id));
+        toast.success("Expense deleted successfully!");
+      } catch (error) {
+        console.error("[handleExpenseDelete] Error:", error);
+        toast.error("Failed to delete expense.");
+      } finally {
+        setShowDeleteModal(false);
+      }
+    });
+    setShowDeleteModal(true);
+  };
+
+  // -------------- Income Handlers --------------
+  const handleIncomeSubmit = (incomeData) => {
+    // Set the confirmation message for income submission
+    setConfirmMessage("Are you sure you want to accept this income?");
+
+    // Set the confirm action to save the income record
+    setConfirmAction(() => async () => {
+      try {
+        const session = await fetchAuthSession();
+        const userId = session.tokens.idToken.payload.sub;
+        let newIncome;
+        if (editingIncome) {
+          newIncome = await DataStore.save(
+            Income.copyOf(editingIncome, (updated) => {
+              Object.assign(updated, incomeData);
+              updated.userId = userId;
+            })
+          );
+          toast.success("Income updated successfully!");
+          setEditingIncome(null);
+        } else {
+          newIncome = await DataStore.save(
+            new Income({ ...incomeData, userId })
+          );
+          toast.success("Income added successfully!");
+        }
+        setFetchedIncomes((prev) =>
+          editingIncome
+            ? prev.map((inc) => (inc.id === newIncome.id ? newIncome : inc))
+            : [...prev, newIncome]
+        );
+      } catch (error) {
+        console.error("[handleIncomeSubmit] Error:", error);
+        toast.error("Failed to save income.");
+      } finally {
+        // Clear the confirmation message and action, hide the modal, and reset the form.
+        setConfirmMessage("");
+        setConfirmAction(() => {});
+        setShowConfirmModal(false);
+        incomeFormRef.current?.resetForm();
+      }
+    });
+
+    // Show the confirmation modal
+    setShowConfirmModal(true);
+  };
+
   const handleIncomeEdit = (income) => {
     navigate(`/edit-income/${income.id}`);
   };
 
-  const handleIncomeDelete = async (id) => {
-    console.debut("[handleIncome Deleting income with id:", id);
-    setIncomeToDelete(id);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmIncomeDelete = async () => {
-    console.debug(
-      "[handleDelete] Attempting to delete expense: ",
-      incomeToDelete
-    );
-    try {
-      const toDeleteIncome = await DataStore.query(Income, incomeToDelete);
-      if (!toDeleteIncome) {
-        toast.error("Income record not found.");
-        return;
+  const handleIncomeDelete = (id) => {
+    setDeleteMessage("Are you sure you want to delete this income?");
+    setDeleteAction(() => async () => {
+      try {
+        const record = await DataStore.query(Income, id);
+        if (!record) {
+          toast.error("Income record not found.");
+          return;
+        }
+        await DataStore.delete(record);
+        setFetchedIncomes((prev) => prev.filter((inc) => inc.id !== id));
+        toast.success("Income deleted successfully!");
+      } catch (error) {
+        console.error("[handleIncomeDelete] Error:", error);
+        toast.error("Failed to delete income.");
+      } finally {
+        setShowDeleteModal(false);
       }
-      await DataStore.delete(toDeleteIncome);
-      console.debug("[handleDelete] Successfully deleted:", incomeToDelete);
-      setFetchedIncomes((prev) =>
-        prev.filter((income) => income.id!== incomeToDelete)
-      );
-      toast.success("Income deleted successfully!");
-    } catch (error) {
-      console.error("[hanldeDelete] Error deleting income:", error);
-      toast.error("Failed to delete income.");
-    } finally {
-      setShowDeleteModal(false);
-      setIncomeToDelete(null);
-    }
-  };
-
-  // -------------- Expense Handlers --------------
-  /** Called when the ExpenseForm is submitted (but before confirmation). */
-  const handleExpenseSubmit = (data) => {
-    console.debug("[handleExpenseSubmit] Received expense data:", data);
-    setPendingExpense(data);
-    console.debug("[handleExpenseSubmit] Navigating to /confirm");
-    // Navigate to the confirm route with background
-    navigate("/confirm", { state: { background: location } });
-  };
-
-  /** Actually save the expense to DataStore after confirmation. */
-  const confirmExpenseSubmit = async () => {
-    console.debug("[confirmExpenseSubmit] Confirming expense submission...", {
-      pendingExpense,
-      editingExpense,
     });
-    if (!pendingExpense) return;
-
-    try {
-      const session = await fetchAuthSession();
-      const userId = session.tokens.idToken.payload.sub;
-      let newExpense;
-      if (editingExpense) {
-        console.debug("[confirmExpenseSubmit] Updating existing expense...");
-        newExpense = await DataStore.save(
-          Expense.copyOf(editingExpense, (updated) => {
-            Object.assign(updated, pendingExpense);
-            updated.userId = userId;
-          })
-        );
-      } else {
-        console.debug("[confirmExpenseSubmit] Saving new expense...");
-        newExpense = await DataStore.save(
-          new Expense({ ...pendingExpense, userId })
-        );
-      }
-      console.debug("[confirmExpenseSubmit] Expense saved:", newExpense);
-      // Update local state
-      setFetchedExpenses((prev) =>
-        editingExpense
-          ? prev.map((exp) => (exp.id === newExpense.id ? newExpense : exp))
-          : [...prev, newExpense]
-      );
-      toast.success(
-        editingExpense
-          ? "Expense updated successfully!"
-          : "Expense successfully added!"
-      );
-      setEditingExpense(null);
-    } catch (error) {
-      console.error("[confirmExpenseSubmit] Error saving expense:", error);
-      toast.error("Failed to save expense.");
-    } finally {
-      // Clear pendingExpense, reset form, and navigate
-      setPendingExpense(null);
-      expenseFormRef.current?.resetForm();
-
-      if (location.state?.background) {
-        navigate(-1);
-      } else {
-        navigate("/dashboard");
-      }
-    }
-  };
-
-  /** Edit an existing expense (opens the expense form for editing). */
-  const handleExpenseEdit = (expense) => {
-    console.debug("[handleEdit] Editing expense:", expense);
-    setEditingExpense(expense);
-  };
-
-  /** Prompt to delete an expense. */
-  const handleExpenseDelete = (id) => {
-    console.debug("[handleExpenseDelete] Deleting expense with id:", id);
-    setExpenseToDelete(id);
     setShowDeleteModal(true);
-  };
-
-  /** Actually delete the expense. */
-  const handleConfirmDeleteExpense = async () => {
-    console.debug(
-      "[handleDelete] Attempting to delete expense:",
-      expenseToDelete
-    );
-    try {
-      const toDeleteExpense = await DataStore.query(Expense, expenseToDelete);
-      if (!toDeleteExpense) {
-        toast.error("Expense not found in DataStore.");
-        return;
-      }
-      await DataStore.delete(toDeleteExpense);
-      console.debug("[handleDelete] Expense deleted:", expenseToDelete);
-      setFetchedExpenses((prev) =>
-        prev.filter((exp) => exp.id !== expenseToDelete)
-      );
-      toast.success("Expense deleted successfully!");
-    } catch (error) {
-      console.error("[handleDelete] Error deleting expense:", error);
-      toast.error("Failed to delete expense.");
-    } finally {
-      setShowDeleteModal(false);
-      setExpenseToDelete(null);
-    }
-  };
-
-  // -------------- Income Handlers --------------
-  /** Called when the IncomeForm is submitted. */
-  const handleIncomeSubmit = async (incomeData) => {
-    console.log("[AppContent] handleIncomeSubmit received:", incomeData);
-    try {
-      const session = await fetchAuthSession();
-      const userId = session.tokens.idToken.payload.sub;
-
-      let newIncome;
-      if (editingIncome) {
-        // If editing an existing income
-        newIncome = await DataStore.save(
-          Income.copyOf(editingIncome, (updated) => {
-            Object.assign(updated, incomeData);
-            updated.userId = userId;
-          })
-        );
-        toast.success("Income updated successfully!");
-        setEditingIncome(null);
-      } else {
-        // If creating a new income
-        newIncome = await DataStore.save(
-          new Income({ ...incomeData, userId: userId })
-        );
-        toast.success("Income added successfully!");
-      }
-      console.log("[AppContent] Income saved:", newIncome);
-
-      // Update local state
-      setFetchedIncomes((prev) =>
-        editingIncome
-          ? prev.map((inc) => (inc.id === newIncome.id ? newIncome : inc))
-          : [...prev, newIncome]
-      );
-    } catch (error) {
-      console.error("[AppContent] Error saving income:", error);
-      toast.error("Failed to save income.");
-    } finally {
-      // If you want to reset the IncomeForm
-      incomeFormRef.current?.resetForm();
-    }
   };
 
   // -------------- Render --------------
@@ -300,95 +255,95 @@ function AppContent() {
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }
 
-  console.debug("[AppContent] Rendering with location:", location);
-
   return (
     <>
       <AppRoutes
-        // Expense states/handlers
+        // Expense handlers
         fetchedExpenses={fetchedExpenses}
-        editingExpense={editingExpense}
         handleExpenseEdit={handleExpenseEdit}
         handleExpenseDelete={handleExpenseDelete}
         handleExpenseSubmit={handleExpenseSubmit}
-        confirmExpenseSubmit={confirmExpenseSubmit}
         expenseFormRef={expenseFormRef}
-        // Income states/handlers
+        // Income handlers
         fetchedIncomes={fetchedIncomes}
-        editingIncome={editingIncome}
-        incomeFormRef={incomeFormRef}
-        handleIncomeSubmit={handleIncomeSubmit}
         handleIncomeEdit={handleIncomeEdit}
         handleIncomeDelete={handleIncomeDelete}
-        confirmIncomeSubmit={confirmIncomeSubmit}
+        handleIncomeSubmit={handleIncomeSubmit}
+        incomeFormRef={incomeFormRef}
       />
 
-      {/* Delete Modal for expenses */}
+      {/* Generic Confirmation Modal (for delete or confirm actions) */}
+      {showConfirmModal && (
+        <GenericModal
+          isOpen={showConfirmModal}
+          onRequestClose={() => setShowConfirmModal(false)}
+          onConfirm={confirmAction}
+          title="Confirm Submission"
+          message={confirmMessage}
+          confirmText="Submit"
+        />
+      )}
+
+      {/* Generic Delete Modal */}
       {showDeleteModal && (
-        <DeleteModal
+        <GenericModal
           isOpen={showDeleteModal}
           onRequestClose={() => setShowDeleteModal(false)}
-          onConfirm={handleDelete}
+          onConfirm={deleteAction}
+          title="Confirm Deletion"
+          message={deleteMessage}
+          confirmText="Delete"
         />
       )}
     </>
   );
 }
 
-/** Defines all routes. Receives the states and handlers as props. */
 function AppRoutes({
   fetchedExpenses,
-  editingExpense,
   handleExpenseEdit,
   handleExpenseDelete,
   handleExpenseSubmit,
-  confirmSubmit,
   expenseFormRef,
 
   fetchedIncomes,
-  handleIncomeDelete,
   handleIncomeEdit,
+  handleIncomeDelete,
   handleIncomeSubmit,
   incomeFormRef,
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const background = location.state?.background;
 
   return (
     <>
-      <Routes location={background || location}>
+      <Routes>
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Show the table of expenses */}
+        {/* Expense Routes */}
         <Route
           path="/expenses"
           element={
             <ExpenseTable
               expenses={fetchedExpenses}
-              onEdit={handleEdit}
+              onEdit={handleExpenseEdit}
               onDelete={handleExpenseDelete}
             />
           }
         />
-
-        {/* Edit Expenses */}
-        <Route path="/edit-expense/:id" element={<EditExpense />} />
-
-        {/* Add or edit an expense */}
         <Route
           path="/add-expense"
           element={
             <ExpenseForm
               ref={expenseFormRef}
-              editingExpense={editingExpense}
               onValidSubmit={handleExpenseSubmit}
             />
           }
         />
+        <Route path="/edit-expense/:id" element={<EditExpense />} />
 
-        {/* Income routes */}
+        {/* Income Routes */}
         <Route
           path="/income"
           element={
@@ -404,63 +359,24 @@ function AppRoutes({
           element={
             <IncomeForm
               ref={incomeFormRef}
-              onValidSubmit={(data) => {
-                // your income submit logic here
-              }}
+              onValidSubmit={handleIncomeSubmit}
             />
           }
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
 
-        {/* Add or edit an income */}
-        <Route
-          path="/add-income"
-          element={
-            <IncomeForm
-              ref={incomeFormRef}
-              onValidSubmit={handleIncomeSubmit}
-            />
-          }
-        />
-
         <Route path="/analytics" element={<AnalyticsDashboard />} />
-
-        {/* Catch-all: go back to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-
-      {/* If there's a background, render the confirm modal route on top */}
-      {background && (
-        <Routes>
-          <Route
-            path="/confirm"
-            element={
-              <ConfirmationModal
-                isOpen={true}
-                onRequestClose={() => {
-                  console.debug("[ConfirmationModal] onRequestClose called.");
-                  if (background) {
-                    navigate(-1);
-                  } else {
-                    navigate("/dashboard");
-                  }
-                }}
-                onConfirm={confirmSubmit}
-              />
-            }
-          />
-        </Routes>
-      )}
     </>
   );
 }
 
-/** The top-level App that wraps everything in Router & Authenticator. */
 function App() {
   return (
     <Router>
       <Authenticator>
-        {({ signOut, user }) => {
+        {({ user }) => {
           console.debug("[Authenticator] User signed in:", user);
           return <AppContent />;
         }}

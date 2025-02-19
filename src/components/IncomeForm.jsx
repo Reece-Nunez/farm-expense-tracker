@@ -1,4 +1,5 @@
-import React, { useImperativeHandle, forwardRef } from "react";
+// IncomeForm.jsx
+import React, { useImperativeHandle, forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
@@ -17,7 +18,7 @@ const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
 
 const IncomeForm = forwardRef((props, ref) => {
-  const { onValidSubmit } = props;
+  const { onValidSubmit, editingIncome } = props;
 
   const {
     register,
@@ -38,10 +39,26 @@ const IncomeForm = forwardRef((props, ref) => {
     },
   });
 
-  // Expose a method to reset the form to the parent
+  // Expose reset method
   useImperativeHandle(ref, () => ({
     resetForm: () => reset(),
   }));
+
+  // Prefill form when editingIncome changes
+  useEffect(() => {
+    if (editingIncome) {
+      reset({
+        ...editingIncome,
+        date: new Date(editingIncome.date),
+        pricePerUnit: editingIncome.pricePerUnit
+          ? editingIncome.pricePerUnit.toString()
+          : "",
+        weightOrQuantity: editingIncome.weightOrQuantity
+          ? editingIncome.weightOrQuantity.toString()
+          : "",
+      });
+    }
+  }, [editingIncome, reset]);
 
   const watchDate = watch("date");
   const item = watch("item");
@@ -55,18 +72,14 @@ const IncomeForm = forwardRef((props, ref) => {
 
   const onValid = (data) => {
     console.log("[IncomeForm] Raw form data:", data);
-
-    // parse numeric fields
     const parsedWeightOrQuantity = parseFloat(data.weightOrQuantity || "0");
     const parsedPricePerUnit = parseFloat(data.pricePerUnit || "0");
     const computedAmount = parsedWeightOrQuantity * parsedPricePerUnit;
     const finalAmount = parseFloat(computedAmount.toFixed(2));
-
     let dateValue = null;
     if (data.date) {
       dateValue = new Date(data.date);
     }
-
     const finalObj = {
       ...data,
       weightOrQuantity: parsedWeightOrQuantity,
@@ -74,19 +87,12 @@ const IncomeForm = forwardRef((props, ref) => {
       amount: finalAmount,
       date: dateValue ? dateValue.toISOString().split("T")[0] : "",
     };
-
-    console.log("[IncomeForm] Final object passed to onValidSubmit:", finalObj);
+    console.log("[IncomeForm] Final object:", finalObj);
     onValidSubmit(finalObj);
-
-    // Reset the form after successful submit
     reset();
   };
 
   const onInvalid = (formErrors) => {
-    console.log(
-      "[IncomeForm] Validation errors from React Hook Form:",
-      formErrors
-    );
     toast.error("Please fix errors before submitting.");
   };
 
@@ -115,7 +121,6 @@ const IncomeForm = forwardRef((props, ref) => {
             }`}
             isClearable
           />
-
           <Select
             {...register("paymentMethod")}
             className={`w-full border rounded px-3 py-2 ${
@@ -129,7 +134,6 @@ const IncomeForm = forwardRef((props, ref) => {
               </option>
             ))}
           </Select>
-
           <Select
             {...register("item")}
             className={`w-full border rounded px-3 py-2 ${
@@ -137,20 +141,18 @@ const IncomeForm = forwardRef((props, ref) => {
             }`}
           >
             <option value="">Select Item Sold</option>
-            {itemsSold.map((itemOption) => (
-              <option key={itemOption} value={itemOption}>
-                {itemOption}
+            {itemsSold.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </Select>
-
           {item && item !== "Other" && (
             <div className="flex items-center space-x-2">
               <Input
                 type="number"
                 step="any"
                 placeholder={item === "Eggs" ? "Enter dozens" : "Enter weight"}
-                // IMPORTANT: setValueAs to convert from string -> number
                 {...register("weightOrQuantity", {
                   setValueAs: (val) =>
                     val === "" ? undefined : parseFloat(val),
@@ -164,7 +166,6 @@ const IncomeForm = forwardRef((props, ref) => {
               </span>
             </div>
           )}
-
           <div className="flex items-center space-x-2">
             <CurrencyInput
               prefix="$"
@@ -182,14 +183,12 @@ const IncomeForm = forwardRef((props, ref) => {
               {item === "Eggs" ? "dozen" : "lb"}
             </span>
           </div>
-
           <Input
             readOnly
             value={amount > 0 ? `$${amount.toFixed(2)}` : ""}
             className="w-full border rounded px-3 py-2 bg-gray-100"
             placeholder="Total Amount"
           />
-
           <Textarea
             placeholder="Description (optional)"
             {...register("description")}
@@ -197,7 +196,6 @@ const IncomeForm = forwardRef((props, ref) => {
               errors.description ? "animate-shake border-red-500" : ""
             }`}
           />
-
           <div className="flex justify-around mt-4 space-x-4">
             <Button
               type="button"

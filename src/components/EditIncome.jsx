@@ -5,6 +5,7 @@ import { DataStore } from "@aws-amplify/datastore";
 import { Income } from "../models";
 import IncomeForm from "./IncomeForm";
 import { toast } from "react-hot-toast";
+import GenericModal from "./GenericModal";
 
 export default function EditIncome() {
   const { id } = useParams();
