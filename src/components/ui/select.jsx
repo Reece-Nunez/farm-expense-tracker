@@ -6,8 +6,8 @@ export const Select = React.forwardRef(function SelectWithRef(
 ) {
   return (
     <select
-      ref={ref} // attach the forwarded ref here
-      className={`border px-3 py-2 rounded ${className}`}
+      ref={ref}
+      className={`w-full border rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 ${className}`}
       {...props}
     >
       {children}

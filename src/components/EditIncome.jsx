@@ -34,7 +34,7 @@ export default function EditIncome() {
     fetchIncomeById();
   }, [id, navigate]);
 
-  // Instead of updating immediately, set confirmation state
+  // Instead of updating immediately, we prompt the user for confirmation.
   const handleUpdateIncome = async (formData) => {
     setConfirmMessage("Are you sure you want to update this income?");
     setConfirmAction(() => async () => {
@@ -57,17 +57,19 @@ export default function EditIncome() {
   };
 
   if (!currentIncome) {
-    return <div style={{ padding: 20 }}>Loading income record...</div>;
+    return <div className="p-8 text-center">Loading income record...</div>;
   }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: 20 }}>
-      <h2 className="text-xl mb-4">Edit Income</h2>
-      <IncomeForm
-        ref={incomeFormRef}
-        editingIncome={currentIncome}
-        onValidSubmit={handleUpdateIncome}
-      />
+    <div className="max-w-xl mx-auto p-8">
+      <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow duration-300">
+        <h2 className="text-3xl font-bold text-center mb-6">Edit Income</h2>
+        <IncomeForm
+          ref={incomeFormRef}
+          editingIncome={currentIncome}
+          onValidSubmit={handleUpdateIncome}
+        />
+      </div>
       {showConfirm && (
         <GenericModal
           isOpen={showConfirm}
