@@ -35,6 +35,7 @@ export default function EditExpense() {
   }, [id, navigate]);
 
   const handleUpdateExpense = async (formData) => {
+    // Instead of updating immediately, we prompt the user with a confirmation.
     setConfirmMessage("Are you sure you want to update this expense?");
     setConfirmAction(() => async () => {
       try {
@@ -56,17 +57,19 @@ export default function EditExpense() {
   };
 
   if (!currentExpense) {
-    return <div style={{ padding: 20 }}>Loading expense...</div>;
+    return <div className="p-8 text-center">Loading expense...</div>;
   }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: 20 }}>
-      <h2 className="text-xl mb-4">Edit Expense</h2>
-      <ExpenseForm
-        ref={expenseFormRef}
-        editingExpense={currentExpense}
-        onValidSubmit={handleUpdateExpense}
-      />
+    <div className="max-w-xl mx-auto p-8">
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-2xl font-bold text-center mb-6">Edit Expense</h2>
+        <ExpenseForm
+          ref={expenseFormRef}
+          editingExpense={currentExpense}
+          onValidSubmit={handleUpdateExpense}
+        />
+      </div>
       {showConfirm && (
         <GenericModal
           isOpen={showConfirm}
