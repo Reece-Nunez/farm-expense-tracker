@@ -104,6 +104,7 @@ export const onCreateExpense = /* GraphQL */ `
       quantity
       totalCost
       description
+      receiptImageKey
       createdAt
       updatedAt
       _version
@@ -131,6 +132,7 @@ export const onUpdateExpense = /* GraphQL */ `
       quantity
       totalCost
       description
+      receiptImageKey
       createdAt
       updatedAt
       _version
@@ -158,6 +160,7 @@ export const onDeleteExpense = /* GraphQL */ `
       quantity
       totalCost
       description
+      receiptImageKey
       createdAt
       updatedAt
       _version

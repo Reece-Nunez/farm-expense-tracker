@@ -96,6 +96,7 @@ export const getExpense = /* GraphQL */ `
       quantity
       totalCost
       description
+      receiptImageKey
       createdAt
       updatedAt
       _version
@@ -125,6 +126,7 @@ export const listExpenses = /* GraphQL */ `
         quantity
         totalCost
         description
+        receiptImageKey
         createdAt
         updatedAt
         _version
@@ -164,6 +166,7 @@ export const syncExpenses = /* GraphQL */ `
         quantity
         totalCost
         description
+        receiptImageKey
         createdAt
         updatedAt
         _version
@@ -289,6 +292,7 @@ export const expensesByUserId = /* GraphQL */ `
         quantity
         totalCost
         description
+        receiptImageKey
         createdAt
         updatedAt
         _version

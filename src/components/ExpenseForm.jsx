@@ -11,13 +11,9 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
-import { expenseSchema } from "@/schemas/expenseSchema";
 import { expenseFormSchema } from "@/schemas/expenseFormSchema";
-import {
-  CalendarIcon,
-  CurrencyDollarIcon,
-  CollectionIcon,
-} from "@heroicons/react/outline";
+import { Storage } from "@aws-amplify";
+import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
 
 // Typical Farm Expense Categories
 const categories = [
@@ -52,6 +48,7 @@ const defaultExpense = {
   item: "",
   vendor: "",
   description: "",
+  receiptFile: null,
 };
 
 function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
@@ -100,18 +97,54 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
   const navigate = useNavigate();
 
-  const onValid = (data) => {
-    // data.expenses is the array
-    const formattedExpenses = data.expenses.map((expense) => ({
-      ...expense,
-      date: expense.date ? expense.date.toISOString().split("T")[0] : "",
-      totalCost:
-        parseFloat(expense.unitCost || 0) * parseFloat(expense.quantity || 0) ||
-        0,
-    }));
-  
-    // Now pass the array directly:
-    onValidSubmit(formattedExpenses);
+  const onValid = async (data) => {
+    try {
+      const formattedExpenses = [];
+
+      // data.expenses is an array
+      for (let expense of data.expenses) {
+        // Convert date to yyyy-MM-dd
+        const isoDate = expense.date
+          ? expense.date.toISOString().split("T")[0]
+          : "";
+
+        // Calculate totalCost
+        const totalCost =
+          parseFloat(expense.unitCost || 0) *
+            parseFloat(expense.quantity || 0) || 0;
+
+        // Prepare the single expense object
+        const newExpense = {
+          ...expense,
+          date: isoDate,
+          totalCost,
+        };
+
+        // 1) If the user selected a file (receiptFile), upload to S3
+        if (expense.receiptFile && expense.receiptFile[0]) {
+          const file = expense.receiptFile[0];
+          // You can generate a unique key. For simplicity, use a timestamp + original name
+          const fileKey = `receipts/${Date.now()}_${file.name}`;
+
+          // Upload to S3 using Amplify Storage
+          const uploadResult = await Storage.put(fileKey, file, {
+            contentType: file.type,
+          });
+
+          // 2) Store the S3 key in the newExpense object
+          newExpense.receiptImageKey = fileKey;
+        }
+
+        // 3) No file selected => no change to receiptImageKey (will remain undefined)
+        formattedExpenses.push(newExpense);
+      }
+
+      // Now pass the entire array to the parent's submit handler
+      onValidSubmit(formattedExpenses);
+    } catch (err) {
+      console.error("[ExpenseForm] File upload error:", err);
+      toast.error("Error uploading file.");
+    }
   };
 
   const onInvalid = () => {
@@ -305,6 +338,22 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                     {...register(`expenses.${index}.description`)}
                     className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   />
+                </div>
+
+                {/* Receipt File Field */}
+                <div>
+                  <label className="block font-medium mb-1">
+                    Receipt Image (Optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...register(`expenses.${index}.receiptFile`)}
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload a picture of the receipt (optional).
+                  </p>
                 </div>
 
                 <div className="flex justify-around mt-6">

@@ -55,6 +55,7 @@ type EagerExpense = {
   readonly quantity: number;
   readonly totalCost: number;
   readonly description?: string | null;
+  readonly receiptImageKey?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly userExpensesId?: string | null;
@@ -75,6 +76,7 @@ type LazyExpense = {
   readonly quantity: number;
   readonly totalCost: number;
   readonly description?: string | null;
+  readonly receiptImageKey?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly userExpensesId?: string | null;

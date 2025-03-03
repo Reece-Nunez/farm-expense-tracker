@@ -1,0 +1,14 @@
+{
+  "resourceName": "receipts",
+  "policyUUID": "05547db0",
+  "bucketName": "farmexpensetrackerreceipts",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

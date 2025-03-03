@@ -194,6 +194,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "receiptImageKey": {
+                    "name": "receiptImageKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -312,7 +319,7 @@ export const schema = {
                     "name": "source",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "amount": {
@@ -423,5 +430,5 @@ export const schema = {
     "enums": {},
     "nonModels": {},
     "codegenVersion": "3.4.4",
-    "version": "eb159024f86550c0c40f5f62adabafe9"
+    "version": "aa09343f54e6e012a43f22be1622a788"
 };

@@ -29,6 +29,7 @@ type Expense
   quantity: Int!
   totalCost: Float!
   description: String
+  receiptImageKey: String
 }
 
 type Income
