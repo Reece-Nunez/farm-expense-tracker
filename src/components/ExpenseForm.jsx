@@ -344,17 +344,30 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
                 {/* Receipt File Field */}
                 <div>
-                  <label className="block font-medium mb-1">
+                  <label className="block font-medium text-base mb-2">
                     Receipt Image (Optional)
                   </label>
                   <input
                     type="file"
                     accept="image/*"
                     {...register(`expenses.${index}.receiptFile`)}
-                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="
+                      block w-full text-sm
+                      text-gray-900
+                      border border-blue-300
+                      rounded-lg
+                      cursor-pointer
+                      focus:outline-none
+                      focus:ring-2 focus:ring-blue-300
+                      file:mr-4 file:py-2 file:px-4 file:rounded
+                      file:border-0 file:text-sm file:font-semibold
+                      file:bg-blue-500 file:text-white
+                      hover:file:bg-blue-600
+                      transition-colors
+                    "
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Upload a picture of the receipt (optional).
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Upload a picture of the receipt (optional)
                   </p>
                 </div>
 
