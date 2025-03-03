@@ -15,4 +15,5 @@ export const expenseSchema = z.object({
   vendor: z.string().min(1, "Vendor is required"),
   // description is optional
   description: z.string().optional(),
+  receiptFile: z.any().optional(),
 });

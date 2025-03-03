@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { expenseFormSchema } from "@/schemas/expenseFormSchema";
-import { Storage } from "@aws-amplify";
+import { uploadData } from "aws-amplify/storage";
 import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
 
 // Typical Farm Expense Categories
@@ -120,27 +120,29 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
           totalCost,
         };
 
-        // 1) If the user selected a file (receiptFile), upload to S3
+        // If the user selected a file, upload to S3
         if (expense.receiptFile && expense.receiptFile[0]) {
           const file = expense.receiptFile[0];
-          // You can generate a unique key. For simplicity, use a timestamp + original name
           const fileKey = `receipts/${Date.now()}_${file.name}`;
 
-          // Upload to S3 using Amplify Storage
-          const uploadResult = await Storage.put(fileKey, file, {
-            contentType: file.type,
+          const operation = uploadData({
+            path: fileKey,
+            data: file,
+            options: { contentType: file.type },
           });
+          await operation.result;
 
-          // 2) Store the S3 key in the newExpense object
+          // Store the S3 key in the newExpense object
           newExpense.receiptImageKey = fileKey;
         }
 
-        // 3) No file selected => no change to receiptImageKey (will remain undefined)
+        // If no file selected, receiptImageKey remains undefined.
         formattedExpenses.push(newExpense);
       }
 
-      // Now pass the entire array to the parent's submit handler
+      // Pass the array to the parent's submit handler
       onValidSubmit(formattedExpenses);
+      console.log(formattedExpenses);
     } catch (err) {
       console.error("[ExpenseForm] File upload error:", err);
       toast.error("Error uploading file.");
