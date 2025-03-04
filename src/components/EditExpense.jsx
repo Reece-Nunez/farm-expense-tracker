@@ -41,7 +41,7 @@ export default function EditExpense() {
       try {
         const updated = await DataStore.save(
           Expense.copyOf(currentExpense, (updated) => {
-            Object.assign(updated, formData);
+            Object.assign(updated, formData[0]);
           })
         );
         toast.success("Expense updated successfully!");
