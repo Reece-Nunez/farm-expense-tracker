@@ -66,7 +66,6 @@ function AppContent() {
 
   // -------------- Effects --------------
   useEffect(() => {
-    console.log("[AppContent] Mounted. (Force sign-out is disabled)");
     setAuthChecked(true);
   }, []);
 
@@ -75,7 +74,6 @@ function AppContent() {
       try {
         const allExpenses = await DataStore.query(Expense);
         setFetchedExpenses(allExpenses);
-        console.log(allExpenses);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
       }
@@ -142,8 +140,6 @@ function AppContent() {
               DataStore.save(new Expense({ ...expense, userId }))
             )
           );
-          console.log(savedExpenses);
-
           // Update local state with the newly created records
           setFetchedExpenses((prev) => [...prev, ...savedExpenses]);
           toast.success("Expenses successfully added!");

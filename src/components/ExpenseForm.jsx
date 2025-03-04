@@ -142,7 +142,6 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
       // Pass the array to the parent's submit handler
       onValidSubmit(formattedExpenses);
-      console.log(formattedExpenses);
     } catch (err) {
       console.error("[ExpenseForm] File upload error:", err);
       toast.error("Error uploading file.");
