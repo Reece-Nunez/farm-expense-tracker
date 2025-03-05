@@ -10,6 +10,7 @@ import {
   CollectionIcon,
   CurrencyDollarIcon,
   LogoutIcon,
+  CloudUploadIcon,
 } from "@heroicons/react/outline";
 
 function Dashboard() {
@@ -70,6 +71,15 @@ function Dashboard() {
       hoverColor: "hover:bg-gray-900",
       textColor: "text-white",
       route: "/income",
+    },
+    {
+      title: "Import CSV",
+      description: "Upload expenses via CSV",
+      icon: CloudUploadIcon,
+      bgColor: "bg-indigo-500",
+      hoverColor: "hover:bg-indigo-600",
+      textColor: "text-white",
+      route: "/import-csv",
     },
   ];
 

@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserRouter as Router,
@@ -10,15 +9,12 @@ import {
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
-
 import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
-
 import Dashboard from "./components/Dashboard";
 import ExpenseTable from "./components/ExpenseTable";
 import ExpenseForm from "./components/ExpenseForm";
@@ -28,7 +24,7 @@ import IncomeTable from "./components/IncomeTable";
 import EditIncome from "./components/EditIncome";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import GenericModal from "./components/GenericModal";
-
+import ImportExpensesCSV from "./components/ImportExpensesCSV";
 import { Expense, Income } from "./models";
 
 Amplify.configure({ ...awsExports });
@@ -373,7 +369,7 @@ function AppRoutes({
           }
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
-
+        <Route path="/import-csv" element={<ImportExpensesCSV />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
