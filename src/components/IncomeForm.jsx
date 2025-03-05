@@ -11,13 +11,11 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+
+// Suppose you have an updated Zod schema that references `notes` not `description`
 import { incomeSchema } from "@/schemas/incomeSchema";
 
-import {
-  CalendarIcon,
-  CurrencyDollarIcon,
-  CollectionIcon,
-} from "@heroicons/react/outline";
+import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
 
 // Define options
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
@@ -41,7 +39,7 @@ const IncomeForm = forwardRef((props, ref) => {
       weightOrQuantity: "",
       item: "",
       paymentMethod: "",
-      description: "",
+      notes: "",
     },
   });
 
@@ -55,45 +53,46 @@ const IncomeForm = forwardRef((props, ref) => {
     if (editingIncome) {
       reset({
         ...editingIncome,
-        date: new Date(editingIncome.date),
-        pricePerUnit: editingIncome.pricePerUnit
-          ? editingIncome.pricePerUnit.toString()
-          : "",
-        weightOrQuantity: editingIncome.weightOrQuantity
-          ? editingIncome.weightOrQuantity.toString()
-          : "",
+        // editingIncome might store `amount`. We'll recalc from price/quantity if you want, or skip
+        // If you stored separate fields for pricePerUnit and weightOrQuantity, set them too
+        date: editingIncome.date ? new Date(editingIncome.date) : "",
+        notes: editingIncome.notes || "",
+        item: editingIncome.item || "",
+        paymentMethod: editingIncome.paymentMethod || "",
       });
     }
   }, [editingIncome, reset]);
 
   const watchDate = watch("date");
-  const item = watch("item");
-  const navigate = useNavigate();
-
   const watchPricePerUnit = watch("pricePerUnit");
   const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
+
+  // If you want to compute final "amount" from pricePerUnit * weightOrQuantity:
   const amount =
-    parseFloat(watchPricePerUnit || 0) *
-      parseFloat(watchWeightOrQuantity || 0) || 0;
+    parseFloat(watchPricePerUnit || 0) * watchWeightOrQuantity || 0;
+
+  const navigate = useNavigate();
 
   const onValid = (data) => {
-    console.log("[IncomeForm] Raw form data:", data);
-    const parsedWeightOrQuantity = parseFloat(data.weightOrQuantity || "0");
-    const parsedPricePerUnit = parseFloat(data.pricePerUnit || "0");
-    const computedAmount = parsedWeightOrQuantity * parsedPricePerUnit;
-    const finalAmount = parseFloat(computedAmount.toFixed(2));
-    let dateValue = null;
-    if (data.date) {
-      dateValue = new Date(data.date);
-    }
+    // Convert date to YYYY-MM-DD
+    const dateValue = data.date ? new Date(data.date) : null;
+    const isoDate = dateValue ? dateValue.toISOString().split("T")[0] : "";
+
+    const parsedQuantity = parseFloat(data.weightOrQuantity || "0");
+    const parsedPrice = parseFloat(data.pricePerUnit || "0");
+    const computedAmount = parsedPrice * parsedQuantity;
+
+    // Final object that matches your Income schema
     const finalObj = {
-      ...data,
-      weightOrQuantity: parsedWeightOrQuantity,
-      pricePerUnit: parsedPricePerUnit,
-      amount: finalAmount,
-      date: dateValue ? dateValue.toISOString().split("T")[0] : "",
+      userId: "", // will be set in parent code
+      date: isoDate,
+      paymentMethod: data.paymentMethod, // optional
+      item: data.item || "Other", // required
+      // or fallback "Other" if none selected
+      amount: parseFloat(computedAmount.toFixed(2)),
+      notes: data.notes || "",
     };
-    console.log("[IncomeForm] Final object:", finalObj);
+
     onValidSubmit(finalObj);
     reset();
   };
@@ -121,7 +120,7 @@ const IncomeForm = forwardRef((props, ref) => {
           {/* Date */}
           <div>
             <label className="block font-medium mb-1">
-            <CalendarIcon className="w-5 h-5 text-blue-500" />
+              <CalendarIcon className="w-5 h-5 text-blue-500 inline mr-1" />
               Date <span className="text-red-500">*</span>
             </label>
             <DatePicker
@@ -141,14 +140,10 @@ const IncomeForm = forwardRef((props, ref) => {
 
           {/* Payment Method */}
           <div>
-            <label className="block font-medium mb-1">
-              Payment Method <span className="text-red-500">*</span>
-            </label>
+            <label className="block font-medium mb-1">Payment Method</label>
             <Select
               {...register("paymentMethod")}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                errors.paymentMethod ? "border-red-500 animate-shake" : ""
-              }`}
+              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300`}
             >
               <option value="">Select Payment Method</option>
               {paymentMethods.map((method) => (
@@ -157,14 +152,9 @@ const IncomeForm = forwardRef((props, ref) => {
                 </option>
               ))}
             </Select>
-            {errors.paymentMethod && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.paymentMethod.message}
-              </p>
-            )}
           </div>
 
-          {/* Item Sold */}
+          {/* Item Sold (REQUIRED) */}
           <div>
             <label className="block font-medium mb-1">
               Item Sold <span className="text-red-500">*</span>
@@ -187,64 +177,49 @@ const IncomeForm = forwardRef((props, ref) => {
             )}
           </div>
 
-          {/* Weight/Quantity */}
-          {item && item !== "Other" && (
-            <div className="flex items-center gap-2">
+          {/* Weight/Quantity + Price per Unit -> Computed total */}
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <label className="block font-medium mb-1">Weight/Quantity</label>
               <Input
                 type="number"
                 step="any"
-                placeholder={item === "Eggs" ? "Enter dozens" : "Enter weight"}
-                {...register("weightOrQuantity", {
-                  setValueAs: (val) =>
-                    val === "" ? undefined : parseFloat(val),
-                })}
-                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                  errors.weightOrQuantity ? "border-red-500 animate-shake" : ""
-                }`}
+                placeholder="e.g., 12 (dozens) or 50 (lbs)"
+                {...register("weightOrQuantity")}
+                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300`}
               />
-              <span className="text-gray-700 font-medium">
-                {item === "Eggs" ? "dozen" : "lb"}
-              </span>
             </div>
-          )}
-
-          {/* Price per Unit */}
-          <div className="flex items-center gap-2">
-            <CurrencyInput
-              prefix="$"
-              decimalsLimit={2}
-              decimalScale={2}
-              allowNegativeValue={false}
-              placeholder="Price per unit"
-              value={watchPricePerUnit}
-              onValueChange={handlePriceChange}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                errors.pricePerUnit ? "border-red-500 animate-shake" : ""
-              }`}
-            />
-            <span className="text-gray-700 font-medium">
-              {item === "Eggs" ? "per dozen" : "per lb"}
-            </span>
+            <div className="flex-1">
+              <label className="block font-medium mb-1">Price Per Unit</label>
+              <CurrencyInput
+                prefix="$"
+                decimalsLimit={2}
+                decimalScale={2}
+                allowNegativeValue={false}
+                placeholder="Price per unit"
+                value={watchPricePerUnit}
+                onValueChange={handlePriceChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+              />
+            </div>
           </div>
 
-          {/* Computed Total */}
+          {/* Computed Amount */}
           <div>
             <label className="block font-medium">Total Amount</label>
             <Input
               readOnly
-              value={amount > 0 ? `$${amount.toFixed(2)}` : ""}
+              value={amount > 0 ? `$${amount.toFixed(2)}` : "$0.00"}
               className="w-full border rounded px-3 py-2 bg-gray-100"
             />
           </div>
 
-          {/* Description */}
+          {/* Notes */}
           <div>
-            <label className="block font-medium mb-1">
-              Description (Optional)
-            </label>
+            <label className="block font-medium mb-1">Notes (Optional)</label>
             <Textarea
               placeholder="Any extra details"
-              {...register("description")}
+              {...register("notes")}
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
             />
           </div>
@@ -253,10 +228,7 @@ const IncomeForm = forwardRef((props, ref) => {
           <div className="flex justify-around mt-6 space-x-4">
             <Button
               type="button"
-              onClick={() => {
-                console.log("[IncomeForm] Resetting form");
-                reset();
-              }}
+              onClick={() => reset()}
               className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Clear

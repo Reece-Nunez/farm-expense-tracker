@@ -25,6 +25,7 @@ import EditIncome from "./components/EditIncome";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import GenericModal from "./components/GenericModal";
 import ImportExpensesCSV from "./components/ImportExpensesCSV";
+import ImportIncomeCSV from "./components/ImportIncomeCSV";
 import { Expense, Income } from "./models";
 
 Amplify.configure({ ...awsExports });
@@ -370,6 +371,7 @@ function AppRoutes({
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
         <Route path="/import-csv" element={<ImportExpensesCSV />} />
+        <Route path="/import-income" element={<ImportIncomeCSV />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>

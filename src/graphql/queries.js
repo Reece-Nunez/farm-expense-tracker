@@ -188,8 +188,11 @@ export const getIncome = /* GraphQL */ `
       id
       userId
       date
-      source
+      quantity
+      price
+      paymentMethod
       amount
+      item
       notes
       createdAt
       updatedAt
@@ -213,8 +216,11 @@ export const listIncomes = /* GraphQL */ `
         id
         userId
         date
-        source
+        quantity
+        price
+        paymentMethod
         amount
+        item
         notes
         createdAt
         updatedAt
@@ -248,8 +254,11 @@ export const syncIncomes = /* GraphQL */ `
         id
         userId
         date
-        source
+        quantity
+        price
+        paymentMethod
         amount
+        item
         notes
         createdAt
         updatedAt
@@ -327,8 +336,11 @@ export const incomesByUserId = /* GraphQL */ `
         id
         userId
         date
-        source
+        quantity
+        price
+        paymentMethod
         amount
+        item
         notes
         createdAt
         updatedAt

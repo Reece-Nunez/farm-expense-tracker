@@ -81,6 +81,15 @@ function Dashboard() {
       textColor: "text-white",
       route: "/import-csv",
     },
+    {
+      title: "Import Income CSV",
+      description: "Upload a CSV file for income",
+      icon: CloudUploadIcon,     // for example
+      bgColor: "bg-green-500",
+      hoverColor: "hover:bg-green-600",
+      textColor: "text-white",
+      route: "/import-income",
+    },    
   ];
 
   return (

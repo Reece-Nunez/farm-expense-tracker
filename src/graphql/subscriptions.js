@@ -181,8 +181,11 @@ export const onCreateIncome = /* GraphQL */ `
       id
       userId
       date
-      source
+      quantity
+      price
+      paymentMethod
       amount
+      item
       notes
       createdAt
       updatedAt
@@ -204,8 +207,11 @@ export const onUpdateIncome = /* GraphQL */ `
       id
       userId
       date
-      source
+      quantity
+      price
+      paymentMethod
       amount
+      item
       notes
       createdAt
       updatedAt
@@ -227,8 +233,11 @@ export const onDeleteIncome = /* GraphQL */ `
       id
       userId
       date
-      source
+      quantity
+      price
+      paymentMethod
       amount
+      item
       notes
       createdAt
       updatedAt

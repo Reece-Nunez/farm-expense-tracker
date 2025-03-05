@@ -42,7 +42,10 @@ type Income
   id: ID!
   userId: ID! @index(name: "byUser")
   date: AWSDate!
-  source: String!
+  quantity: Int!
+  price: Float!
+  paymentMethod: String
   amount: Float!
+  item: String
   notes: String
 }

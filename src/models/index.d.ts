@@ -96,8 +96,11 @@ type EagerIncome = {
   readonly id: string;
   readonly userId: string;
   readonly date: string;
-  readonly source: string;
+  readonly quantity: number;
+  readonly price: number;
+  readonly paymentMethod?: string | null;
   readonly amount: number;
+  readonly item?: string | null;
   readonly notes?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -112,8 +115,11 @@ type LazyIncome = {
   readonly id: string;
   readonly userId: string;
   readonly date: string;
-  readonly source: string;
+  readonly quantity: number;
+  readonly price: number;
+  readonly paymentMethod?: string | null;
   readonly amount: number;
+  readonly item?: string | null;
   readonly notes?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;

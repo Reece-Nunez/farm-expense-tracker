@@ -315,11 +315,25 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "source": {
-                    "name": "source",
+                "quantity": {
+                    "name": "quantity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "price": {
+                    "name": "price",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "paymentMethod": {
+                    "name": "paymentMethod",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "amount": {
@@ -327,6 +341,13 @@ export const schema = {
                     "isArray": false,
                     "type": "Float",
                     "isRequired": true,
+                    "attributes": []
+                },
+                "item": {
+                    "name": "item",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "notes": {
@@ -430,5 +451,5 @@ export const schema = {
     "enums": {},
     "nonModels": {},
     "codegenVersion": "3.4.4",
-    "version": "aa09343f54e6e012a43f22be1622a788"
+    "version": "e4b93cbd3a1935e67c475f5933ea8f95"
 };
