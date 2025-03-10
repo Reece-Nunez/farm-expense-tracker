@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
-import { Storage } from "aws-amplify";
+// Same approach as your expense form:
+import { uploadData, getUrl } from "aws-amplify/storage";
 import { User } from "../models";
 
 export default function Profile() {
@@ -16,32 +17,30 @@ export default function Profile() {
   const [aboutMe, setAboutMe] = useState("");
 
   // Profile picture
-  const defaultProfileImage = "https://via.placeholder.com/150?text=No+Profile+Picture";
+  const defaultProfileImage = "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg";
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
   const [newProfilePicFile, setNewProfilePicFile] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // 1) Get current user’s sub from Auth
         const session = await fetchAuthSession();
         const userSub = session.tokens.idToken.payload.sub;
 
-        // 2) Query DataStore for an existing record by 'sub'
+        // Query for a User record by sub
         const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(userSub));
         if (foundUser) {
           setUserRecord(foundUser);
-          // Pre-fill fields
           setUsername(foundUser.username || "");
           setFarmName(foundUser.farmName || "");
           setEmail(foundUser.email || "");
           setPhone(foundUser.phone || "");
           setAboutMe(foundUser.aboutMe || "");
 
-          // If user has a profilePictureKey, fetch from S3
+          // If user has a profile pic, fetch its URL from S3
           if (foundUser.profilePictureKey) {
-            const imageUrl = await Storage.get(foundUser.profilePictureKey);
-            setProfileImageUrl(imageUrl);
+            const { url } = await getUrl({ path: foundUser.profilePictureKey });
+            setProfileImageUrl(url.href);
           }
         } else {
           console.log("No existing user record found for sub:", userSub);
@@ -63,16 +62,17 @@ export default function Profile() {
     }
   };
 
-  // Called when user hits "Save" in the form
+  // Called when user hits "Save"
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // If there's a new file to upload, handle that first
+    // If there's a new file, upload it first
     let uploadedKey = userRecord?.profilePictureKey || null;
     if (newProfilePicFile) {
       uploadedKey = await uploadProfilePicture(newProfilePicFile);
     }
 
+    // Create or update the User record
     if (!userRecord) {
       await createNewUser(uploadedKey);
     } else {
@@ -80,22 +80,23 @@ export default function Profile() {
     }
   };
 
-  // Uploads the selected file to S3 and returns the S3 key
+  // Uploads file to S3 using your existing "uploadData" approach
   const uploadProfilePicture = async (file) => {
     try {
       const session = await fetchAuthSession();
       const userSub = session.tokens.idToken.payload.sub;
 
-      // Example key: "profile-pictures/<sub>.jpg" 
-      // or you can do something unique like `${Date.now()}_${file.name}`
-      const s3Key = `profile-pictures/${userSub}_${file.name}`;
+      const fileKey = `profile-pictures/${Date.now()}_${userSub}_${file.name}`;
 
-      // Upload to S3
-      await Storage.put(s3Key, file, {
-        contentType: file.type,
+      // "uploadData" from "aws-amplify/storage"
+      const operation = uploadData({
+        path: fileKey,
+        data: file,
+        options: { contentType: file.type },
       });
+      await operation.result;
 
-      return s3Key;
+      return fileKey;
     } catch (err) {
       console.error("Error uploading profile picture:", err);
       return null;
@@ -121,10 +122,10 @@ export default function Profile() {
       );
       setUserRecord(newUser);
 
-      // If we successfully uploaded a picture, display it
+      // If we uploaded a new pic, fetch and display it
       if (profilePictureKey) {
-        const imageUrl = await Storage.get(profilePictureKey);
-        setProfileImageUrl(imageUrl);
+        const { url } = await getUrl({ path: profilePictureKey });
+        setProfileImageUrl(url.href);
       }
 
       alert("Profile created successfully!");
@@ -151,10 +152,10 @@ export default function Profile() {
       );
       setUserRecord(updated);
 
-      // If we uploaded a new picture, show it
+      // If we uploaded a new pic, fetch and display it
       if (profilePictureKey) {
-        const imageUrl = await Storage.get(profilePictureKey);
-        setProfileImageUrl(imageUrl);
+        const { url } = await getUrl({ path: profilePictureKey });
+        setProfileImageUrl(url.href);
       }
 
       alert("Profile updated successfully!");
@@ -182,7 +183,7 @@ export default function Profile() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Username */}
+        {/* Username (required, because username: String!) */}
         <div>
           <label className="block font-medium mb-1">Username</label>
           <input
@@ -245,8 +246,11 @@ export default function Profile() {
             type="file"
             accept="image/*"
             onChange={handleProfilePicChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0
-                       file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
+            className="block w-full text-sm text-gray-500
+                       file:mr-4 file:py-2 file:px-4
+                       file:rounded file:border-0
+                       file:text-sm file:font-semibold
+                       file:bg-blue-50 file:text-blue-700
                        hover:file:bg-blue-100"
           />
         </div>
