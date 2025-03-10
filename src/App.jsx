@@ -391,12 +391,22 @@ function AppRoutes({
 function App() {
   return (
     <Router>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#f3f4f6",
+        }}
+      >
       <Authenticator>
         {({ user }) => {
           console.debug("[Authenticator] User signed in:", user);
           return <AppContent />;
         }}
       </Authenticator>
+      </div>
     </Router>
   );
 }

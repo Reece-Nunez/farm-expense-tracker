@@ -27,6 +27,7 @@ const categories = [
   "Insurance (Not Health)",
   "Other Interest",
   "Equipment Rental",
+  "Farm Equipment",
   "Other Rental",
   "Repairs and Maintenance",
   "Seeds and Plants",

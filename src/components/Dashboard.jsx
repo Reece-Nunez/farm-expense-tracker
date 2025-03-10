@@ -71,11 +71,16 @@ export default function Dashboard() {
   });
   const combinedLineData = Object.keys(monthlyDataMap)
     .sort()
-    .map((month) => ({
-      month,
-      expenses: monthlyDataMap[month].expenses,
-      incomes: monthlyDataMap[month].incomes,
-    }));
+    .map((month) => {
+      const expenses = monthlyDataMap[month].expenses;
+      const incomes = monthlyDataMap[month].incomes;
+      return {
+        month,
+        // Round to 2 decimals
+        expenses: parseFloat(expenses.toFixed(2)),
+        incomes: parseFloat(incomes.toFixed(2)),
+      };
+    });
 
   // Expense Categories Bar Chart
   const expenseCategoryMap = {};
