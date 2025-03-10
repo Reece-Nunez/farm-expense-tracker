@@ -8,7 +8,6 @@ import { getUrl } from "aws-amplify/storage";
 export default function ExpenseTable({ expenses = [], onDelete }) {
   const navigate = useNavigate();
   const [imageUrls, setImageUrls] = React.useState({});
-  // NEW: Track which image URL we're showing in full-size
   const [selectedImageUrl, setSelectedImageUrl] = React.useState(null);
 
   React.useEffect(() => {
@@ -22,7 +21,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
             // getUrl returns { url: URL, expiresAt: Date }
             const { url } = await getUrl({ path: exp.receiptImageKey });
             if (isMounted) {
-              // Grab the string URL (url.href) for the <img> src
               newImageUrls[exp.id] = url.href;
             }
           } catch (error) {
@@ -41,7 +39,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     };
   }, [expenses]);
 
-  // A simple overlay for the enlarged image
+  // Overlay for the enlarged image
   const FullSizeImageOverlay = ({ imageUrl, onClose }) => {
     if (!imageUrl) return null; // no overlay if no image selected
 
@@ -59,9 +57,171 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     );
   };
 
+  // MOBILE layout (cards) for screens < md
+  const MobileExpenseCards = () => (
+    <div className="block md:hidden">
+      {expenses.map((exp, idx) => {
+        const receiptUrl = imageUrls[exp.id];
+        return (
+          <div
+            key={exp.id ?? idx}
+            className="bg-white shadow rounded mb-4 p-4 border"
+          >
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Date:</span>
+              <span>{new Date(exp.date).toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Category:</span>
+              <span>{exp.category}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Item:</span>
+              <span>{exp.item}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Vendor:</span>
+              <span>{exp.vendor}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Cost:</span>
+              <span>${exp.unitCost}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Quantity:</span>
+              <span>{exp.quantity}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="font-semibold">Total:</span>
+              <span>${exp.totalCost?.toFixed(2)}</span>
+            </div>
+            {exp.description && (
+              <div className="mb-2">
+                <span className="font-semibold">Notes:</span>{" "}
+                <span>{exp.description}</span>
+              </div>
+            )}
+            {/* Receipt Image */}
+            <div className="mb-4">
+              <span className="font-semibold">Receipt:</span>{" "}
+              {exp.receiptImageKey ? (
+                receiptUrl ? (
+                  <img
+                    src={receiptUrl}
+                    alt="Receipt"
+                    className="w-20 h-20 object-cover cursor-pointer mt-2"
+                    onClick={() => setSelectedImageUrl(receiptUrl)}
+                  />
+                ) : (
+                  <span>Loading...</span>
+                )
+              ) : (
+                <span>No receipt</span>
+              )}
+            </div>
+            {/* Actions */}
+            <div className="flex gap-2 mt-2">
+              <Button
+                onClick={() => navigate(`/edit-expense/${exp.id}`)}
+                className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
+              >
+                <PencilAltIcon className="w-4 h-4" />
+                Edit
+              </Button>
+              <Button
+                onClick={() => onDelete(exp.id)}
+                className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded"
+              >
+                <TrashIcon className="w-4 h-4" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  // DESKTOP layout (table) for screens >= md
+  const DesktopExpenseTable = () => (
+    <div className="hidden md:block overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="p-2">Date</th>
+            <th className="p-2">Category</th>
+            <th className="p-2">Item</th>
+            <th className="p-2">Vendor</th>
+            <th className="p-2">Cost</th>
+            <th className="p-2">Quantity</th>
+            <th className="p-2">Total</th>
+            <th className="p-2">Notes</th>
+            <th className="p-2">Receipt</th>
+            <th className="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {expenses.map((exp, idx) => {
+            const receiptUrl = imageUrls[exp.id];
+            return (
+              <tr
+                key={exp.id ?? idx}
+                className="hover:bg-blue-50 transition-colors"
+              >
+                <td className="p-2">{new Date(exp.date).toLocaleDateString()}</td>
+                <td className="p-2">{exp.category}</td>
+                <td className="p-2">{exp.item}</td>
+                <td className="p-2">{exp.vendor}</td>
+                <td className="p-2">${exp.unitCost}</td>
+                <td className="p-2">{exp.quantity}</td>
+                <td className="p-2">${exp.totalCost?.toFixed(2)}</td>
+                <td className="p-2">{exp.description || ""}</td>
+                {/* Receipt thumbnail */}
+                <td className="p-2">
+                  {exp.receiptImageKey ? (
+                    receiptUrl ? (
+                      <img
+                        src={receiptUrl}
+                        alt="Receipt"
+                        className="w-[50px] h-[50px] object-cover cursor-pointer transform transition duration-200 hover:scale-110"
+                        onClick={() => setSelectedImageUrl(receiptUrl)}
+                      />
+                    ) : (
+                      <span>Loading...</span>
+                    )
+                  ) : (
+                    <span>No receipt</span>
+                  )}
+                </td>
+                <td className="p-2">
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => navigate(`/edit-expense/${exp.id}`)}
+                      className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
+                    >
+                      <PencilAltIcon className="w-4 h-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => onDelete(exp.id)}
+                      className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
     <>
-      {/* Render the overlay if an image is selected */}
+      {/* Full-size overlay if an image is selected */}
       <FullSizeImageOverlay
         imageUrl={selectedImageUrl}
         onClose={() => setSelectedImageUrl(null)}
@@ -74,86 +234,12 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         <CardContent>
           {expenses.length ? (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th>Date</th>
-                      <th>Category</th>
-                      <th>Item</th>
-                      <th>Vendor</th>
-                      <th>Cost</th>
-                      <th>Quantity</th>
-                      <th>Total</th>
-                      <th>Notes</th>
-                      <th>Receipt</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {expenses.map((exp, idx) => (
-                      <tr
-                        key={exp.id ?? idx}
-                        className="hover:bg-blue-50 transition-colors"
-                      >
-                        <td>{new Date(exp.date).toLocaleDateString()}</td>
-                        <td>{exp.category}</td>
-                        <td>{exp.item}</td>
-                        <td>{exp.vendor}</td>
-                        <td>${exp.unitCost}</td>
-                        <td>{exp.quantity}</td>
-                        <td>${exp.totalCost?.toFixed(2)}</td>
-                        <td>{exp.description || ""}</td>
+              {/* Mobile layout (cards) */}
+              <MobileExpenseCards />
 
-                        {/* Show the receipt thumbnail if we have a URL */}
-                        <td className="hover: scale-75">
-                          {exp.receiptImageKey ? (
-                            imageUrls[exp.id] ? (
-                              <img
-                                src={imageUrls[exp.id]}
-                                alt="Receipt"
-                                className="
-                                  w-[50px] h-[50px]
-                                  object-cover
-                                  cursor-pointer
-                                  transform
-                                  transition
-                                  duration-200
-                                  hover:scale-110
-                                "
-                                onClick={() =>
-                                  setSelectedImageUrl(imageUrls[exp.id])
-                                }
-                              />
-                            ) : (
-                              <span>Loading...</span>
-                            )
-                          ) : (
-                            <span>No receipt</span>
-                          )}
-                        </td>
+              {/* Desktop layout (table) */}
+              <DesktopExpenseTable />
 
-                        <td className="flex gap-2">
-                          <Button
-                            onClick={() => navigate(`/edit-expense/${exp.id}`)}
-                            className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
-                          >
-                            <PencilAltIcon className="w-4 h-4" />
-                            Edit
-                          </Button>
-                          <Button
-                            onClick={() => onDelete(exp.id)}
-                            className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                            Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
               <div className="flex justify-center mt-6">
                 <Button
                   type="button"
