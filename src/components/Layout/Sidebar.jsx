@@ -18,31 +18,80 @@ import {
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const [profileImageUrl, setProfileImageUrl] = useState("https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg");
+
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
+  );
   const [username, setUsername] = useState("User");
+  const [userSub, setUserSub] = useState(null);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    let subscription; // We'll store our DataStore subscription here
+
+    // Helper function to fetch the user's record from DataStore
+    const fetchUserProfile = async (sub) => {
       try {
-        const session = await fetchAuthSession();
-        const userSub = session.tokens.idToken.payload.sub;
-        // Query for the user record using the 'sub' field
-        const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(userSub));
+        const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(sub));
         if (foundUser) {
           setUsername(foundUser.username || "User");
+
           if (foundUser.profilePictureKey) {
-            // Use getUrl to get the image URL from S3
+            // Retrieve the profile image URL from S3
             const result = await getUrl({ path: foundUser.profilePictureKey });
-            // Depending on your setup, result may be a string or an object with a URL property
+            // Depending on your setup, `result` may be a string or an object with `url`
             setProfileImageUrl(result.url ? result.url.href : result);
+          } else {
+            // If no profilePictureKey, use a default
+            setProfileImageUrl(
+              "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
+            );
           }
+        } else {
+          // If no user is found, reset to defaults
+          setUsername("User");
+          setProfileImageUrl(
+            "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
+          );
         }
-      } catch (error) {
-        console.error("Error fetching user profile in sidebar", error);
+      } catch (err) {
+        console.error("Error fetching user profile in sidebar:", err);
       }
     };
 
-    fetchUserProfile();
+    // Initialize: fetch user info and subscribe to changes
+    const init = async () => {
+      try {
+        // 1) Get current user's sub
+        const session = await fetchAuthSession();
+        const sub = session.tokens.idToken.payload.sub;
+        setUserSub(sub);
+
+        // 2) Fetch their profile once on mount
+        await fetchUserProfile(sub);
+
+        // 3) Observe any changes to the User model
+        subscription = DataStore.observe(User).subscribe((msg) => {
+          // If there's an update or insert for THIS user's record, re-fetch
+          if (
+            (msg.opType === "UPDATE" || msg.opType === "INSERT") &&
+            msg.element.sub === sub
+          ) {
+            fetchUserProfile(sub);
+          }
+        });
+      } catch (err) {
+        console.error("Error in sidebar init:", err);
+      }
+    };
+
+    init();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -76,9 +125,13 @@ export default function Sidebar() {
         />
         <p className="text-sm">Hi, {username}</p>
       </div>
+
+      {/* App Name */}
       <div className="p-4 border-b border-gray-200 text-xl font-bold">
         Harvest-Hub
       </div>
+
+      {/* Navigation Links */}
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map(({ label, icon: Icon, route }, idx) => (
           <button
@@ -91,6 +144,8 @@ export default function Sidebar() {
           </button>
         ))}
       </nav>
+
+      {/* Sign Out Button */}
       <div className="p-4 border-t border-gray-200 mb-20">
         <button
           onClick={handleSignOut}

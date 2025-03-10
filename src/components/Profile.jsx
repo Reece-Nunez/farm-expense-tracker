@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
-// Same approach as your expense form:
-import { uploadData, getUrl } from "aws-amplify/storage";
+import { uploadData, getUrl, remove } from "aws-amplify/storage";
 import { User } from "../models";
 
 export default function Profile() {
@@ -103,6 +102,30 @@ export default function Profile() {
     }
   };
 
+  // Deletes the profile picture from S3 and updates the user record
+  const deleteProfilePicture = async () => {
+    if (!userRecord?.profilePictureKey) return;
+
+    try {
+      // Remove from S3 using your removeData function
+      const operation = remove({ path: userRecord.profilePictureKey });
+      await operation.result;
+
+      // Update user record to remove the profilePictureKey
+      const updated = await DataStore.save(
+        User.copyOf(userRecord, (updated) => {
+          updated.profilePictureKey = "";
+        })
+      );
+      setUserRecord(updated);
+      setProfileImageUrl(defaultProfileImage);
+      alert("Profile picture deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting profile picture:", error);
+      alert("Failed to delete profile picture.");
+    }
+  };
+
   // Create a new user record
   const createNewUser = async (profilePictureKey) => {
     try {
@@ -173,17 +196,36 @@ export default function Profile() {
     <div className="max-w-xl mx-auto p-4 bg-white shadow rounded">
       <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
 
-      {/* Show profile image (default if none) */}
-      <div className="flex justify-center mb-4">
+      {/* Profile Picture Section with hover trash icon */}
+      <div className="relative flex justify-center mb-4 group">
         <img
           src={profileImageUrl}
           alt="Profile"
           className="w-32 h-32 object-cover rounded-full border"
         />
+        {/* Trash icon overlay */}
+        {userRecord?.profilePictureKey && (
+          <button
+            onClick={deleteProfilePicture}
+            className="absolute top-0 right-0 m-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Delete profile picture"
+          >
+            {/* Trashcan Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Username (required, because username: String!) */}
+        {/* Username */}
         <div>
           <label className="block font-medium mb-1">Username</label>
           <input
