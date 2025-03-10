@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
+import '../AuthOverides.css';
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
 import { DataStore } from "@aws-amplify/datastore";
@@ -391,22 +392,15 @@ function AppRoutes({
 function App() {
   return (
     <Router>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          backgroundColor: "#f3f4f6",
-        }}
-      >
+        
       <Authenticator>
+      <h1>Welcome!</h1>
         {({ user }) => {
           console.debug("[Authenticator] User signed in:", user);
           return <AppContent />;
         }}
       </Authenticator>
-      </div>
+
     </Router>
   );
 }

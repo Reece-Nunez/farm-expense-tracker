@@ -1,0 +1,90 @@
+
+/* 1) Center the Authenticator on the screen */
+[data-amplify-authenticator] {
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #f3f4f6;
+  }
+  
+  /* 2) The container that wraps each Auth step (Sign In, Create Account, etc.) */
+  .amplify-tabs__list, .amplify-tabs__list--top, .amplify-tabs__list--equal {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: #fff; 
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+  }
+  
+  /* 3) The header for each step (e.g. "Sign In", "Create Account") */
+  .amplify-tabs__item, .amplify-tabs__item--active {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: #3b82f6;
+    background: transparent;
+  }
+
+  .amplify-tabs__item--active {
+    border-color: #2563eb;
+  }
+
+  .amplify-tabs__item:hover, .amplify-tabs__item--active:hover {
+    color: #2563eb;
+  }
+  
+  /* 4) Each group of fields (username, password) */
+  .amplify-label {
+    margin-bottom: 1rem;
+  }
+  
+  /* 5) The actual input fields (username, password) */
+  .amplify-input {
+    width: 100%;
+    border: 1px solid #d1d5db; /* light gray */
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* 6) The sign-in/create-account buttons */
+  .amplify-button {
+    display: inline-block;
+    background: #3b82f6; /* brand color (blue) */
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    transition: background 0.2s;
+  }
+  
+  .amplify-button:hover {
+    background: #2563eb; /* darker blue on hover */
+  }
+  
+  /* 7) Links (e.g., "Forgot your password?") */
+  [data-amplify-section-footer] a,
+  [data-amplify-hint] a {
+    color: #3b82f6;
+    font-size: 0.875rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  /* 8) Hide or style the 'Password is hidden' label if you want */
+  .amplify-field__show-password {
+    font-size: 0.75rem;
+    color: #000000;
+  }
+
+  .amplify-field-group__outer-end .amplify-field-group__control {
+    margin-top: 0;
+  }
+  
