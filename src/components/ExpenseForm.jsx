@@ -15,7 +15,6 @@ import { expenseFormSchema } from "@/schemas/expenseFormSchema";
 import { uploadData } from "aws-amplify/storage";
 import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
 
-// Typical Farm Expense Categories
 const categories = [
   "Chemicals",
   "Conservation Expenses",
@@ -67,7 +66,6 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
     },
   });
 
-  // Expose a method to reset the form to the parent
   useImperativeHandle(ref, () => ({
     resetForm: () => reset(),
   }));
@@ -77,7 +75,6 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
     name: "expenses",
   });
 
-  // When editing, pre-fill the form. Convert unitCost to a string if needed.
   useEffect(() => {
     if (editingExpense) {
       reset({
@@ -100,47 +97,31 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
   const onValid = async (data) => {
     try {
       const formattedExpenses = [];
-
-      // data.expenses is an array
       for (let expense of data.expenses) {
-        // Convert date to yyyy-MM-dd
         const isoDate = expense.date
           ? expense.date.toISOString().split("T")[0]
           : "";
-
-        // Calculate totalCost
         const totalCost =
           parseFloat(expense.unitCost || 0) *
             parseFloat(expense.quantity || 0) || 0;
-
-        // Prepare the single expense object
         const newExpense = {
           ...expense,
           date: isoDate,
           totalCost,
         };
-
-        // If the user selected a file, upload to S3
         if (expense.receiptFile && expense.receiptFile[0]) {
           const file = expense.receiptFile[0];
           const fileKey = `receipts/${Date.now()}_${file.name}`;
-
           const operation = uploadData({
             path: fileKey,
             data: file,
             options: { contentType: file.type },
           });
           await operation.result;
-
-          // Store the S3 key in the newExpense object
           newExpense.receiptImageKey = fileKey;
         }
-
-        // If no file selected, receiptImageKey remains undefined.
         formattedExpenses.push(newExpense);
       }
-
-      // Pass the array to the parent's submit handler
       onValidSubmit(formattedExpenses);
     } catch (err) {
       console.error("[ExpenseForm] File upload error:", err);
@@ -153,14 +134,13 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
   };
 
   return (
-    <Card className="max-w-4xl mx-auto p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <CardHeader className="text-3xl font-bold flex items-center justify-center mb-6">
+    <Card className="w-full max-w-md md:max-w-4xl mx-auto p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <CardHeader className="text-2xl md:text-3xl font-bold flex items-center justify-center mb-6">
         Expense Form
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onValid, onInvalid)}>
           {fields.map((field, index) => {
-            // Watch each expense field by its index
             const expenseDate = watch(`expenses.${index}.date`);
             const expenseUnitCost = watch(`expenses.${index}.unitCost`);
             const expenseQuantity = watch(`expenses.${index}.quantity`);
@@ -350,27 +330,15 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                     type="file"
                     accept="image/*"
                     {...register(`expenses.${index}.receiptFile`)}
-                    className="
-                      block w-full text-sm
-                      text-gray-900
-                      border border-blue-300
-                      rounded-lg
-                      cursor-pointer
-                      focus:outline-none
-                      focus:ring-2 focus:ring-blue-300
-                      file:mr-4 file:py-2 file:px-4 file:rounded
-                      file:border-0 file:text-sm file:font-semibold
-                      file:bg-blue-500 file:text-white
-                      hover:file:bg-blue-600
-                      transition-colors
-                    "
+                    className="block w-full text-sm text-gray-900 border border-blue-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-colors"
                   />
                   <p className="text-xs text-gray-500 mt-2 italic">
                     Upload a picture of the receipt (optional)
                   </p>
                 </div>
 
-                <div className="flex justify-around mt-6">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-around gap-4 mt-6">
                   <Button
                     type="button"
                     onClick={() =>
@@ -383,7 +351,7 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                   <Button
                     type="button"
                     onClick={() => navigate("/dashboard")}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors"
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
                   >
                     Back to Dashboard
                   </Button>
@@ -399,7 +367,7 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
             );
           })}
 
-          <div className="flex justify-around m-12">
+          <div className="flex flex-col sm:flex-row justify-around gap-4 m-12">
             <Button
               type="button"
               onClick={() => append(defaultExpense)}

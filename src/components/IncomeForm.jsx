@@ -11,10 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
-
-// Suppose you have an updated Zod schema that references `notes` not `description`
 import { incomeSchema } from "@/schemas/incomeSchema";
-
 import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
 
 // Define options
@@ -48,13 +45,10 @@ const IncomeForm = forwardRef((props, ref) => {
     resetForm: () => reset(),
   }));
 
-  // When editingIncome changes, prefill the form.
   useEffect(() => {
     if (editingIncome) {
       reset({
         ...editingIncome,
-        // editingIncome might store `amount`. We'll recalc from price/quantity if you want, or skip
-        // If you stored separate fields for pricePerUnit and weightOrQuantity, set them too
         date: editingIncome.date ? new Date(editingIncome.date) : "",
         notes: editingIncome.notes || "",
         item: editingIncome.item || "",
@@ -66,8 +60,6 @@ const IncomeForm = forwardRef((props, ref) => {
   const watchDate = watch("date");
   const watchPricePerUnit = watch("pricePerUnit");
   const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
-
-  // If you want to compute final "amount" from pricePerUnit * weightOrQuantity:
   const amount =
     parseFloat(watchPricePerUnit || 0) * watchWeightOrQuantity || 0;
 
@@ -77,22 +69,17 @@ const IncomeForm = forwardRef((props, ref) => {
     // Convert date to YYYY-MM-DD
     const dateValue = data.date ? new Date(data.date) : null;
     const isoDate = dateValue ? dateValue.toISOString().split("T")[0] : "";
-
     const parsedQuantity = parseFloat(data.weightOrQuantity || "0");
     const parsedPrice = parseFloat(data.pricePerUnit || "0");
     const computedAmount = parsedPrice * parsedQuantity;
-
-    // Final object that matches your Income schema
     const finalObj = {
       userId: "", // will be set in parent code
       date: isoDate,
-      paymentMethod: data.paymentMethod, // optional
-      item: data.item || "Other", // required
-      // or fallback "Other" if none selected
+      paymentMethod: data.paymentMethod,
+      item: data.item || "Other",
       amount: parseFloat(computedAmount.toFixed(2)),
       notes: data.notes || "",
     };
-
     onValidSubmit(finalObj);
     reset();
   };
@@ -111,16 +98,16 @@ const IncomeForm = forwardRef((props, ref) => {
   };
 
   return (
-    <Card className="max-w-4xl mx-auto p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <CardHeader className="text-3xl font-bold text-center mb-6">
+    <Card className="w-full max-w-md md:max-w-4xl mx-auto p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <CardHeader className="text-2xl md:text-3xl font-bold text-center mb-4">
         Income Form
       </CardHeader>
-      <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-6">
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-4">
           {/* Date */}
           <div>
             <label className="block font-medium mb-1">
-              <CalendarIcon className="w-5 h-5 text-blue-500 inline mr-1" />
+              <CalendarIcon className="inline-block w-5 h-5 text-blue-500 mr-1" />
               Date <span className="text-red-500">*</span>
             </label>
             <DatePicker
@@ -143,7 +130,7 @@ const IncomeForm = forwardRef((props, ref) => {
             <label className="block font-medium mb-1">Payment Method</label>
             <Select
               {...register("paymentMethod")}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300`}
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
             >
               <option value="">Select Payment Method</option>
               {paymentMethods.map((method) => (
@@ -154,7 +141,7 @@ const IncomeForm = forwardRef((props, ref) => {
             </Select>
           </div>
 
-          {/* Item Sold (REQUIRED) */}
+          {/* Item Sold */}
           <div>
             <label className="block font-medium mb-1">
               Item Sold <span className="text-red-500">*</span>
@@ -177,8 +164,8 @@ const IncomeForm = forwardRef((props, ref) => {
             )}
           </div>
 
-          {/* Weight/Quantity + Price per Unit -> Computed total */}
-          <div className="flex space-x-4">
+          {/* Weight/Quantity and Price Per Unit */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block font-medium mb-1">Weight/Quantity</label>
               <Input
@@ -186,7 +173,7 @@ const IncomeForm = forwardRef((props, ref) => {
                 step="any"
                 placeholder="e.g., 12 (dozens) or 50 (lbs)"
                 {...register("weightOrQuantity")}
-                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300`}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
               />
             </div>
             <div className="flex-1">
@@ -225,7 +212,7 @@ const IncomeForm = forwardRef((props, ref) => {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-around mt-6 space-x-4">
+          <div className="flex flex-col sm:flex-row justify-around gap-4 mt-6">
             <Button
               type="button"
               onClick={() => reset()}

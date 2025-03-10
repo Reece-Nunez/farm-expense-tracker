@@ -14,9 +14,10 @@ import {
   ChartBarIcon,
   LogoutIcon,
   UserIcon,
+  PlusIcon,
 } from "@heroicons/react/outline";
 
-export default function Sidebar() {
+export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navigate = useNavigate();
 
   const [profileImageUrl, setProfileImageUrl] = useState(
@@ -26,9 +27,8 @@ export default function Sidebar() {
   const [userSub, setUserSub] = useState(null);
 
   useEffect(() => {
-    let subscription; // We'll store our DataStore subscription here
+    let subscription;
 
-    // Helper function to fetch the user's record from DataStore
     const fetchUserProfile = async (sub) => {
       try {
         const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(sub));
@@ -36,18 +36,15 @@ export default function Sidebar() {
           setUsername(foundUser.username || "User");
 
           if (foundUser.profilePictureKey) {
-            // Retrieve the profile image URL from S3
             const result = await getUrl({ path: foundUser.profilePictureKey });
-            // Depending on your setup, `result` may be a string or an object with `url`
             setProfileImageUrl(result.url ? result.url.href : result);
           } else {
-            // If no profilePictureKey, use a default
             setProfileImageUrl(
               "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
             );
           }
         } else {
-          // If no user is found, reset to defaults
+          // Reset to defaults if not found
           setUsername("User");
           setProfileImageUrl(
             "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
@@ -58,20 +55,15 @@ export default function Sidebar() {
       }
     };
 
-    // Initialize: fetch user info and subscribe to changes
     const init = async () => {
       try {
-        // 1) Get current user's sub
         const session = await fetchAuthSession();
         const sub = session.tokens.idToken.payload.sub;
         setUserSub(sub);
-
-        // 2) Fetch their profile once on mount
         await fetchUserProfile(sub);
 
-        // 3) Observe any changes to the User model
+        // Subscribe to DataStore changes
         subscription = DataStore.observe(User).subscribe((msg) => {
-          // If there's an update or insert for THIS user's record, re-fetch
           if (
             (msg.opType === "UPDATE" || msg.opType === "INSERT") &&
             msg.element.sub === sub
@@ -86,7 +78,6 @@ export default function Sidebar() {
 
     init();
 
-    // Cleanup subscription on unmount
     return () => {
       if (subscription) {
         subscription.unsubscribe();
@@ -103,6 +94,7 @@ export default function Sidebar() {
     }
   };
 
+  // Our nav items
   const navItems = [
     { label: "Dashboard", icon: HomeIcon, route: "/dashboard" },
     { label: "Expenses", icon: CreditCardIcon, route: "/expenses" },
@@ -114,9 +106,15 @@ export default function Sidebar() {
     { label: "Profile", icon: UserIcon, route: "/profile" },
   ];
 
+  // Helper for nav clicks
+  const handleNavClick = (route) => {
+    navigate(route);
+    onCloseSidebar(); // call the prop if provided
+  };
+
   return (
     <div className="flex flex-col h-full">
-      {/* Profile display at the top */}
+      {/* Profile display */}
       <div className="p-4 border-b border-gray-200 flex flex-col items-center">
         <img
           src={profileImageUrl}
@@ -131,12 +129,12 @@ export default function Sidebar() {
         Harvest-Hub
       </div>
 
-      {/* Navigation Links */}
+      {/* Nav Links */}
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map(({ label, icon: Icon, route }, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(route)}
+            onClick={() => handleNavClick(route)}
             className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <Icon className="w-5 h-5" />
@@ -145,7 +143,25 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Sign Out Button */}
+      {/* Add Expense / Add Income Buttons */}
+      <div className="p-4 border-b border-gray-200 flex gap-2 justify-around">
+        <button
+          onClick={() => handleNavClick("/add-expense")}
+          className="flex items-center gap-1 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded transition-colors"
+        >
+          <PlusIcon className="w-5 h-5 text-green-600" />
+          <span>Add Expense</span>
+        </button>
+        <button
+          onClick={() => handleNavClick("/add-income")}
+          className="flex items-center gap-1 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded transition-colors"
+        >
+          <PlusIcon className="w-5 h-5 text-blue-600" />
+          <span>Add Income</span>
+        </button>
+      </div>
+
+      {/* Sign Out */}
       <div className="p-4 border-t border-gray-200 mb-20">
         <button
           onClick={handleSignOut}

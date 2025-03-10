@@ -78,8 +78,8 @@ export default function DashboardLayout() {
             </button>
           </div>
           {/* Your existing sidebar navigation items */}
-          <Sidebar />
-        </aside>
+          <Sidebar onCloseSidebar={() => setShowSidebar(false)} />
+          </aside>
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
