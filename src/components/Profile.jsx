@@ -40,6 +40,8 @@ export default function Profile() {
           if (foundUser.profilePictureKey) {
             const { url } = await getUrl({ path: foundUser.profilePictureKey });
             setProfileImageUrl(url.href);
+          } else {
+            setProfileImageUrl(defaultProfileImage);
           }
         } else {
           console.log("No existing user record found for sub:", userSub);
