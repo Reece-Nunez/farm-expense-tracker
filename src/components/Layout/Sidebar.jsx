@@ -1,7 +1,10 @@
-// src/components/Layout/Sidebar.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "@aws-amplify/auth";
+import { DataStore } from "@aws-amplify/datastore";
+import { fetchAuthSession } from "@aws-amplify/auth";
+import { getUrl } from "aws-amplify/storage";
+import { User } from "../../models";
 import {
   HomeIcon,
   CurrencyDollarIcon,
@@ -10,11 +13,37 @@ import {
   UploadIcon,
   ChartBarIcon,
   LogoutIcon,
-  UserIcon
+  UserIcon,
 } from "@heroicons/react/outline";
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const [profileImageUrl, setProfileImageUrl] = useState("https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg");
+  const [username, setUsername] = useState("User");
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const userSub = session.tokens.idToken.payload.sub;
+        // Query for the user record using the 'sub' field
+        const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(userSub));
+        if (foundUser) {
+          setUsername(foundUser.username || "User");
+          if (foundUser.profilePictureKey) {
+            // Use getUrl to get the image URL from S3
+            const result = await getUrl({ path: foundUser.profilePictureKey });
+            // Depending on your setup, result may be a string or an object with a URL property
+            setProfileImageUrl(result.url ? result.url.href : result);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user profile in sidebar", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -38,6 +67,15 @@ export default function Sidebar() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Profile display at the top */}
+      <div className="p-4 border-b border-gray-200 flex flex-col items-center">
+        <img
+          src={profileImageUrl}
+          alt="Profile"
+          className="w-16 h-16 rounded-full object-cover mb-2"
+        />
+        <p className="text-sm">Hi, {username}</p>
+      </div>
       <div className="p-4 border-b border-gray-200 text-xl font-bold">
         Harvest-Hub
       </div>
