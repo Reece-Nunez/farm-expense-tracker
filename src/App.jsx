@@ -392,15 +392,25 @@ function AppRoutes({
 function App() {
   return (
     <Router>
-        
-      <Authenticator>
-      <h1>Welcome!</h1>
-        {({ user }) => {
-          console.debug("[Authenticator] User signed in:", user);
-          return <AppContent />;
-        }}
-      </Authenticator>
-
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#f3f4f6", // match your dashboard's bg
+        }}>
+        <h2 style={{ fontSize: "2rem", margin: "1em" }}>
+          Hi! Welcome to Harvest Hub
+        </h2>
+        <Authenticator>
+          {({ user }) => {
+            console.debug("[Authenticator] User signed in:", user);
+            return <AppContent />;
+          }}
+        </Authenticator>
+      </div>
     </Router>
   );
 }
