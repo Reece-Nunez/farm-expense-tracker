@@ -1,16 +1,24 @@
-type User
-  @model
+type User @model
   @auth(rules: [
-      { allow: owner },
-      { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
-      { allow: private, operations: [read] }
+    { allow: owner },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+    { allow: private, operations: [read] }
   ]) {
   id: ID!
+  sub: String!
   username: String!
-  email: String!
+  email: String
+  farmName: String
+  phone: String
+  aboutMe: String
+  profilePictureKey: String
+  role: String
+  preferences: AWSJSON
+  owner: String
   expenses: [Expense] @hasMany
   income: [Income] @hasMany
 }
+
 
 type Expense
   @model

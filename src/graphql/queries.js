@@ -5,8 +5,16 @@ export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
     getUser(id: $id) {
       id
+      sub
       username
       email
+      farmName
+      phone
+      aboutMe
+      profilePictureKey
+      role
+      preferences
+      owner
       expenses {
         nextToken
         startedAt
@@ -22,7 +30,6 @@ export const getUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
   }
@@ -36,14 +43,21 @@ export const listUsers = /* GraphQL */ `
     listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         username
         email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        owner
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
-        owner
         __typename
       }
       nextToken
@@ -67,14 +81,21 @@ export const syncUsers = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         username
         email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        owner
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
-        owner
         __typename
       }
       nextToken

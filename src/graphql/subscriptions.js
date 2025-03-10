@@ -8,8 +8,16 @@ export const onCreateUser = /* GraphQL */ `
   ) {
     onCreateUser(filter: $filter, owner: $owner) {
       id
+      sub
       username
       email
+      farmName
+      phone
+      aboutMe
+      profilePictureKey
+      role
+      preferences
+      owner
       expenses {
         nextToken
         startedAt
@@ -25,7 +33,6 @@ export const onCreateUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
   }
@@ -37,8 +44,16 @@ export const onUpdateUser = /* GraphQL */ `
   ) {
     onUpdateUser(filter: $filter, owner: $owner) {
       id
+      sub
       username
       email
+      farmName
+      phone
+      aboutMe
+      profilePictureKey
+      role
+      preferences
+      owner
       expenses {
         nextToken
         startedAt
@@ -54,7 +69,6 @@ export const onUpdateUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
   }
@@ -66,8 +80,16 @@ export const onDeleteUser = /* GraphQL */ `
   ) {
     onDeleteUser(filter: $filter, owner: $owner) {
       id
+      sub
       username
       email
+      farmName
+      phone
+      aboutMe
+      profilePictureKey
+      role
+      preferences
+      owner
       expenses {
         nextToken
         startedAt
@@ -83,7 +105,6 @@ export const onDeleteUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
   }

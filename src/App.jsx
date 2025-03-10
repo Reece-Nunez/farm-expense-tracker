@@ -27,6 +27,8 @@ import GenericModal from "./components/GenericModal";
 import ImportExpensesCSV from "./components/ImportExpensesCSV";
 import ImportIncomeCSV from "./components/ImportIncomeCSV";
 import { Expense, Income } from "./models";
+import DashboardLayout from "./components/Layout/DashboardLayout";
+import Profile from "./components/Profile";
 
 Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
@@ -46,12 +48,12 @@ function AppContent() {
 
   // Generic modal state for confirmations (can be used for expense or income actions)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => {}); // function to run on confirm
+  const [confirmAction, setConfirmAction] = useState(() => { }); // function to run on confirm
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // Generic modal state for deletions (can be used for expense or income deletions)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => {}); // function to run on deletion confirm
+  const [deleteAction, setDeleteAction] = useState(() => { }); // function to run on deletion confirm
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
@@ -146,7 +148,7 @@ function AppContent() {
         toast.error("Failed to save expense(s).");
       } finally {
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         expenseFormRef.current?.resetForm();
       }
@@ -220,7 +222,7 @@ function AppContent() {
       } finally {
         // Clear the confirmation message and action, hide the modal, and reset the form.
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
@@ -318,13 +320,16 @@ function AppRoutes({
   handleIncomeSubmit,
   incomeFormRef,
 }) {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+    <Routes>
+      {/* Redirect root "/" to "/dashboard" */}
+      <Route path="/" element={<Navigate to="/dashboard" />} />
+
+      {/* Wrap everything in the DashboardLayout */}
+      <Route element={<DashboardLayout />}>
+        {/* The actual child routes inside the layout */}
+
+        {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Expense Routes */}
@@ -363,19 +368,23 @@ function AppRoutes({
         <Route
           path="/add-income"
           element={
-            <IncomeForm
-              ref={incomeFormRef}
-              onValidSubmit={handleIncomeSubmit}
-            />
+            <IncomeForm ref={incomeFormRef} onValidSubmit={handleIncomeSubmit} />
           }
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
+        <Route path="/profile" element={<Profile />} />
+
+        {/* CSV Imports */}
         <Route path="/import-csv" element={<ImportExpensesCSV />} />
         <Route path="/import-income" element={<ImportIncomeCSV />} />
+
+        {/* Analytics */}
         <Route path="/analytics" element={<AnalyticsDashboard />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </>
+      </Route>
+
+      {/* Catch-all: if no route matches, go to /dashboard */}
+      <Route path="*" element={<Navigate to="/dashboard" />} />
+    </Routes>
   );
 }
 
