@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import '../AuthOverides.css';
+import "../AuthOverides.css";
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
 import { DataStore } from "@aws-amplify/datastore";
@@ -49,12 +49,12 @@ function AppContent() {
 
   // Generic modal state for confirmations (can be used for expense or income actions)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => { }); // function to run on confirm
+  const [confirmAction, setConfirmAction] = useState(() => {}); // function to run on confirm
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // Generic modal state for deletions (can be used for expense or income deletions)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => { }); // function to run on deletion confirm
+  const [deleteAction, setDeleteAction] = useState(() => {}); // function to run on deletion confirm
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
@@ -72,8 +72,13 @@ function AppContent() {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const allExpenses = await DataStore.query(Expense);
-        setFetchedExpenses(allExpenses);
+        const session = await fetchAuthSession();
+        const userSub = session.tokens.idToken.payload.sub;
+        // Filter expenses by userId equal to the current user's sub
+        const userExpenses = await DataStore.query(Expense, (e) =>
+          e.userId.eq(userSub)
+        );
+        setFetchedExpenses(userExpenses);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
       }
@@ -149,7 +154,7 @@ function AppContent() {
         toast.error("Failed to save expense(s).");
       } finally {
         setConfirmMessage("");
-        setConfirmAction(() => { });
+        setConfirmAction(() => {});
         setShowConfirmModal(false);
         expenseFormRef.current?.resetForm();
       }
@@ -223,7 +228,7 @@ function AppContent() {
       } finally {
         // Clear the confirmation message and action, hide the modal, and reset the form.
         setConfirmMessage("");
-        setConfirmAction(() => { });
+        setConfirmAction(() => {});
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
@@ -369,7 +374,10 @@ function AppRoutes({
         <Route
           path="/add-income"
           element={
-            <IncomeForm ref={incomeFormRef} onValidSubmit={handleIncomeSubmit} />
+            <IncomeForm
+              ref={incomeFormRef}
+              onValidSubmit={handleIncomeSubmit}
+            />
           }
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
@@ -400,7 +408,8 @@ function App() {
           justifyContent: "center",
           minHeight: "100vh",
           backgroundColor: "#f3f4f6", // match your dashboard's bg
-        }}>
+        }}
+      >
         <h2 style={{ fontSize: "1.5rem", margin: ".5em" }}>
           Hi! Welcome to Harvest Hub
         </h2>
