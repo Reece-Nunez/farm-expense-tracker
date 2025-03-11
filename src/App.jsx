@@ -401,7 +401,7 @@ function App() {
           minHeight: "100vh",
           backgroundColor: "#f3f4f6", // match your dashboard's bg
         }}>
-        <h2 style={{ fontSize: "2rem", margin: "1em" }}>
+        <h2 style={{ fontSize: "1.5rem", margin: ".5em" }}>
           Hi! Welcome to Harvest Hub
         </h2>
         <Authenticator>

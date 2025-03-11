@@ -268,10 +268,10 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                   )}
                 </div>
 
-                {/* Item / Description Field */}
+                {/* Item Name */}
                 <div>
                   <label className="block font-medium mb-1">
-                    Item/Description <span className="text-red-500">*</span>
+                    Item Name <span className="text-red-500">*</span>
                   </label>
                   <Input
                     placeholder="Item"
