@@ -110,14 +110,18 @@ export const getExpense = /* GraphQL */ `
       id
       userId
       date
-      category
-      item
       vendor
-      unitCost
-      quantity
-      totalCost
+      grandTotal
       description
       receiptImageKey
+      lineItems {
+        category
+        item
+        unitCost
+        quantity
+        lineTotal
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -140,12 +144,8 @@ export const listExpenses = /* GraphQL */ `
         id
         userId
         date
-        category
-        item
         vendor
-        unitCost
-        quantity
-        totalCost
+        grandTotal
         description
         receiptImageKey
         createdAt
@@ -180,12 +180,8 @@ export const syncExpenses = /* GraphQL */ `
         id
         userId
         date
-        category
-        item
         vendor
-        unitCost
-        quantity
-        totalCost
+        grandTotal
         description
         receiptImageKey
         createdAt
@@ -315,12 +311,8 @@ export const expensesByUserId = /* GraphQL */ `
         id
         userId
         date
-        category
-        item
         vendor
-        unitCost
-        quantity
-        totalCost
+        grandTotal
         description
         receiptImageKey
         createdAt

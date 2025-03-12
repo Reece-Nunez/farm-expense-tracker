@@ -18,6 +18,9 @@ import {
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense, Income } from "@/models";
 
+// If you have "vendor", "grandTotal", "lineItems[]" in Expense,
+// each lineItem has "category", "lineTotal", etc.
+
 export default function Dashboard() {
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
@@ -32,6 +35,7 @@ export default function Dashboard() {
           DataStore.query(Income),
         ]);
 
+        // Sort by date descending
         const sortedExpenses = [...allExpenses].sort(
           (a, b) => new Date(b.date) - new Date(a.date)
         );
@@ -49,17 +53,23 @@ export default function Dashboard() {
     })();
   }, []);
 
-  const totalExpense = expenses.reduce((sum, exp) => sum + (exp.totalCost || 0), 0);
+  // 1) TOTALS
+  // We'll trust exp.grandTotal as the total cost for each expense
+  const totalExpense = expenses.reduce((sum, e) => sum + (e.grandTotal || 0), 0);
+  // For income, we assume inc.amount is the total
   const totalIncome = incomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
   const net = totalIncome - totalExpense;
 
-  // Combined line chart data (group by month)
+  // 2) Monthly Data for the combined line chart
+  // We'll group by "YYYY-MM" from expense.date, and sum grandTotal
   const monthlyDataMap = {};
   expenses.forEach((exp) => {
     if (!exp.date) return;
-    const monthKey = exp.date.slice(0, 7);
-    monthlyDataMap[monthKey] = (monthlyDataMap[monthKey] || { expenses: 0, incomes: 0 });
-    monthlyDataMap[monthKey].expenses += exp.totalCost || 0;
+    const monthKey = exp.date.slice(0, 7); // "YYYY-MM"
+    if (!monthlyDataMap[monthKey]) {
+      monthlyDataMap[monthKey] = { expenses: 0, incomes: 0 };
+    }
+    monthlyDataMap[monthKey].expenses += exp.grandTotal || 0;
   });
   incomes.forEach((inc) => {
     if (!inc.date) return;
@@ -69,31 +79,31 @@ export default function Dashboard() {
     }
     monthlyDataMap[monthKey].incomes += inc.amount || 0;
   });
+
+  // Build an array sorted by month
   const combinedLineData = Object.keys(monthlyDataMap)
     .sort()
-    .map((month) => {
-      const expenses = monthlyDataMap[month].expenses;
-      const incomes = monthlyDataMap[month].incomes;
-      return {
-        month,
-        // Round to 2 decimals
-        expenses: parseFloat(expenses.toFixed(2)),
-        incomes: parseFloat(incomes.toFixed(2)),
-      };
-    });
+    .map((month) => ({
+      month,
+      expenses: parseFloat(monthlyDataMap[month].expenses.toFixed(2)),
+      incomes: parseFloat(monthlyDataMap[month].incomes.toFixed(2)),
+    }));
 
-  // Expense Categories Bar Chart
+  // 3) Expense Categories – we now sum them from lineItems
+  // Because top-level "category" is gone, we loop over each expense's lineItems
   const expenseCategoryMap = {};
   expenses.forEach((exp) => {
-    const cat = exp.category || "Uncategorized";
-    expenseCategoryMap[cat] = (expenseCategoryMap[cat] || 0) + (exp.totalCost || 0);
+    if (!exp.lineItems) return;
+    exp.lineItems.forEach((li) => {
+      const cat = li.category || "Uncategorized";
+      expenseCategoryMap[cat] = (expenseCategoryMap[cat] || 0) + (li.lineTotal || 0);
+    });
   });
-  const expenseCategoryData = Object.entries(expenseCategoryMap).map(([category, total]) => ({
-    category,
-    total,
-  }));
+  const expenseCategoryData = Object.entries(expenseCategoryMap).map(
+    ([category, total]) => ({ category, total })
+  );
 
-  // Income by Item Pie Chart
+  // 4) Income by item (same as your existing code, if you have inc.item & inc.amount)
   const incomeItemMap = {};
   incomes.forEach((inc) => {
     const item = inc.item || "Other";
@@ -111,12 +121,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <header className="md:col-span-3 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
         <h1 className="text-2xl font-extrabold">Financial Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          {/* Extra controls can be added here */}
-        </div>
       </header>
 
-      {/* For md+ screens, leave an empty space where sidebar is provided by DashboardLayout */}
+      {/* For md+ screens, empty space for left sidebar if your layout uses one */}
       <div className="hidden md:block"></div>
 
       {/* MAIN CONTENT */}
@@ -145,7 +152,7 @@ export default function Dashboard() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Combined Line Chart */}
+          {/* Combined Line Chart: monthly incomes vs. monthly expenses */}
           <div className="bg-white rounded-xl shadow p-4">
             <h2 className="text-lg font-semibold mb-2">Expenses vs. Income Over Time</h2>
             <div style={{ width: "100%", height: 300 }}>
@@ -165,6 +172,7 @@ export default function Dashboard() {
 
           {/* 2-Chart Grid for Expense Categories & Income by Item */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Expense Categories Bar Chart */}
             <div className="bg-white rounded-xl shadow p-4">
               <h2 className="text-lg font-semibold mb-2">Expenses by Category</h2>
               {expenseCategoryData.length > 0 ? (
@@ -183,6 +191,8 @@ export default function Dashboard() {
                 <p className="text-gray-500 text-sm mt-2">No expenses found.</p>
               )}
             </div>
+
+            {/* Income by Item Pie Chart */}
             <div className="bg-white rounded-xl shadow p-4">
               <h2 className="text-lg font-semibold mb-2">Income by Item</h2>
               {incomeItemData.length > 0 ? (
@@ -197,7 +207,10 @@ export default function Dashboard() {
                         label={(entry) => `$${entry.value.toFixed(0)}`}
                       >
                         {incomeItemData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip formatter={(val) => [`$${val}`, "Total"]} />
@@ -213,19 +226,26 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* RIGHT PANEL: Only visible on md+ */}
+      {/* RIGHT PANEL: recent items */}
       <aside className="hidden md:block p-6 border-l border-gray-200 bg-white">
         {/* Recent Expenses */}
         <h2 className="text-lg font-semibold mb-2">Recent Expenses</h2>
         <div className="space-y-2 mb-6">
           {recentExpenses.length ? (
             recentExpenses.map((exp) => (
-              <div key={exp.id} className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100">
+              <div
+                key={exp.id}
+                className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100"
+              >
                 <div>
-                  <p className="text-sm font-medium">{exp.item}</p>
-                  <p className="text-xs text-gray-500">{new Date(exp.date).toLocaleDateString()}</p>
+                  <p className="text-sm font-medium">{exp.vendor}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(exp.date).toLocaleDateString()}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-red-500">-${exp.totalCost?.toFixed(2)}</p>
+                <p className="text-sm font-bold text-red-500">
+                  -${exp.grandTotal?.toFixed(2)}
+                </p>
               </div>
             ))
           ) : (
@@ -244,12 +264,19 @@ export default function Dashboard() {
         <div className="space-y-2">
           {recentIncomes.length ? (
             recentIncomes.map((inc) => (
-              <div key={inc.id} className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100">
+              <div
+                key={inc.id}
+                className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100"
+              >
                 <div>
                   <p className="text-sm font-medium">{inc.item}</p>
-                  <p className="text-xs text-gray-500">{new Date(inc.date).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(inc.date).toLocaleDateString()}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-green-600">+${inc.amount?.toFixed(2)}</p>
+                <p className="text-sm font-bold text-green-600">
+                  +${inc.amount?.toFixed(2)}
+                </p>
               </div>
             ))
           ) : (

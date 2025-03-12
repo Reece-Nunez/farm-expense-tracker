@@ -101,7 +101,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
     { label: "Income", icon: CurrencyDollarIcon, route: "/income" },
     { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv" },
     { label: "Import Income CSV", icon: UploadIcon, route: "/import-income" },
-    { label: "Expense Table", icon: TableIcon, route: "/expenses" },
     { label: "Profile", icon: UserIcon, route: "/profile" },
   ];
 

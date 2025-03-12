@@ -118,14 +118,18 @@ export const onCreateExpense = /* GraphQL */ `
       id
       userId
       date
-      category
-      item
       vendor
-      unitCost
-      quantity
-      totalCost
+      grandTotal
       description
       receiptImageKey
+      lineItems {
+        category
+        item
+        unitCost
+        quantity
+        lineTotal
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -146,14 +150,18 @@ export const onUpdateExpense = /* GraphQL */ `
       id
       userId
       date
-      category
-      item
       vendor
-      unitCost
-      quantity
-      totalCost
+      grandTotal
       description
       receiptImageKey
+      lineItems {
+        category
+        item
+        unitCost
+        quantity
+        lineTotal
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -174,14 +182,18 @@ export const onDeleteExpense = /* GraphQL */ `
       id
       userId
       date
-      category
-      item
       vendor
-      unitCost
-      quantity
-      totalCost
+      grandTotal
       description
       receiptImageKey
+      lineItems {
+        category
+        item
+        unitCost
+        quantity
+        lineTotal
+        __typename
+      }
       createdAt
       updatedAt
       _version

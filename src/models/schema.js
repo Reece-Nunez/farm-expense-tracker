@@ -195,20 +195,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "category": {
-                    "name": "category",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "item": {
-                    "name": "item",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "vendor": {
                     "name": "vendor",
                     "isArray": false,
@@ -216,25 +202,11 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "unitCost": {
-                    "name": "unitCost",
+                "grandTotal": {
+                    "name": "grandTotal",
                     "isArray": false,
                     "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "quantity": {
-                    "name": "quantity",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCost": {
-                    "name": "totalCost",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "description": {
@@ -250,6 +222,16 @@ export const schema = {
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "lineItems": {
+                    "name": "lineItems",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "LineItem"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -487,7 +469,48 @@ export const schema = {
         }
     },
     "enums": {},
-    "nonModels": {},
+    "nonModels": {
+        "LineItem": {
+            "name": "LineItem",
+            "fields": {
+                "category": {
+                    "name": "category",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "item": {
+                    "name": "item",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unitCost": {
+                    "name": "unitCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "quantity": {
+                    "name": "quantity",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lineTotal": {
+                    "name": "lineTotal",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        }
+    },
     "codegenVersion": "3.4.4",
-    "version": "f796d2259acbf210e15e1d978975f93c"
+    "version": "6b823fa0ddd02d96a5c4375a5c81dabb"
 };

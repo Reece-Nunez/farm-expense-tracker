@@ -41,20 +41,19 @@ function AppContent() {
   // Expense states
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [pendingExpense, setPendingExpense] = useState(null);
 
   // Income states
   const [fetchedIncomes, setFetchedIncomes] = useState([]);
   const [editingIncome, setEditingIncome] = useState(null);
 
-  // Generic modal state for confirmations (can be used for expense or income actions)
+  // Generic modal state for confirmations
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => {}); // function to run on confirm
+  const [confirmAction, setConfirmAction] = useState(() => {});
   const [confirmMessage, setConfirmMessage] = useState("");
 
-  // Generic modal state for deletions (can be used for expense or income deletions)
+  // Generic modal state for deletions
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => {}); // function to run on deletion confirm
+  const [deleteAction, setDeleteAction] = useState(() => {});
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
@@ -74,7 +73,7 @@ function AppContent() {
       try {
         const session = await fetchAuthSession();
         const userSub = session.tokens.idToken.payload.sub;
-        // Filter expenses by userId equal to the current user's sub
+        // Filter expenses by userId
         const userExpenses = await DataStore.query(Expense, (e) =>
           e.userId.eq(userSub)
         );
@@ -113,8 +112,9 @@ function AppContent() {
   }, []);
 
   // -------------- Expense Handlers --------------
-  const handleExpenseSubmit = (formattedExpenses) => {
-    setConfirmMessage("Are you sure you want to accept these expenses?");
+  // CHANGED: now "formattedExpenses" is actually a SINGLE expense object
+  const handleExpenseSubmit = (formattedExpense) => {
+    setConfirmMessage("Are you sure you want to accept this expense?");
 
     setConfirmAction(() => async () => {
       try {
@@ -122,15 +122,13 @@ function AppContent() {
         const userId = session.tokens.idToken.payload.sub;
 
         if (editingExpense) {
-          // -- Editing a single expense --
+          // Editing an existing expense
           const updatedExpense = await DataStore.save(
             Expense.copyOf(editingExpense, (updated) => {
-              Object.assign(updated, formattedExpenses[0]);
+              Object.assign(updated, formattedExpense);
               updated.userId = userId;
             })
           );
-
-          // Update local state with the updated record
           setFetchedExpenses((prev) =>
             prev.map((exp) =>
               exp.id === updatedExpense.id ? updatedExpense : exp
@@ -139,19 +137,17 @@ function AppContent() {
           toast.success("Expense updated successfully!");
           setEditingExpense(null);
         } else {
-          // -- Creating new expense(s) --
-          const savedExpenses = await Promise.all(
-            formattedExpenses.map((expense) =>
-              DataStore.save(new Expense({ ...expense, userId }))
-            )
+          // Creating a new expense
+          // We no longer do .map(...) because there's only one object now
+          const newExpense = await DataStore.save(
+            new Expense({ ...formattedExpense, userId })
           );
-          // Update local state with the newly created records
-          setFetchedExpenses((prev) => [...prev, ...savedExpenses]);
-          toast.success("Expenses successfully added!");
+          setFetchedExpenses((prev) => [...prev, newExpense]);
+          toast.success("Expense successfully added!");
         }
       } catch (error) {
-        console.error("[handleExpenseSubmit] Error saving expense(s):", error);
-        toast.error("Failed to save expense(s).");
+        console.error("[handleExpenseSubmit] Error saving expense:", error);
+        toast.error("Failed to save expense.");
       } finally {
         setConfirmMessage("");
         setConfirmAction(() => {});
@@ -164,12 +160,10 @@ function AppContent() {
   };
 
   const handleExpenseEdit = (expense) => {
-    // For editing, navigate to a dedicated edit page (or open a modal)
     navigate(`/edit-expense/${expense.id}`);
   };
 
   const handleExpenseDelete = (id) => {
-    // Set up a generic delete confirmation
     setDeleteMessage("Are you sure you want to delete this expense?");
     setDeleteAction(() => async () => {
       try {
@@ -193,10 +187,8 @@ function AppContent() {
 
   // -------------- Income Handlers --------------
   const handleIncomeSubmit = (incomeData) => {
-    // Set the confirmation message for income submission
     setConfirmMessage("Are you sure you want to accept this income?");
 
-    // Set the confirm action to save the income record
     setConfirmAction(() => async () => {
       try {
         const session = await fetchAuthSession();
@@ -212,9 +204,7 @@ function AppContent() {
           toast.success("Income updated successfully!");
           setEditingIncome(null);
         } else {
-          newIncome = await DataStore.save(
-            new Income({ ...incomeData, userId })
-          );
+          newIncome = await DataStore.save(new Income({ ...incomeData, userId }));
           toast.success("Income added successfully!");
         }
         setFetchedIncomes((prev) =>
@@ -226,7 +216,6 @@ function AppContent() {
         console.error("[handleIncomeSubmit] Error:", error);
         toast.error("Failed to save income.");
       } finally {
-        // Clear the confirmation message and action, hide the modal, and reset the form.
         setConfirmMessage("");
         setConfirmAction(() => {});
         setShowConfirmModal(false);
@@ -234,7 +223,6 @@ function AppContent() {
       }
     });
 
-    // Show the confirmation modal
     setShowConfirmModal(true);
   };
 
@@ -264,7 +252,6 @@ function AppContent() {
     setShowDeleteModal(true);
   };
 
-  // -------------- Render --------------
   if (!authChecked) {
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }
@@ -286,7 +273,7 @@ function AppContent() {
         incomeFormRef={incomeFormRef}
       />
 
-      {/* Generic Confirmation Modal (for delete or confirm actions) */}
+      {/* Confirmation Modal */}
       {showConfirmModal && (
         <GenericModal
           isOpen={showConfirmModal}
@@ -298,7 +285,7 @@ function AppContent() {
         />
       )}
 
-      {/* Generic Delete Modal */}
+      {/* Delete Modal */}
       {showDeleteModal && (
         <GenericModal
           isOpen={showDeleteModal}
@@ -328,14 +315,8 @@ function AppRoutes({
 }) {
   return (
     <Routes>
-      {/* Redirect root "/" to "/dashboard" */}
       <Route path="/" element={<Navigate to="/dashboard" />} />
-
-      {/* Wrap everything in the DashboardLayout */}
       <Route element={<DashboardLayout />}>
-        {/* The actual child routes inside the layout */}
-
-        {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Expense Routes */}
@@ -383,15 +364,13 @@ function AppRoutes({
         <Route path="/edit-income/:id" element={<EditIncome />} />
         <Route path="/profile" element={<Profile />} />
 
-        {/* CSV Imports */}
+        {/* CSV */}
         <Route path="/import-csv" element={<ImportExpensesCSV />} />
         <Route path="/import-income" element={<ImportIncomeCSV />} />
 
         {/* Analytics */}
         <Route path="/analytics" element={<AnalyticsDashboard />} />
       </Route>
-
-      {/* Catch-all: if no route matches, go to /dashboard */}
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
@@ -407,7 +386,7 @@ function App() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          backgroundColor: "#f3f4f6", // match your dashboard's bg
+          backgroundColor: "#f3f4f6",
         }}
       >
         <h2 style={{ fontSize: "1.5rem", margin: ".5em" }}>

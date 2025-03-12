@@ -27,14 +27,19 @@ type Expense @model
   id: ID!
   userId: ID! @index(name: "byUser")
   date: AWSDate!
-  category: String!
-  item: String!
   vendor: String!
-  unitCost: Float!
-  quantity: Int!
-  totalCost: Float!
+  grandTotal: Float
   description: String
   receiptImageKey: String
+  lineItems: [LineItem!]!
+}
+
+type LineItem {
+  category: String!     
+  item: String!         
+  unitCost: Float!      
+  quantity: Int!        
+  lineTotal: Float
 }
 
 type Income

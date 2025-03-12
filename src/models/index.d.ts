@@ -4,7 +4,25 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/
 
 
 
+type EagerLineItem = {
+  readonly category: string;
+  readonly item: string;
+  readonly unitCost: number;
+  readonly quantity: number;
+  readonly lineTotal?: number | null;
+}
 
+type LazyLineItem = {
+  readonly category: string;
+  readonly item: string;
+  readonly unitCost: number;
+  readonly quantity: number;
+  readonly lineTotal?: number | null;
+}
+
+export declare type LineItem = LazyLoading extends LazyLoadingDisabled ? EagerLineItem : LazyLineItem
+
+export declare const LineItem: (new (init: ModelInit<LineItem>) => LineItem)
 
 type EagerUser = {
   readonly [__modelMeta__]: {
@@ -64,14 +82,11 @@ type EagerExpense = {
   readonly id: string;
   readonly userId: string;
   readonly date: string;
-  readonly category: string;
-  readonly item: string;
   readonly vendor: string;
-  readonly unitCost: number;
-  readonly quantity: number;
-  readonly totalCost: number;
+  readonly grandTotal?: number | null;
   readonly description?: string | null;
   readonly receiptImageKey?: string | null;
+  readonly lineItems: LineItem[];
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly userExpensesId?: string | null;
@@ -85,14 +100,11 @@ type LazyExpense = {
   readonly id: string;
   readonly userId: string;
   readonly date: string;
-  readonly category: string;
-  readonly item: string;
   readonly vendor: string;
-  readonly unitCost: number;
-  readonly quantity: number;
-  readonly totalCost: number;
+  readonly grandTotal?: number | null;
   readonly description?: string | null;
   readonly receiptImageKey?: string | null;
+  readonly lineItems: LineItem[];
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly userExpensesId?: string | null;

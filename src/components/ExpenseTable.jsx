@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { PencilAltIcon, TrashIcon } from "@heroicons/react/outline";
 import { getUrl } from "aws-amplify/storage";
 
+/**
+ * 
+ * @param {Object} props
+ * @param {Array} props.expenses - array of Expenses, each with { date, vendor, grandTotal, receiptImageKey, lineItems[] }
+ * @param {Function} props.onDelete - callback when deleting an expense
+ */
 export default function ExpenseTable({ expenses = [], onDelete }) {
   const navigate = useNavigate();
   const [imageUrls, setImageUrls] = React.useState({});
   const [selectedImageUrl, setSelectedImageUrl] = React.useState(null);
 
+  // Fetch receipt image URLs
   React.useEffect(() => {
     let isMounted = true;
 
@@ -18,7 +25,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
       for (const exp of expenses) {
         if (exp.receiptImageKey) {
           try {
-            // getUrl returns { url: URL, expiresAt: Date }
             const { url } = await getUrl({ path: exp.receiptImageKey });
             if (isMounted) {
               newImageUrls[exp.id] = url.href;
@@ -41,8 +47,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
   // Overlay for the enlarged image
   const FullSizeImageOverlay = ({ imageUrl, onClose }) => {
-    if (!imageUrl) return null; // no overlay if no image selected
-
+    if (!imageUrl) return null;
     return (
       <div
         className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
@@ -57,43 +62,31 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     );
   };
 
-  // MOBILE layout (cards) for screens < md
+  /** 
+   * MOBILE layout (cards) for screens < md
+   */
   const MobileExpenseCards = () => (
     <div className="block md:hidden">
-      {expenses.map((exp, idx) => {
+      {expenses.map((exp) => {
         const receiptUrl = imageUrls[exp.id];
         return (
           <div
-            key={exp.id ?? idx}
+            key={exp.id}
             className="bg-white shadow rounded mb-4 p-4 border"
           >
+            {/* Top-level Expense Info */}
             <div className="flex justify-between mb-2">
               <span className="font-semibold">Date:</span>
               <span>{new Date(exp.date).toLocaleDateString()}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Category:</span>
-              <span>{exp.category}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Item:</span>
-              <span>{exp.item}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="font-semibold">Vendor:</span>
               <span>{exp.vendor}</span>
             </div>
             <div className="flex justify-between mb-2">
-              <span className="font-semibold">Cost:</span>
-              <span>${exp.unitCost}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Quantity:</span>
-              <span>{exp.quantity}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold">Total:</span>
-              <span>${exp.totalCost?.toFixed(2)}</span>
+              <span className="font-semibold">Grand Total:</span>
+              {/* Use ?? 0 fallback */}
+              <span>${(exp.grandTotal ?? 0).toFixed(2)}</span>
             </div>
             {exp.description && (
               <div className="mb-2">
@@ -119,8 +112,35 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
                 <span>No receipt</span>
               )}
             </div>
+
+            {/* Now list each Line Item */}
+            <div className="mt-4">
+              <p className="font-semibold underline">Line Items:</p>
+              {exp.lineItems?.map((li, index) => (
+                <div key={index} className="border rounded p-2 mt-2">
+                  <p>
+                    <span className="font-semibold">Category:</span> {li.category}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Item:</span> {li.item}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Unit Cost:</span>{" "}
+                    ${(li.unitCost ?? 0).toFixed(2)}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Quantity:</span> {li.quantity}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Line Total:</span>{" "}
+                    ${(li.lineTotal ?? 0).toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
             {/* Actions */}
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-4">
               <Button
                 onClick={() => navigate(`/edit-expense/${exp.id}`)}
                 className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
@@ -142,76 +162,155 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     </div>
   );
 
-  // DESKTOP layout (table) for screens >= md
+  /**
+   * DESKTOP layout (table) for screens >= md
+   */
   const DesktopExpenseTable = () => (
     <div className="hidden md:block overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-100">
           <tr>
             <th className="p-2">Date</th>
-            <th className="p-2">Category</th>
-            <th className="p-2">Item</th>
             <th className="p-2">Vendor</th>
-            <th className="p-2">Cost</th>
+            <th className="p-2">Category (Line Item)</th>
+            <th className="p-2">Item</th>
+            <th className="p-2">Unit Cost</th>
             <th className="p-2">Quantity</th>
-            <th className="p-2">Total</th>
+            <th className="p-2">Line Total</th>
+            <th className="p-2">Grand Total</th>
             <th className="p-2">Notes</th>
             <th className="p-2">Receipt</th>
             <th className="p-2">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {expenses.map((exp, idx) => {
+          {expenses.map((exp) => {
             const receiptUrl = imageUrls[exp.id];
+            const rowCount = exp.lineItems?.length || 1;
+
             return (
-              <tr
-                key={exp.id ?? idx}
-                className="hover:bg-blue-50 transition-colors"
-              >
-                <td className="p-2">{new Date(exp.date).toLocaleDateString()}</td>
-                <td className="p-2">{exp.category}</td>
-                <td className="p-2">{exp.item}</td>
-                <td className="p-2">{exp.vendor}</td>
-                <td className="p-2">${exp.unitCost}</td>
-                <td className="p-2">{exp.quantity}</td>
-                <td className="p-2">${exp.totalCost?.toFixed(2)}</td>
-                <td className="p-2">{exp.description || ""}</td>
-                {/* Receipt thumbnail */}
-                <td className="p-2">
-                  {exp.receiptImageKey ? (
-                    receiptUrl ? (
-                      <img
-                        src={receiptUrl}
-                        alt="Receipt"
-                        className="w-[50px] h-[50px] object-cover cursor-pointer transform transition duration-200 hover:scale-110"
-                        onClick={() => setSelectedImageUrl(receiptUrl)}
-                      />
-                    ) : (
-                      <span>Loading...</span>
-                    )
-                  ) : (
-                    <span>No receipt</span>
-                  )}
-                </td>
-                <td className="p-2">
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => navigate(`/edit-expense/${exp.id}`)}
-                      className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
+              <React.Fragment key={exp.id}>
+                {exp.lineItems && exp.lineItems.length > 0 ? (
+                  exp.lineItems.map((li, liIndex) => (
+                    <tr
+                      key={`${exp.id}-${liIndex}`}
+                      className="hover:bg-blue-50 transition-colors"
                     >
-                      <PencilAltIcon className="w-4 h-4" />
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => onDelete(exp.id)}
-                      className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                      Delete
-                    </Button>
-                  </div>
-                </td>
-              </tr>
+                      {/* For the first line item, show top-level fields with rowSpan */}
+                      {liIndex === 0 && (
+                        <>
+                          <td rowSpan={rowCount} className="p-2">
+                            {new Date(exp.date).toLocaleDateString()}
+                          </td>
+                          <td rowSpan={rowCount} className="p-2">
+                            {exp.vendor}
+                          </td>
+                        </>
+                      )}
+
+                      {/* Now the line item fields */}
+                      <td className="p-2">{li.category}</td>
+                      <td className="p-2">{li.item}</td>
+                      {/* Use ?? 0 fallback */}
+                      <td className="p-2">${(li.unitCost ?? 0).toFixed(2)}</td>
+                      <td className="p-2">{li.quantity}</td>
+                      <td className="p-2">${(li.lineTotal ?? 0).toFixed(2)}</td>
+
+                      {liIndex === 0 && (
+                        <>
+                          {/* Grand total with fallback */}
+                          <td rowSpan={rowCount} className="p-2 font-bold text-red-500">
+                            ${(exp.grandTotal ?? 0).toFixed(2)}
+                          </td>
+                          <td rowSpan={rowCount} className="p-2">
+                            {exp.description || ""}
+                          </td>
+                          <td rowSpan={rowCount} className="p-2">
+                            {exp.receiptImageKey ? (
+                              receiptUrl ? (
+                                <img
+                                  src={receiptUrl}
+                                  alt="Receipt"
+                                  className="w-[50px] h-[50px] object-cover cursor-pointer transform transition duration-200 hover:scale-110"
+                                  onClick={() => setSelectedImageUrl(receiptUrl)}
+                                />
+                              ) : (
+                                <span>Loading...</span>
+                              )
+                            ) : (
+                              <span>No receipt</span>
+                            )}
+                          </td>
+                          <td rowSpan={rowCount} className="p-2">
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                onClick={() => navigate(`/edit-expense/${exp.id}`)}
+                                className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
+                              >
+                                <PencilAltIcon className="w-4 h-4" />
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={() => onDelete(exp.id)}
+                                className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))
+                ) : (
+                  // If for some reason an expense has no lineItems
+                  <tr className="hover:bg-blue-50 transition-colors">
+                    <td className="p-2">
+                      {new Date(exp.date).toLocaleDateString()}
+                    </td>
+                    <td className="p-2">{exp.vendor}</td>
+                    <td colSpan={4} className="p-2 text-gray-500 italic">
+                      No line items
+                    </td>
+                    {/* Use fallback for grandTotal */}
+                    <td className="p-2 font-bold">${(exp.grandTotal ?? 0).toFixed(2)}</td>
+                    <td className="p-2">{exp.description || ""}</td>
+                    <td className="p-2">
+                      {exp.receiptImageKey ? (
+                        receiptUrl ? (
+                          <img
+                            src={receiptUrl}
+                            alt="Receipt"
+                            className="w-[50px] h-[50px] object-cover cursor-pointer transform transition duration-200 hover:scale-110"
+                            onClick={() => setSelectedImageUrl(receiptUrl)}
+                          />
+                        ) : (
+                          <span>Loading...</span>
+                        )
+                      ) : (
+                        <span>No receipt</span>
+                      )}
+                    </td>
+                    <td className="p-2">
+                      <Button
+                        onClick={() => navigate(`/edit-expense/${exp.id}`)}
+                        className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1 px-3 py-1 rounded"
+                      >
+                        <PencilAltIcon className="w-4 h-4" />
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => onDelete(exp.id)}
+                        className="bg-red-500 hover:bg-red-600 flex items-center gap-1 px-3 py-1 rounded ml-2"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             );
           })}
         </tbody>
@@ -221,12 +320,10 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
   return (
     <>
-      {/* Full-size overlay if an image is selected */}
       <FullSizeImageOverlay
         imageUrl={selectedImageUrl}
         onClose={() => setSelectedImageUrl(null)}
       />
-
       <Card className="max-w-7xl mx-auto p-6 mb-6 shadow-lg">
         <CardHeader className="text-2xl font-bold text-center mb-4">
           Submitted Expenses
