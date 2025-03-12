@@ -1,528 +1,138 @@
-import React, { useEffect, useImperativeHandle, forwardRef } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import CurrencyInput from "react-currency-input-field";
-import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { toast } from "react-hot-toast";
-import { expenseFormSchema } from "@/schemas/expenseFormSchema";
-import { uploadData } from "aws-amplify/storage";
-import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
+# 🌾 Farm Expense Tracker
 
-// Categories (unchanged)
-const categories = [
-  "Chemicals",
-  "Conservation Expenses",
-  "Custom Hire",
-  "Feed Purchased",
-  "Fertilizers and Lime",
-  "Freight and Trucking",
-  "Gasoline, Fuel, and Oil",
-  "Mortgage Interest",
-  "Insurance (Not Health)",
-  "Other Interest",
-  "Equipment Rental",
-  "Farm Equipment",
-  "Other Rental",
-  "Repairs and Maintenance",
-  "Seeds and Plants",
-  "Storage and Warehousing",
-  "Supplies Purchased",
-  "Taxes",
-  "Utilities",
-  "Vet",
-  "Breeding",
-  "Medicine",
-];
+A simple, user-friendly web application built with **React**, **AWS Amplify**, and **Tailwind CSS**, designed to help farmers and small agricultural businesses track their farm-related expenses without the hassle of spreadsheets or piles of receipts.
 
-// Extend your default expense record to include an optional lineItems array.
-const defaultExpense = {
-  date: "",
-  vendor: "",
-  notes: "",
-  receiptFile: null,
-  // Top-level fields (for single-line entry)
-  unitCost: "",
-  quantity: "",
-  category: "",
-  item: "",
-  // Nested line items (optional)
-  lineItems: [],
-};
+---
 
-function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
-  const navigate = useNavigate();
+## 🚜💻 Project Description
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-    reset,
-  } = useForm({
-    resolver: zodResolver(expenseFormSchema),
-    defaultValues: {
-      expenses: [defaultExpense],
-    },
-  });
+After countless late nights (and way too much caffeine ☕), I’m excited to share something I’ve been working hard on—**Farm Expense Tracker**! It’s a simple, clean app built to help farmers (or anyone running a small or hobby farm) easily track their expenses—no more digging through piles of receipts or stressing over spreadsheets.
 
-  useImperativeHandle(ref, () => ({
-    resetForm: () => reset(),
-  }));
+We were doing it the old-school way... envelope stuffed with receipts. Now? It’s all streamlined. ✅
 
-  // Outer field array: each element is a "receipt" expense entry.
-  const { fields: receiptFields, append, remove } = useFieldArray({
-    control,
-    name: "expenses",
-  });
+---
 
-  useEffect(() => {
-    if (editingExpense) {
-      reset({
-        expenses: [
-          {
-            ...editingExpense,
-            date: new Date(editingExpense.date),
-            // Ensure string conversion if needed:
-            unitCost:
-              typeof editingExpense.unitCost === "number"
-                ? editingExpense.unitCost.toString()
-                : editingExpense.unitCost,
-            // For backwards compatibility, we prefill lineItems as empty array if missing.
-            lineItems: editingExpense.lineItems || [],
-          },
-        ],
-      });
-    }
-  }, [editingExpense, reset]);
+## 💡 Features
 
-  // Submit logic
-  const onValid = async (data) => {
-    try {
-      const finalExpenses = [];
+- ✅ Enter and track expenses easily by category (Feed, Seed, Fuel, Repairs, etc.)
+- ✅ View everything on a simple, clean dashboard
+- ✅ Analyze where your money’s going so tax time isn’t a headache
+- ✅ Secure user login and registration—your data stays safe!
+- ✅ Responsive design—works great on desktop, tablet, or mobile!
 
-      for (let expense of data.expenses) {
-        // Upload receipt file if provided
-        let uploadedFileKey = "";
-        if (expense.receiptFile && expense.receiptFile[0]) {
-          const file = expense.receiptFile[0];
-          const fileKey = `receipts/${Date.now()}_${file.name}`;
-          const operation = uploadData({
-            path: fileKey,
-            data: file,
-            options: { contentType: file.type },
-          });
-          await operation.result;
-          uploadedFileKey = fileKey;
-        }
+---
 
-        // Convert date to ISO (yyyy-mm-dd) if provided
-        const isoDate = expense.date
-          ? new Date(expense.date).toISOString().split("T")[0]
-          : "";
+## 🛠️ Tech Stack
 
-        // If lineItems exist, push multiple expense records
-        if (expense.lineItems && expense.lineItems.length > 0) {
-          expense.lineItems.forEach((item) => {
-            const unitCost = parseFloat(item.unitCost || 0);
-            const quantity = parseFloat(item.quantity || 0);
-            finalExpenses.push({
-              date: isoDate,
-              vendor: expense.vendor,
-              description: expense.notes || "",
-              category: item.category,
-              item: item.item,
-              quantity,
-              unitCost,
-              totalCost: unitCost * quantity,
-              receiptImageKey: uploadedFileKey,
-            });
-          });
-        } else {
-          // Otherwise, single record from top-level fields
-          const unitCost = parseFloat(expense.unitCost || 0);
-          const quantity = parseFloat(expense.quantity || 0);
-          finalExpenses.push({
-            date: isoDate,
-            vendor: expense.vendor,
-            description: expense.notes || "",
-            category: expense.category,
-            item: expense.item,
-            quantity,
-            unitCost,
-            totalCost: unitCost * quantity,
-            receiptImageKey: uploadedFileKey,
-          });
-        }
-      }
+- **Frontend:** React
+- **Styling:** Tailwind CSS
+- **Backend / Authentication:** AWS Amplify
+- **State Management:** React Hooks and Context API
+- **Build Tool:** Vite
 
-      await onValidSubmit(finalExpenses);
-    } catch (err) {
-      console.error("[ExpenseForm] File upload error:", err);
-      toast.error("Error uploading file.");
-    }
-  };
+---
 
-  const onInvalid = () => {
-    toast.error("Please fix errors before submitting.");
-  };
+## ⚙️ Local Installation and Setup
 
-  // Render each receipt entry with nested line items
-  const MultiReceiptExpenseItem = ({ receiptIndex }) => {
-    // Nested field array for line items within this receipt.
-    const {
-      fields: lineItemFields,
-      append: appendLineItem,
-      remove: removeLineItem,
-    } = useFieldArray({
-      control,
-      name: `expenses.${receiptIndex}.lineItems`,
-    });
+Follow these steps to get the project running locally on your machine.
 
-    // Watch for date display
-    const watchDate = watch(`expenses.${receiptIndex}.date`);
+### 1. Clone the repository
+Open your terminal and run:
+```bash
+git clone https://github.com/yourusername/farm-expense-tracker.git
+cd farm-expense-tracker
+2. Install project dependencies
+Make sure you have Node.js and npm installed. Then run:
 
-    return (
-      <div className="p-6 rounded-lg bg-white shadow-md border border-gray-200 my-10">
-        <h3 className="text-lg font-semibold mb-4">
-          Expense #{receiptIndex + 1}
-        </h3>
+npm install
 
-        {/* Shared fields for the receipt */}
-        <div>
-          <label className="font-medium mb-1 flex items-center gap-1">
-            <CalendarIcon className="w-5 h-5 text-blue-500" />
-            Date <span className="text-red-500">*</span>
-          </label>
-          <DatePicker
-            selected={watchDate ? new Date(watchDate) : null}
-            onChange={(date) =>
-              setValue(`expenses.${receiptIndex}.date`, date || "")
-            }
-            placeholderText="Select Date"
-            dateFormat="yyyy-MM-dd"
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.date
-                ? "border-red-500 animate-shake"
-                : ""
-              }`}
-            isClearable
-          />
-          {errors.expenses?.[receiptIndex]?.date && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.expenses[receiptIndex].date?.message}
-            </p>
-          )}
-        </div>
+3. Start the development server
+Launch the app locally:
 
-        <div className="mt-4">
-          <label className="block font-medium mb-1">
-            Vendor/Supplier <span className="text-red-500">*</span>
-          </label>
-          <Input
-            placeholder="Vendor"
-            {...register(`expenses.${receiptIndex}.vendor`)}
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.vendor
-                ? "border-red-500 animate-shake"
-                : ""
-              }`}
-          />
-          {errors.expenses?.[receiptIndex]?.vendor && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.expenses[receiptIndex].vendor?.message}
-            </p>
-          )}
-        </div>
+npm run dev
+By default, the app runs at http://localhost:5173.
 
-        <div className="mt-4">
-          <label className="block font-medium mb-1">Notes (Optional)</label>
-          <Textarea
-            placeholder="Any extra details"
-            {...register(`expenses.${receiptIndex}.notes`)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-        </div>
+🔐 AWS Amplify Setup
+You'll need an AWS account to deploy backend services like authentication and data storage.
 
-        <div className="mt-4">
-          <label className="block font-medium text-base mb-2">
-            Receipt Image (Optional)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            {...register(`expenses.${receiptIndex}.receiptFile`)}
-            className="block w-full text-sm text-gray-900 border border-blue-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-colors"
-          />
-        </div>
+1. Install the Amplify CLI globally
 
-        {/* Nested line items for this receipt */}
-        <div className="mt-6 p-4 border rounded bg-gray-50">
-          <h4 className="font-semibold mb-2">Line Items</h4>
-          {lineItemFields.map((lineField, lineIndex) => {
-            // Watch for line total calculation
-            const watchUnitCost = watch(
-              `expenses.${receiptIndex}.lineItems.${lineIndex}.unitCost`
-            );
-            const watchQuantity = watch(
-              `expenses.${receiptIndex}.lineItems.${lineIndex}.quantity`
-            );
-            const lineTotal =
-              parseFloat(watchUnitCost || 0) * parseFloat(watchQuantity || 0);
+npm install -g @aws-amplify/cli
 
-            return (
-              <div
-                key={lineField.id}
-                className="border-b border-gray-200 py-4 mb-4 last:border-none last:mb-0"
-              >
-                <div className="mt-2">
-                  <label className="block font-medium mb-1">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <Select
-                    {...register(
-                      `expenses.${receiptIndex}.lineItems.${lineIndex}.category`
-                    )}
-                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                        ?.category
-                        ? "border-red-500 animate-shake"
-                        : ""
-                      }`}
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </Select>
-                  {errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                    ?.category && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {
-                          errors.expenses[receiptIndex].lineItems[lineIndex]
-                            .category.message
-                        }
-                      </p>
-                    )}
-                </div>
+2. Configure Amplify CLI with your AWS account
+This step sets up your access credentials.
 
-                <div className="mt-2">
-                  <label className="block font-medium mb-1">
-                    Item Name <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder="Item"
-                    {...register(
-                      `expenses.${receiptIndex}.lineItems.${lineIndex}.item`
-                    )}
-                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                        ?.item
-                        ? "border-red-500 animate-shake"
-                        : ""
-                      }`}
-                  />
-                  {errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                    ?.item && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {
-                          errors.expenses[receiptIndex].lineItems[lineIndex].item
-                            .message
-                        }
-                      </p>
-                    )}
-                </div>
 
-                <div className="mt-2">
-                  <label className="block font-medium mb-1">
-                    Quantity <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="number"
-                    {...register(
-                      `expenses.${receiptIndex}.lineItems.${lineIndex}.quantity`,
-                      { valueAsNumber: true }
-                    )}
-                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                        ?.quantity
-                        ? "border-red-500 animate-shake"
-                        : ""
-                      }`}
-                  />
-                  {errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                    ?.quantity && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {
-                          errors.expenses[receiptIndex].lineItems[lineIndex]
-                            .quantity.message
-                        }
-                      </p>
-                    )}
-                </div>
+amplify configure
+Follow the CLI prompts to:
 
-                <div className="mt-2">
-                  <label className="block font-medium mb-1 flex items-center gap-1">
-                    <CurrencyDollarIcon className="w-5 h-5 text-blue-500" />
-                    Unit Cost <span className="text-red-500">*</span>
-                  </label>
-                  {/* Use Controller here for CurrencyInput */}
-                  <Controller
-                    control={control}
-                    name={`expenses.${receiptIndex}.lineItems.${lineIndex}.unitCost`}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <CurrencyInput
-                        prefix="$"
-                        allowDecimals={true}
-                        decimalsLimit={2}
-                        allowNegativeValue={false}
-                        decimalSeparator="."
-                        groupSeparator=","
-                        placeholder="Unit Cost"
-                        value={value}
-                        onValueChange={(val) => onChange(val || "")}
-                        onBlur={onBlur}
-                        className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors.expenses?.[receiptIndex]?.lineItems?.[
-                            lineIndex
-                          ]?.unitCost
-                            ? "border-red-500 animate-shake"
-                            : ""
-                          }`}
-                      />
-                    )}
-                  />
-                  {errors.expenses?.[receiptIndex]?.lineItems?.[lineIndex]
-                    ?.unitCost && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {
-                          errors.expenses[receiptIndex].lineItems[lineIndex]
-                            .unitCost.message
-                        }
-                      </p>
-                    )}
-                </div>
+Sign in to your AWS account
+Create a new IAM user
+Set up your AWS access keys locally
+3. Initialize Amplify in the project
+If Amplify isn't already initialized, run:
 
-                <div className="mt-2">
-                  <label className="block font-medium mb-1">
-                    Line Item Total
-                  </label>
-                  <Input
-                    readOnly
-                    value={
-                      lineTotal > 0
-                        ? `$${Number(lineTotal).toFixed(2)}`
-                        : ""
-                    }
-                    className="w-full border rounded px-3 py-2 bg-gray-100"
-                  />
-                </div>
+amplify init
+4. Push the backend environment to AWS
+This deploys backend resources (authentication, database, etc.)
 
-                <div className="mt-4 flex justify-center">
-                  <Button
-                    type="button"
-                    onClick={() => removeLineItem(lineIndex)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                  >
-                    Remove Item
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-          <div className="mt-4 flex justify-around">
-            <Button
-              type="button"
-              onClick={() =>
-                appendLineItem({
-                  category: "",
-                  item: "",
-                  quantity: 1,
-                  unitCost: "",
-                })
-              }
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded"
-            >
-              + Add Another Line Item
-            </Button>
-            <Button
-              type="button"
-              onClick={() => remove(receiptIndex)}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Remove This Receipt
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
-  return (
-    <Card className="w-full max-w-md md:max-w-4xl mx-auto p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <CardHeader className="text-2xl md:text-3xl font-bold flex items-center justify-center mb-6">
-        Expense Form
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form
-          onSubmit={handleSubmit(onValid, onInvalid)}
-          // Prevent accidental "Enter" from reloading the page:
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-            }
-          }}
-        >
-          {receiptFields.map((receiptField, receiptIndex) => (
-            <MultiReceiptExpenseItem
-              key={receiptField.id}
-              receiptIndex={receiptIndex}
-            />
-          ))}
+amplify push
+5. Add Authentication (if not already added)
 
-          <div className="flex flex-col sm:flex-row justify-around gap-4 m-12">
-            <Button
-              type="button"
-              onClick={() =>
-                append({
-                  date: "",
-                  vendor: "",
-                  notes: "",
-                  receiptFile: null,
-                  lineItems: [
-                    {
-                      category: "",
-                      item: "",
-                      quantity: 1,
-                      unitCost: "",
-                    },
-                  ],
-                  // Also include top-level fields for backwards compatibility:
-                  unitCost: "",
-                  quantity: "",
-                  category: "",
-                  item: "",
-                })
-              }
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
-            >
-              + Add Another Receipt
-            </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
-            >
-              Submit All
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
+amplify add auth
+Choose the default configuration or customize it for your needs.
 
-export default forwardRef(ExpenseForm);
+6. Push the authentication changes
+
+amplify push
+📝 How to Contribute
+If you’re testing the app or want to contribute, here’s how you can help:
+
+🐛 Report Bugs
+If you spot something broken or buggy, let me know!
+
+💡 Suggest Features or Improvements
+Got an idea for a new feature? Something you wish was easier? I’m all ears.
+
+🛠️ Give UI/UX Feedback
+Tell me what’s confusing or what works well. The goal is to make this as simple and helpful as possible!
+
+📬 Feedback & Testing Call
+I'm actively looking for testers and feedback!
+If you're willing to try it out and give honest input, please DM me.
+
+I'm especially interested in:
+
+New feature ideas 💡
+Things that could be easier to use 🛠️
+Bugs or weird stuff happening 🐛
+This is just the beginning, and I want it to be as helpful as possible for real users like you. Thanks for any help you can throw my way! 🙏
+
+🌱 Roadmap & Future Ideas
+Income tracking
+Budget forecasting
+Receipt image uploads
+Offline mode
+Mobile app version
+Export data (CSV/Excel)
+Multi-user / family farm support
+📜 License
+This project is licensed under the MIT License.
+Feel free to fork, clone, or contribute!
+
+👨‍💻 Author
+Reece Nunez
+LinkedIn | GitHub
+
+---
+
+### ✅ What's included:
+- Full **installation instructions** (local + AWS Amplify backend)
+- **Contribution guidelines**
+- **Feedback request section**
+- **Future roadmap** ideas
+- **License & author** info
+- Clean and easy-to-read **Markdown structure**
+
+Let me know if you want me to add **Amplify Hosting deployment** steps or anything else!
