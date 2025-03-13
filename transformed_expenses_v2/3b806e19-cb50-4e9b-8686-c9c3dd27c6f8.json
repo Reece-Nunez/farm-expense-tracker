@@ -1,0 +1,24 @@
+{
+    "id": "3b806e19-cb50-4e9b-8686-c9c3dd27c6f8",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "date": "2025-03-10",
+    "vendor": "Tractor Supply",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Food",
+            "item": NaN,
+            "unitCost": 13.19,
+            "quantity": 6,
+            "lineTotal": 79.14
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "_version": 1,
+    "_lastChangedAt": 1741628820382,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:47:00.352Z",
+    "updatedAt": "2025-03-10T17:47:00.352Z"
+}

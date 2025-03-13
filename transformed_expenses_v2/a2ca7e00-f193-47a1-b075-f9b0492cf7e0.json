@@ -1,0 +1,24 @@
+{
+    "id": "a2ca7e00-f193-47a1-b075-f9b0492cf7e0",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "date": "2025-03-08",
+    "vendor": "\"Family Dollar \"",
+    "grandTotal": NaN,
+    "description": "\"5 sterlite laying boxes \"",
+    "receiptImageKey": "receipts/1741478193839_1000001143.jpg",
+    "lineItems": [
+        {
+            "category": "Supplies Purchased",
+            "item": "laying boxes",
+            "unitCost": 43.5,
+            "quantity": 1,
+            "lineTotal": 43.5
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "_version": 1,
+    "_lastChangedAt": 1741478197248,
+    "_deleted": false,
+    "createdAt": "2025-03-08T23:56:37.220Z",
+    "updatedAt": "2025-03-08T23:56:37.220Z"
+}

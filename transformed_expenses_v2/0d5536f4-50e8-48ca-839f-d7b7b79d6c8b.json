@@ -1,0 +1,24 @@
+{
+    "id": "0d5536f4-50e8-48ca-839f-d7b7b79d6c8b",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "date": "2025-02-01",
+    "vendor": "",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Supplies",
+            "item": "Chicken Feeder",
+            "unitCost": 44.94,
+            "quantity": 1,
+            "lineTotal": 44.94
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "_version": 2,
+    "_lastChangedAt": 1741725769792,
+    "_deleted": true,
+    "createdAt": "2025-03-11T20:42:41.583Z",
+    "updatedAt": "2025-03-11T20:42:41.583Z"
+}

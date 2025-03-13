@@ -1,0 +1,24 @@
+{
+    "id": "0fbbe042-2107-4579-85e9-4dd2ec1ffd9c",
+    "date": "2025-03-11",
+    "vendor": "Test",
+    "grandTotal": 16.0,
+    "description": "Test",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Custom Hire",
+            "item": "Test",
+            "unitCost": 4.0,
+            "quantity": 4,
+            "lineTotal": 16.0
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "_version": 2,
+    "_lastChangedAt": 1741723581136,
+    "_deleted": true,
+    "createdAt": "2025-03-11T19:54:51.753Z",
+    "updatedAt": "2025-03-11T19:54:51.753Z"
+}

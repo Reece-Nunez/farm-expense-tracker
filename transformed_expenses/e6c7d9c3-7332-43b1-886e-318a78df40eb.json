@@ -1,0 +1,24 @@
+{
+    "id": "e6c7d9c3-7332-43b1-886e-318a78df40eb",
+    "date": "2025-02-01",
+    "vendor": "",
+    "grandTotal": 35.97,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Supplies",
+            "item": "Pig Food Buckets",
+            "unitCost": 11.99,
+            "quantity": 3,
+            "lineTotal": 35.97
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "_version": 2,
+    "_lastChangedAt": 1741725771020,
+    "_deleted": true,
+    "createdAt": "2025-03-11T20:42:41.864Z",
+    "updatedAt": "2025-03-11T20:42:41.864Z"
+}

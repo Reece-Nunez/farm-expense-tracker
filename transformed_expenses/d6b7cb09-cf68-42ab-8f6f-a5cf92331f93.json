@@ -1,0 +1,24 @@
+{
+    "id": "d6b7cb09-cf68-42ab-8f6f-a5cf92331f93",
+    "date": "2025-03-11",
+    "vendor": "this place",
+    "grandTotal": 129.0,
+    "description": "test",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Seeds and Plants",
+            "item": "This is a test",
+            "unitCost": 43.0,
+            "quantity": 3,
+            "lineTotal": 129.0
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "_version": 3,
+    "_lastChangedAt": 1741723908578,
+    "_deleted": true,
+    "createdAt": "2025-03-11T19:48:59.055Z",
+    "updatedAt": "2025-03-11T19:57:58.514Z"
+}

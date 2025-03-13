@@ -1,0 +1,24 @@
+{
+    "id": "e2628178-fcf4-47dc-9ef9-6c8b616751d4",
+    "date": "2025-02-24",
+    "vendor": "McDonalds",
+    "grandTotal": 49.15,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Food",
+            "item": "Unknown",
+            "unitCost": 49.15,
+            "quantity": 1,
+            "lineTotal": 49.15
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "_version": 1,
+    "_lastChangedAt": 1741628819652,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:46:59.615Z",
+    "updatedAt": "2025-03-10T17:46:59.615Z"
+}

@@ -1,0 +1,24 @@
+{
+    "id": "015b3afe-e829-46f4-9812-3b454abdd298",
+    "date": "2025-02-24",
+    "vendor": "",
+    "grandTotal": 78.86,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Fuel",
+            "item": "Gas for Picking Up Side by Side",
+            "unitCost": 78.86,
+            "quantity": 1,
+            "lineTotal": 78.86
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "_version": 2,
+    "_lastChangedAt": 1741725777130,
+    "_deleted": true,
+    "createdAt": "2025-03-11T20:42:42.935Z",
+    "updatedAt": "2025-03-11T20:42:42.935Z"
+}

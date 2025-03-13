@@ -1,0 +1,24 @@
+{
+    "id": "e2628178-fcf4-47dc-9ef9-6c8b616751d4",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "date": "2025-02-24",
+    "vendor": "McDonalds",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Food",
+            "item": NaN,
+            "unitCost": 49.15,
+            "quantity": 1,
+            "lineTotal": 49.15
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "_version": 1,
+    "_lastChangedAt": 1741628819652,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:46:59.615Z",
+    "updatedAt": "2025-03-10T17:46:59.615Z"
+}

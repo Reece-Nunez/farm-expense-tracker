@@ -1,0 +1,24 @@
+{
+    "id": "f5793fdf-70f3-46e9-9b2d-fc9eccd3e25c",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "date": "2025-02-24",
+    "vendor": "Facebook",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Equipment",
+            "item": NaN,
+            "unitCost": 5000.0,
+            "quantity": 1,
+            "lineTotal": 5000.0
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "_version": 1,
+    "_lastChangedAt": 1741628818991,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:46:58.955Z",
+    "updatedAt": "2025-03-10T17:46:58.955Z"
+}

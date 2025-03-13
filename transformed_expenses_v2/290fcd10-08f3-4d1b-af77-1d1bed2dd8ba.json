@@ -1,0 +1,24 @@
+{
+    "id": "290fcd10-08f3-4d1b-af77-1d1bed2dd8ba",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "date": "2025-03-08",
+    "vendor": "\"Harbor freight \"",
+    "grandTotal": NaN,
+    "description": "Stretch wrap for metal sheets returning",
+    "receiptImageKey": "receipts/1741478356516_1000001126.dng",
+    "lineItems": [
+        {
+            "category": "Supplies Purchased",
+            "item": "Stretch wrap",
+            "unitCost": 29.99,
+            "quantity": 1,
+            "lineTotal": 29.99
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "_version": 1,
+    "_lastChangedAt": 1741478392654,
+    "_deleted": false,
+    "createdAt": "2025-03-08T23:59:52.625Z",
+    "updatedAt": "2025-03-08T23:59:52.625Z"
+}

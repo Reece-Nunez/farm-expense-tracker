@@ -1,0 +1,24 @@
+{
+    "id": "962a6fbd-917f-42d8-bd5d-85b5d33368bb",
+    "date": "2025-02-24",
+    "vendor": "",
+    "grandTotal": 12.82,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Fuel",
+            "item": "Gas For Side by Side",
+            "unitCost": 12.82,
+            "quantity": 1,
+            "lineTotal": 12.82
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "_version": 2,
+    "_lastChangedAt": 1741725774224,
+    "_deleted": true,
+    "createdAt": "2025-03-11T20:42:42.401Z",
+    "updatedAt": "2025-03-11T20:42:42.401Z"
+}

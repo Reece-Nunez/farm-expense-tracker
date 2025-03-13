@@ -82,22 +82,36 @@ function AppContent() {
     // Fire it once when the app loads
     fixOwnerField();
   }, []);
+  
+  useEffect(() => {
+    async function clearAndResync() {
+      await DataStore.clear();
+      await DataStore.start();
+    }
+  
+    clearAndResync();
+  }, []);
+  
 
   // 2) Fetch & subscribe to expenses for the current user
   useEffect(() => {
     async function fetchExpenses() {
       try {
+        // 🔧 Clear and restart syncing to avoid stale cache
+        await DataStore.clear();
+        await DataStore.start(); // Optional: waits for sync (depends on setup)
+
         const session = await fetchAuthSession();
         const userSub = session.tokens.idToken.payload.sub;
         console.log("[fetchExpenses] Current user sub:", userSub);
 
-        // Only get expenses belonging to this user
+        // Query AFTER clearing
         const userExpenses = await DataStore.query(Expense, (e) =>
           e.userId.eq(userSub)
         );
         console.log("[fetchExpenses] Type of userExpenses:", Array.isArray(userExpenses));
         console.log("[fetchExpenses] JSON:", JSON.stringify(userExpenses, null, 2));
-        console.log("Current user sub:", userSub);
+
         setFetchedExpenses(userExpenses);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
@@ -117,6 +131,7 @@ function AppContent() {
     // cleanup subscription on unmount
     return () => expenseSub.unsubscribe();
   }, []);
+
 
   // 3) Fetch & subscribe to all incomes (no user filter?)
   useEffect(() => {

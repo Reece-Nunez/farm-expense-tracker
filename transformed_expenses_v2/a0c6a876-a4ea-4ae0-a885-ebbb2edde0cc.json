@@ -1,0 +1,24 @@
+{
+    "id": "a0c6a876-a4ea-4ae0-a885-ebbb2edde0cc",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "date": "2025-02-01",
+    "vendor": "Tractor Supply",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Supplies",
+            "item": NaN,
+            "unitCost": 11.99,
+            "quantity": 3,
+            "lineTotal": 35.97
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "_version": 1,
+    "_lastChangedAt": 1741628818629,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:46:58.599Z",
+    "updatedAt": "2025-03-10T17:46:58.599Z"
+}

@@ -1,0 +1,24 @@
+{
+    "id": "17d71199-7db8-43fb-9fce-da2be69c9312",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "date": "2025-03-08",
+    "vendor": "\"Harbor freight \"",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": "receipts/1741478299036_1000001123.jpg",
+    "lineItems": [
+        {
+            "category": "Supplies Purchased",
+            "item": "Work gloves",
+            "unitCost": 9.99,
+            "quantity": 2,
+            "lineTotal": 19.98
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "_version": 1,
+    "_lastChangedAt": 1741478301922,
+    "_deleted": false,
+    "createdAt": "2025-03-08T23:58:21.893Z",
+    "updatedAt": "2025-03-08T23:58:21.893Z"
+}

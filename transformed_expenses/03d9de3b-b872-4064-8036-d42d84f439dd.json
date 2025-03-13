@@ -1,0 +1,24 @@
+{
+    "id": "03d9de3b-b872-4064-8036-d42d84f439dd",
+    "date": "2025-02-24",
+    "vendor": "",
+    "grandTotal": 49.15,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Food",
+            "item": "Food for Travel",
+            "unitCost": 49.15,
+            "quantity": 1,
+            "lineTotal": 49.15
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "_version": 2,
+    "_lastChangedAt": 1741725775410,
+    "_deleted": true,
+    "createdAt": "2025-03-11T20:42:42.631Z",
+    "updatedAt": "2025-03-11T20:42:42.631Z"
+}

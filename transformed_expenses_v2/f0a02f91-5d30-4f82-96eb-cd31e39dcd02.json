@@ -1,0 +1,52 @@
+{
+    "id": "f0a02f91-5d30-4f82-96eb-cd31e39dcd02",
+    "userId": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "date": "2025-01-21",
+    "vendor": "Atwoods",
+    "grandTotal": 63.94999999999999,
+    "description": "",
+    "receiptImageKey": "receipts/1741831359774_20250311_151808.jpg",
+    "lineItems": [
+        {
+            "category": "Supplies Purchased",
+            "item": "20G x 1\" alum hub disp",
+            "unitCost": 3.99,
+            "quantity": 1,
+            "lineTotal": 3.99
+        },
+        {
+            "category": "Medicine",
+            "item": "Vit B Complex Oral Gel 30ml",
+            "unitCost": 18.99,
+            "quantity": 1,
+            "lineTotal": 18.99
+        },
+        {
+            "category": "Medicine",
+            "item": "Syringe 12 ML 4pk",
+            "unitCost": 3.99,
+            "quantity": 1,
+            "lineTotal": 3.99
+        },
+        {
+            "category": "Medicine",
+            "item": "Colostrum pack",
+            "unitCost": 16.99,
+            "quantity": 1,
+            "lineTotal": 16.99
+        },
+        {
+            "category": "Medicine",
+            "item": "fluid feeder",
+            "unitCost": 19.99,
+            "quantity": 1,
+            "lineTotal": 19.99
+        }
+    ],
+    "owner": "74c88408-2041-70a6-c023-9dfcbd1495a6::nunezfam",
+    "_version": 1,
+    "_lastChangedAt": 1741831475580,
+    "_deleted": false,
+    "createdAt": "2025-03-13T02:04:35.551Z",
+    "updatedAt": "2025-03-13T02:04:35.551Z"
+}

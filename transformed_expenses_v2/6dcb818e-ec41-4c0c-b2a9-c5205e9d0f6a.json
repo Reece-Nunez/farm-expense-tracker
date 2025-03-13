@@ -1,0 +1,24 @@
+{
+    "id": "6dcb818e-ec41-4c0c-b2a9-c5205e9d0f6a",
+    "userId": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "date": "2025-02-24",
+    "vendor": "Shell",
+    "grandTotal": NaN,
+    "description": "",
+    "receiptImageKey": null,
+    "lineItems": [
+        {
+            "category": "Fuel",
+            "item": NaN,
+            "unitCost": 78.86,
+            "quantity": 1,
+            "lineTotal": 78.86
+        }
+    ],
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "_version": 1,
+    "_lastChangedAt": 1741628820063,
+    "_deleted": false,
+    "createdAt": "2025-03-10T17:47:00.035Z",
+    "updatedAt": "2025-03-10T17:47:00.035Z"
+}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PencilAltIcon, TrashIcon } from "@heroicons/react/outline";
 import { getUrl } from "aws-amplify/storage";
 
+
 /**
  * 
  * @param {Object} props
