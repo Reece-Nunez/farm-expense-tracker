@@ -1,4 +1,3 @@
-// EditExpense.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DataStore } from "@aws-amplify/datastore";
@@ -34,14 +33,13 @@ export default function EditExpense() {
     fetchExpenseById();
   }, [id, navigate]);
 
-  const handleUpdateExpense = async (formData) => {
-    // Instead of updating immediately, we prompt the user with a confirmation.
+  const handleUpdateExpense = async (formattedExpense) => {
     setConfirmMessage("Are you sure you want to update this expense?");
     setConfirmAction(() => async () => {
       try {
         const updated = await DataStore.save(
           Expense.copyOf(currentExpense, (updated) => {
-            Object.assign(updated, formData[0]);
+            Object.assign(updated, formattedExpense);
           })
         );
         toast.success("Expense updated successfully!");

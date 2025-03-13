@@ -124,60 +124,58 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
   const onValid = useCallback(
     async (data) => {
       try {
-        // 1) Convert date to YYYY-MM-DD if needed
         const isoDate = data.date
           ? new Date(data.date).toISOString().split("T")[0]
           : "";
 
-        // 2) Upload receiptFile (optional)
-        let receiptImageKey = null;
+        let receiptImageKey = editingExpense?.receiptImageKey || null;
+
         if (data.receiptFile && data.receiptFile[0]) {
           const file = data.receiptFile[0];
           const fileKey = `receipts/${Date.now()}_${file.name}`;
+
           const operation = uploadData({
             path: fileKey,
             data: file,
             options: { contentType: file.type },
           });
+
           await operation.result;
           receiptImageKey = fileKey;
+          toast.success("Receipt uploaded successfully!");
         }
 
-        // 3) Transform lineItems into numeric cost/quantity, and compute lineTotal
         const lineItems = data.lineItems.map((li) => {
           const cost = parseFloat(li.unitCost || 0);
           const qty = parseFloat(li.quantity || 0);
-          const lineTotal = cost * qty; // compute
+          const lineTotal = cost * qty;
 
           return {
             ...li,
             unitCost: cost,
             quantity: qty,
-            lineTotal,    // store lineTotal
+            lineTotal,
           };
         });
 
-        // 4) Sum lineTotals to get a grandTotal
         const grandTotal = lineItems.reduce((sum, li) => sum + li.lineTotal, 0);
 
-        // 5) Build a single "expense" object with lineItems + grandTotal
         const formattedExpense = {
           date: isoDate,
           vendor: data.vendor,
           description: data.description,
           receiptImageKey,
           lineItems,
-          grandTotal,  // store it so the DB has it
+          grandTotal,
         };
 
-        // 6) Pass to parent
         onValidSubmit(formattedExpense);
       } catch (err) {
         console.error("[ExpenseForm] File upload error:", err);
         toast.error("Error uploading file.");
       }
     },
-    [onValidSubmit]
+    [onValidSubmit, editingExpense]
   );
 
 
@@ -292,8 +290,8 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                       placeholder="Item"
                       {...register(`lineItems.${index}.item`)}
                       className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors?.lineItems?.[index]?.item
-                          ? "border-red-500 animate-shake"
-                          : ""
+                        ? "border-red-500 animate-shake"
+                        : ""
                         }`}
                     />
                     {errors?.lineItems?.[index]?.item && (
@@ -311,8 +309,8 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                     <Select
                       {...register(`lineItems.${index}.category`)}
                       className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors?.lineItems?.[index]?.category
-                          ? "border-red-500 animate-shake"
-                          : ""
+                        ? "border-red-500 animate-shake"
+                        : ""
                         }`}
                     >
                       <option value="">Select Category</option>
@@ -342,8 +340,8 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                       allowNegativeValue={false}
                       placeholder="Unit Cost"
                       className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors?.lineItems?.[index]?.unitCost
-                          ? "border-red-500 animate-shake"
-                          : ""
+                        ? "border-red-500 animate-shake"
+                        : ""
                         }`}
                       value={watchedUnitCost}
                       onValueChange={(val) =>
@@ -367,8 +365,8 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
                       placeholder="Quantity"
                       {...register(`lineItems.${index}.quantity`)}
                       className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 ${errors?.lineItems?.[index]?.quantity
-                          ? "border-red-500 animate-shake"
-                          : ""
+                        ? "border-red-500 animate-shake"
+                        : ""
                         }`}
                     />
                     {errors?.lineItems?.[index]?.quantity && (
