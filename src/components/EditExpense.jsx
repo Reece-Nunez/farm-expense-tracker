@@ -13,7 +13,7 @@ export default function EditExpense() {
   const [currentExpense, setCurrentExpense] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
 
   useEffect(() => {
     const fetchExpenseById = async () => {
@@ -39,7 +39,13 @@ export default function EditExpense() {
       try {
         const updated = await DataStore.save(
           Expense.copyOf(currentExpense, (updated) => {
-            Object.assign(updated, formattedExpense);
+            // Explicitly update receiptImageKey + other fields
+            updated.date = formattedExpense.date;
+            updated.vendor = formattedExpense.vendor;
+            updated.description = formattedExpense.description;
+            updated.receiptImageKey = formattedExpense.receiptImageKey;
+            updated.lineItems = formattedExpense.lineItems;
+            updated.grandTotal = formattedExpense.grandTotal;
           })
         );
         toast.success("Expense updated successfully!");
@@ -53,6 +59,7 @@ export default function EditExpense() {
     });
     setShowConfirm(true);
   };
+
 
   if (!currentExpense) {
     return <div className="p-8 text-center">Loading expense...</div>;
