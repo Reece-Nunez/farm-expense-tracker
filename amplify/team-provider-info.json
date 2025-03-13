@@ -1,4 +1,25 @@
 {
+  "main": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-farmexpensetracker-main-94813-authRole",
+      "UnauthRoleArn": "arn:aws:iam::730335638958:role/amplify-farmexpensetracker-main-94813-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::730335638958:role/amplify-farmexpensetracker-main-94813-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-farmexpensetracker-main-94813-deployment",
+      "UnauthRoleName": "amplify-farmexpensetracker-main-94813-unauthRole",
+      "StackName": "amplify-farmexpensetracker-main-94813",
+      "StackId": "arn:aws:cloudformation:us-east-1:730335638958:stack/amplify-farmexpensetracker-main-94813/d2ec3ea0-eef9-11ef-b4b2-12b4b457fe5b",
+      "AmplifyAppId": "d1vmyzw49srl6b"
+    },
+    "categories": {
+      "auth": {
+        "farmexpensetracker1da593af": {}
+      },
+      "storage": {
+        "receipts": {}
+      }
+    }
+  },
   "dev": {
     "awscloudformation": {
       "AuthRoleName": "amplify-farmexpensetracker-dev-3b0d2-authRole",

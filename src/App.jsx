@@ -32,6 +32,8 @@ import ImportIncomeCSV from "./components/ImportIncomeCSV";
 import { Expense, Income } from "./models";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import Profile from "./components/Profile";
+import { fixOwnerField } from "./utils/fixOwnerField";
+
 
 // Amplify init
 Amplify.configure({ ...awsExports });
@@ -54,12 +56,12 @@ function AppContent() {
 
   // Generic confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // Generic delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => {});
+  const [deleteAction, setDeleteAction] = useState(() => { });
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
@@ -76,6 +78,11 @@ function AppContent() {
     setAuthChecked(true);
   }, []);
 
+  useEffect(() => {
+    // Fire it once when the app loads
+    fixOwnerField();
+  }, []);
+
   // 2) Fetch & subscribe to expenses for the current user
   useEffect(() => {
     async function fetchExpenses() {
@@ -88,7 +95,9 @@ function AppContent() {
         const userExpenses = await DataStore.query(Expense, (e) =>
           e.userId.eq(userSub)
         );
-        console.log("[fetchExpenses] Found expenses:", userExpenses);
+        console.log("[fetchExpenses] Type of userExpenses:", Array.isArray(userExpenses));
+        console.log("[fetchExpenses] JSON:", JSON.stringify(userExpenses, null, 2));
+        console.log("Current user sub:", userSub);
         setFetchedExpenses(userExpenses);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
@@ -169,7 +178,7 @@ function AppContent() {
         toast.error("Failed to save expense.");
       } finally {
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         expenseFormRef.current?.resetForm();
       }
@@ -240,7 +249,7 @@ function AppContent() {
         toast.error("Failed to save income.");
       } finally {
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
