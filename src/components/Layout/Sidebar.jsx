@@ -9,7 +9,6 @@ import {
   HomeIcon,
   CurrencyDollarIcon,
   CreditCardIcon,
-  TableIcon,
   UploadIcon,
   ChartBarIcon,
   LogoutIcon,
@@ -101,6 +100,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
     { label: "Income", icon: CurrencyDollarIcon, route: "/income" },
     { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv" },
     { label: "Import Income CSV", icon: UploadIcon, route: "/import-income" },
+    { label: "Reports", icon: ChartBarIcon, route: "/reports" },
     { label: "Profile", icon: UserIcon, route: "/profile" },
   ];
 

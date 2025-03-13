@@ -11,7 +11,7 @@ import { CloudUploadIcon } from "@heroicons/react/outline";
 import ColumnMapper from "./ColumnMapper";
 import CsvReviewIncome from "./CsvReviewIncome";
 
-// Define the expected CSV fields for Income records.
+// Define your required fields
 const expectedFields = [
   { key: "date", label: "Date", required: true },
   { key: "item", label: "Item", required: true },
@@ -22,16 +22,17 @@ const expectedFields = [
 ];
 
 export default function ImportIncomeCSV() {
-  const [step, setStep] = useState("upload"); // "upload" | "mapping" | "review"
+  const [step, setStep] = useState("upload");
   const [csvData, setCsvData] = useState([]);
   const [csvHeaders, setCsvHeaders] = useState([]);
   const [mapping, setMapping] = useState(null);
   const [mappedRows, setMappedRows] = useState([]);
+
   const [file, setFile] = useState(null);
   const [parsing, setParsing] = useState(false);
   const navigate = useNavigate();
 
-  // Step 1: File upload & CSV parsing
+  // Step 1: File upload & parsing
   const handleFileChange = (e) => {
     setFile(e.target.files?.[0] || null);
   };
@@ -41,7 +42,9 @@ export default function ImportIncomeCSV() {
       toast.error("Please select a CSV file first.");
       return;
     }
+
     setParsing(true);
+
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -49,16 +52,18 @@ export default function ImportIncomeCSV() {
         try {
           const headers = results.meta.fields || [];
           setCsvHeaders(headers);
-          // Filter out rows that lack a Date value (or are blank)
+
           const validRows = results.data.filter(
-            (row) => row.Date && row.Date.trim() !== ""
+            (row) => row.Date || row.date
           );
+
           setCsvData(validRows);
-          // Initialize mapping object for each expected field as empty string.
-          const initialMapping = expectedFields.reduce(
-            (acc, field) => ({ ...acc, [field.key]: "" }),
-            {}
-          );
+
+          const initialMapping = expectedFields.reduce((acc, field) => {
+            acc[field.key] = "";
+            return acc;
+          }, {});
+
           setMapping(initialMapping);
           setStep("mapping");
           setParsing(false);
@@ -76,35 +81,39 @@ export default function ImportIncomeCSV() {
     });
   };
 
-  // Step 2: Handle column mapping complete from ColumnMapper
+  // Step 2: Column Mapper complete
   const handleMappingComplete = (map) => {
     setMapping(map);
-    // Process each CSV row using the mapping object.
-    const finalRows = csvData.map((row) => {
-      const processedRow = {};
+
+    const processedRows = csvData.map((row) => {
+      const mapped = {};
       expectedFields.forEach((field) => {
-        // If the mapping value exists as a key in the CSV row, use it; otherwise, use the manual value.
-        processedRow[field.key] = map[field.key] in row ? row[map[field.key]] : map[field.key];
+        const csvHeader = map[field.key];
+        mapped[field.key] = csvHeader in row ? row[csvHeader] : map[field.key];
       });
-      return processedRow;
+      return mapped;
     });
-    setMappedRows(finalRows);
+
+    setMappedRows(processedRows);
     setStep("review");
   };
 
-  // Step 3: Review and final submission
+  // Step 3: Submit after Review
   const handleReviewSubmit = async (finalRows) => {
     try {
       const session = await fetchAuthSession();
       const userId = session.tokens.idToken.payload.sub;
 
-      // Process each row and compute the amount (quantity * price).
-      const newIncomes = finalRows.map((row) => {
-        // For date, assume the value is already a valid ISO date (or a string in YYYY-MM-DD format)
+      const incomesToSave = finalRows.map((row) => {
         const date = row.date || "";
         const quantity = parseInt(row.quantity, 10) || 0;
-        const price = parseFloat((row.price || "").replace(/[$,]/g, "")) || 0;
+
+        // FIX: Ensure price is a string before using replace
+        const priceString = typeof row.price === "string" ? row.price : String(row.price || "");
+        const price = parseFloat(priceString.replace(/[$,]/g, "")) || 0;
+
         const amount = quantity * price;
+
         return {
           userId,
           date,
@@ -112,15 +121,16 @@ export default function ImportIncomeCSV() {
           quantity,
           price,
           amount,
-          paymentMethod: row.paymentMethod || "",
+          paymentMethod: row.paymentMethod || "Other",
           notes: row.notes || "",
         };
       });
 
-      const savedItems = await Promise.all(
-        newIncomes.map((inc) => DataStore.save(new Income(inc)))
+      const saved = await Promise.all(
+        incomesToSave.map((inc) => DataStore.save(new Income(inc)))
       );
-      toast.success(`Successfully imported ${savedItems.length} income records!`);
+
+      toast.success(`Successfully imported ${saved.length} income records!`);
       navigate("/income");
     } catch (err) {
       console.error("Error saving Income to DataStore:", err);
@@ -128,14 +138,8 @@ export default function ImportIncomeCSV() {
     }
   };
 
-  // Handle "Back" from ColumnMapper: return to file upload step.
-  const handleBackToUpload = () => {
-    setStep("upload");
-  };
-
-  const handleBackToMapping = () => {
-    setStep("mapping")
-  }
+  const handleBackToUpload = () => setStep("upload");
+  const handleBackToMapping = () => setStep("mapping");
 
   let content;
   if (step === "upload") {
@@ -186,19 +190,24 @@ export default function ImportIncomeCSV() {
     );
   } else if (step === "review") {
     content = (
-      <CsvReviewIncome mappedData={mappedRows} onSubmit={handleReviewSubmit} onBack={handleBackToMapping} />
+      <CsvReviewIncome
+        mappedData={mappedRows}
+        onSubmit={handleReviewSubmit}
+        onBack={handleBackToMapping}
+      />
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 flex items-center justify-center p-4">
-      <Card className="w-full max-w-8xl shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="w-full max-w-6xl shadow-2xl rounded-3xl overflow-hidden">
         <CardHeader className="flex flex-col items-center justify-center bg-white p-6 shadow-sm">
+          <CloudUploadIcon className="w-16 h-16 text-green-600 mb-3" />
           <h1 className="text-3xl font-extrabold text-green-700 mb-3">
             Import Income via CSV
           </h1>
           <p className="text-gray-500 mt-2 text-sm">
-            Your CSV should include columns: Date, Item, Quantity, Price, Payment Method, Notes.
+            Your CSV should include: Date, Item, Quantity, Price, Payment Method, Notes.
           </p>
         </CardHeader>
         <CardContent className="bg-white px-8 py-6 space-y-6">{content}</CardContent>

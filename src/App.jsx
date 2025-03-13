@@ -25,6 +25,7 @@ import IncomeForm from "./components/IncomeForm";
 import EditExpense from "./components/EditExpense";
 import IncomeTable from "./components/IncomeTable";
 import EditIncome from "./components/EditIncome";
+import Reports from "./components/Reports";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import GenericModal from "./components/GenericModal";
 import ImportExpensesCSV from "./components/ImportExpensesCSV";
@@ -33,6 +34,7 @@ import { Expense, Income } from "./models";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import Profile from "./components/Profile";
 import { fixOwnerField } from "./utils/fixOwnerField";
+
 
 
 // Amplify init
@@ -395,6 +397,7 @@ function AppRoutes({
           }
         />
         <Route path="/edit-income/:id" element={<EditIncome />} />
+        <Route path="/reports" element={<Reports />} />
 
         {/* Profile & CSV */}
         <Route path="/profile" element={<Profile />} />
