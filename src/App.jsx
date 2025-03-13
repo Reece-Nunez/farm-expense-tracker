@@ -88,9 +88,6 @@ function AppContent() {
   useEffect(() => {
     async function fetchExpenses() {
       try {
-        // 🔧 Clear and restart syncing to avoid stale cache
-        await DataStore.clear();
-        await DataStore.start(); // Optional: waits for sync (depends on setup)
 
         const session = await fetchAuthSession();
         const userSub = session.tokens.idToken.payload.sub;
