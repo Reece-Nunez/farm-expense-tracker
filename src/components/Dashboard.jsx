@@ -116,180 +116,177 @@ export default function Dashboard() {
 
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a78bfa", "#f87171"];
 
-  return (
-    <div className="h-full grid grid-cols-1 md:grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr]">
-      {/* HEADER */}
-      <header className="md:col-span-3 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold">Financial Dashboard</h1>
-      </header>
+    return (
+      <div className="h-full grid grid-cols-1 md:grid-cols-[1fr_300px] grid-rows-[auto_1fr] gap-4">
 
-      {/* For md+ screens, empty space for left sidebar if your layout uses one */}
-      <div className="hidden md:block"></div>
+        {/* HEADER */}
+        <header className="md:col-span-2 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+          <h1 className="text-2xl font-extrabold">Financial Dashboard</h1>
+        </header>
 
-      {/* MAIN CONTENT */}
-      <main className="p-6 space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Total Expenses</p>
-            <h2 className="text-2xl font-bold text-red-500">
-              ${totalExpense.toFixed(2)}
-            </h2>
-          </div>
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Total Income</p>
-            <h2 className="text-2xl font-bold text-green-600">
-              ${totalIncome.toFixed(2)}
-            </h2>
-          </div>
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Net (Income - Expenses)</p>
-            <h2 className={`text-2xl font-bold ${net >= 0 ? "text-green-600" : "text-red-600"}`}>
-              ${net.toFixed(2)}
-            </h2>
-          </div>
-        </div>
+        {/* MAIN CONTENT */}
+        <main className="px-4 py-6 md:px-6 md:py-8 space-y-8">
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Combined Line Chart: monthly incomes vs. monthly expenses */}
-          <div className="bg-white rounded-xl shadow p-4">
-            <h2 className="text-lg font-semibold mb-2">Expenses vs. Income Over Time</h2>
-            <div style={{ width: "100%", height: 300 }}>
-              <ResponsiveContainer>
+          {/* SUMMARY CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <p className="text-sm text-gray-500 mb-2">Total Expenses</p>
+              <h2 className="text-3xl font-bold text-red-500">${totalExpense.toFixed(2)}</h2>
+            </div>
+            <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <p className="text-sm text-gray-500 mb-2">Total Income</p>
+              <h2 className="text-3xl font-bold text-green-600">${totalIncome.toFixed(2)}</h2>
+            </div>
+            <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <p className="text-sm text-gray-500 mb-2">Net (Income - Expenses)</p>
+              <h2 className={`text-3xl font-bold ${net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                ${net.toFixed(2)}
+              </h2>
+            </div>
+          </div>
+
+          {/* CHARTS SECTION */}
+          <div className="flex flex-col xl:flex-row gap-6">
+
+            {/* Expenses vs. Income Over Time */}
+            <div className="flex-1 bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <h2 className="text-lg font-semibold mb-4">Expenses vs. Income Over Time</h2>
+              <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={combinedLineData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#f87171" strokeWidth={2} />
-                  <Line type="monotone" dataKey="incomes" name="Income" stroke="#4ade80" strokeWidth={2} />
+                  <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#f87171" strokeWidth={3} />
+                  <Line type="monotone" dataKey="incomes" name="Income" stroke="#4ade80" strokeWidth={3} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
 
-          {/* 2-Chart Grid for Expense Categories & Income by Item */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Expense Categories Bar Chart */}
-            <div className="bg-white rounded-xl shadow p-4">
-              <h2 className="text-lg font-semibold mb-2">Expenses by Category</h2>
+            {/* Expenses by Category */}
+            <div className="flex-1 bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <h2 className="text-lg font-semibold mb-4">Expenses by Category</h2>
               {expenseCategoryData.length > 0 ? (
-                <div style={{ width: "100%", height: 200 }}>
-                  <ResponsiveContainer>
-                    <BarChart data={expenseCategoryData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="category" />
-                      <YAxis />
-                      <Tooltip formatter={(val) => [`$${val}`, "Total"]} />
-                      <Bar dataKey="total" fill="#fbbf24" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={expenseCategoryData} layout="vertical" barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="category" type="category" width={150} />
+                    <Tooltip formatter={(val) => [`$${val}`, "Total"]} />
+                    <Bar dataKey="total" fill="#fbbf24" barSize={25} />
+                  </BarChart>
+                </ResponsiveContainer>
               ) : (
-                <p className="text-gray-500 text-sm mt-2">No expenses found.</p>
+                <p className="text-gray-500 text-sm mt-4">No expenses found.</p>
               )}
             </div>
 
-            {/* Income by Item Pie Chart */}
-            <div className="bg-white rounded-xl shadow p-4">
-              <h2 className="text-lg font-semibold mb-2">Income by Item</h2>
-              {incomeItemData.length > 0 ? (
-                <div style={{ width: "100%", height: 200 }}>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie
-                        data={incomeItemData}
-                        dataKey="total"
-                        nameKey="item"
-                        outerRadius={80}
-                        label={(entry) => `$${entry.value.toFixed(0)}`}
-                      >
-                        {incomeItemData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(val) => [`$${val}`, "Total"]} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm mt-2">No income records found.</p>
-              )}
-            </div>
           </div>
-        </div>
-      </main>
 
-      {/* RIGHT PANEL: recent items */}
-      <aside className="hidden md:block p-6 border-l border-gray-200 bg-white">
-        {/* Recent Expenses */}
-        <h2 className="text-lg font-semibold mb-2">Recent Expenses</h2>
-        <div className="space-y-2 mb-6">
-          {recentExpenses.length ? (
-            recentExpenses.map((exp) => (
-              <div
-                key={exp.id}
-                className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100"
-              >
-                <div>
-                  <p className="text-sm font-medium">{exp.vendor}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(exp.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <p className="text-sm font-bold text-red-500">
-                  -${exp.grandTotal?.toFixed(2)}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-sm">No recent expenses found.</p>
-          )}
-        </div>
-        <button
-          onClick={() => window.location.assign("/expenses")}
-          className="mb-8 w-full text-blue-600 hover:underline text-sm"
-        >
-          View All Expenses
-        </button>
+          {/* INCOME BY ITEM PIE */}
+          <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow">
+            <h2 className="text-lg font-semibold mb-4">Income by Item</h2>
+            {incomeItemData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={incomeItemData}
+                    dataKey="total"
+                    nameKey="item"
+                    outerRadius={120}
+                    labelLine={false}
+                    label={({ percent, item }) =>
+                      `${item} (${(percent * 100).toFixed(0)}%)`
+                    }
+                  >
+                    {incomeItemData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(val) => [`$${val}`, "Total"]} />
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500 text-sm mt-4">No income records found.</p>
+            )}
+          </div>
 
-        {/* Recent Incomes */}
-        <h2 className="text-lg font-semibold mb-2">Recent Incomes</h2>
-        <div className="space-y-2">
-          {recentIncomes.length ? (
-            recentIncomes.map((inc) => (
-              <div
-                key={inc.id}
-                className="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100"
-              >
-                <div>
-                  <p className="text-sm font-medium">{inc.item}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(inc.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <p className="text-sm font-bold text-green-600">
-                  +${inc.amount?.toFixed(2)}
-                </p>
+        </main>
+
+        {/* RIGHT SIDEBAR */}
+        <aside className="hidden md:block bg-white p-6 space-y-8 border-l border-gray-200">
+
+          {/* Recent Expenses */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Recent Expenses</h2>
+            {recentExpenses.length > 0 ? (
+              <div className="space-y-3">
+                {recentExpenses.map((exp) => (
+                  <div
+                    key={exp.id}
+                    className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded-lg shadow-sm hover:bg-gray-100 transition"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{exp.vendor}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(exp.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-red-500">
+                      -${exp.grandTotal?.toFixed(2)}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-sm">No recent incomes found.</p>
-          )}
-        </div>
-        <button
-          onClick={() => window.location.assign("/income")}
-          className="mt-4 w-full text-blue-600 hover:underline text-sm"
-        >
-          View All Incomes
-        </button>
-      </aside>
-    </div>
-  );
-}
+            ) : (
+              <p className="text-gray-500 text-sm">No recent expenses found.</p>
+            )}
+            <button
+              onClick={() => window.location.assign("/expenses")}
+              className="mt-4 w-full text-blue-600 hover:underline text-sm"
+            >
+              View All Expenses
+            </button>
+          </div>
+
+          {/* Recent Incomes */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Recent Incomes</h2>
+            {recentIncomes.length > 0 ? (
+              <div className="space-y-3">
+                {recentIncomes.map((inc) => (
+                  <div
+                    key={inc.id}
+                    className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded-lg shadow-sm hover:bg-gray-100 transition"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{inc.item}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(inc.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-green-600">
+                      +${inc.amount?.toFixed(2)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">No recent incomes found.</p>
+            )}
+            <button
+              onClick={() => window.location.assign("/income")}
+              className="mt-4 w-full text-blue-600 hover:underline text-sm"
+            >
+              View All Incomes
+            </button>
+          </div>
+        </aside>
+      </div>
+    );
+  }
