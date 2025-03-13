@@ -15,8 +15,32 @@ import {
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense, Income } from "@/models";
 
-// Define your colors for the charts and progress bars
-const COLORS = ["#fbbf24", "#f87171", "#34d399", "#60a5fa", "#c084fc", "#cbd5e1"];
+const COLORS = [
+  "#FF6384", // Red/Pink
+  "#36A2EB", // Blue
+  "#FFCE56", // Yellow
+  "#4BC0C0", // Teal
+  "#9966FF", // Purple
+  "#FF9F40", // Orange
+  "#8D99AE", // Cool Gray
+  "#2B2D42", // Dark Gray
+  "#EF233C", // Deep Red
+  "#FDCB82", // Light Orange
+  "#70C1B3", // Mint
+  "#247BA0", // Dark Cyan
+  "#FF1654", // Vivid Red
+  "#00CFC1", // Cyan
+  "#FFD166", // Soft Yellow
+  "#06D6A0", // Green Mint
+  "#118AB2", // Blue Shade
+  "#073B4C", // Deep Blue
+  "#E63946", // Coral Red
+  "#F1FAEE", // Off-White
+  "#A8DADC", // Light Teal
+  "#457B9D", // Dusty Blue
+  "#1D3557"  // Navy Blue
+];
+
 
 export default function Dashboard() {
   const [expenses, setExpenses] = useState([]);
