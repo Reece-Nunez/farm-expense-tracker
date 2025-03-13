@@ -83,15 +83,6 @@ function AppContent() {
     fixOwnerField();
   }, []);
   
-  useEffect(() => {
-    async function clearAndResync() {
-      await DataStore.clear();
-      await DataStore.start();
-    }
-  
-    clearAndResync();
-  }, []);
-  
 
   // 2) Fetch & subscribe to expenses for the current user
   useEffect(() => {
