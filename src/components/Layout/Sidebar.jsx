@@ -97,8 +97,10 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navItems = [
     { label: "Dashboard", icon: HomeIcon, route: "/dashboard" },
     { label: "Expenses", icon: CreditCardIcon, route: "/expenses" },
-    { label: "Income", icon: CurrencyDollarIcon, route: "/income" },
+    { label: "Add Expense", icon: PlusIcon, route: "/add-expense" },
     { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv" },
+    { label: "Income", icon: CurrencyDollarIcon, route: "/income" },
+    { label: "Add Income", icon: PlusIcon, route: "/add-income" },
     { label: "Import Income CSV", icon: UploadIcon, route: "/import-income" },
     { label: "Reports", icon: ChartBarIcon, route: "/reports" },
     { label: "Profile", icon: UserIcon, route: "/profile" },
@@ -129,35 +131,41 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
 
       {/* Nav Links */}
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map(({ label, icon: Icon, route }, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleNavClick(route)}
-            className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <Icon className="w-5 h-5" />
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
+        {navItems.map(({ label, icon: Icon, route }, idx) => {
+          // Conditional color logic
+          const iconColor =
+            label === "Add Income"
+              ? "text-green-600"
+              : label === "Add Expense"
+              ? "text-blue-600"
+              : label === "Reports"
+              ? "text-yellow-600"
+              : label === "Profile"
+              ? "text-blue-800"
+              : label === "Import Income CSV"
+              ? "text-green-600"
+              : label === "Import Expenses CSV"
+              ? "text-blue-600"
+              : label === "Income"
+              ? "text-green-600"
+              : label === "Expenses"
+              ? "text-blue-600"
+              :label === "Dashboard"
+              ? "text-orange-600"
+              : "text-gray-700";
 
-      {/* Add Expense / Add Income Buttons */}
-      <div className="p-4 border-b border-gray-200 flex gap-2 justify-around">
-        <button
-          onClick={() => handleNavClick("/add-expense")}
-          className="flex items-center gap-1 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded transition-colors"
-        >
-          <PlusIcon className="w-5 h-5 text-green-600" />
-          <span>Add Expense</span>
-        </button>
-        <button
-          onClick={() => handleNavClick("/add-income")}
-          className="flex items-center gap-1 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded transition-colors"
-        >
-          <PlusIcon className="w-5 h-5 text-blue-600" />
-          <span>Add Income</span>
-        </button>
-      </div>
+          return (
+            <button
+              key={idx}
+              onClick={() => handleNavClick(route)}
+              className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <Icon className={`w-5 h-5 ${iconColor}`} />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* Sign Out */}
       <div className="p-4 border-t border-gray-200 mb-20">
