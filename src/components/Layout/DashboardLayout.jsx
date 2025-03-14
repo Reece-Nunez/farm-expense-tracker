@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { PlusIcon } from "@heroicons/react/outline";
 
 export default function DashboardLayout() {
   const [showSidebar, setShowSidebar] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleAddExpense = () => {
+    navigate("/add-expense");
+  };
+
+  const handleAddIncome = () => {
+    navigate("/add-income");
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col">
       {/* Mobile Header (for screens < md) */}
       <header className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Harvest-Hub</h1>
-
         {/* Always a hamburger icon */}
-        <button
-          onClick={() => setShowSidebar(true)}
-          className="text-gray-700"
-        >
+        <button onClick={() => setShowSidebar(true)} className="text-gray-700">
           {/* Hamburger Icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +42,6 @@ export default function DashboardLayout() {
 
       {/* Main container */}
       <div className="flex flex-1 overflow-hidden relative">
-
         {/* Overlay (click to close sidebar) */}
         {showSidebar && (
           <div
@@ -79,10 +84,27 @@ export default function DashboardLayout() {
           </div>
           {/* Your existing sidebar navigation items */}
           <Sidebar onCloseSidebar={() => setShowSidebar(false)} />
-          </aside>
+        </aside>
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={handleAddExpense}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            >
+              <PlusIcon className="w-5 h-5 text-white" />
+              Add Expense
+            </button>
+
+            <button
+              onClick={handleAddIncome}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+            >
+              <PlusIcon className="w-5 h-5 text-white" />
+              Add Income
+            </button>
+          </div>
           <Outlet />
         </main>
       </div>

@@ -430,7 +430,6 @@ function App() {
           backgroundColor: "#f3f4f6",
         }}
       >
-        <h2 style={{ fontSize: "1.5rem", margin: ".5em" }}>Hi! Welcome to Harvest Hub</h2>
         <Authenticator>
           {({ user }) => {
             console.debug("[Authenticator] User signed in:", user);

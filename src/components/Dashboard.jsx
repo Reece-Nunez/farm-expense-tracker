@@ -113,7 +113,6 @@ export default function Dashboard() {
   // -------------------------
   return (
     <div className="h-full grid grid-cols-1 md:grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr]">
-      <Header />
 
       <div className="hidden md:block"></div>
 
@@ -226,11 +225,7 @@ const getIncomeItemData = (incomes = []) => {
 // 🧩 Extracted Components
 // =========================
 //
-const Header = () => (
-  <header className="md:col-span-3 bg-white border-b border-gray-400 p-6 flex items-center justify-between">
-    <h1 className="text-2xl font-extrabold">Financial Dashboard</h1>
-  </header>
-);
+
 
 const SummaryCards = ({ totalExpense, totalIncome, net }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
