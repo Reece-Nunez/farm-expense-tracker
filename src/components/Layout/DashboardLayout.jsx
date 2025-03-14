@@ -87,7 +87,7 @@ export default function DashboardLayout() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto">
           <div className="flex justify-end gap-4 m-3">
             <button
               onClick={handleAddExpense}

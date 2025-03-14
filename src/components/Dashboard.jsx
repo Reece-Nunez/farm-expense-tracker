@@ -113,18 +113,17 @@ export default function Dashboard() {
   // -------------------------
   return (
     <div className="h-full grid grid-cols-1 md:grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr]">
-
       <div className="hidden md:block"></div>
 
-      <main className="p-6 space-y-6">
+      <main className="space-y-6">
         <SummaryCards
-        className="text-green-500"
+          className="text-green-500"
           totalExpense={totalExpense}
           totalIncome={totalIncome}
           net={net}
         />
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2">
           <LineChartCard
             timeRange={timeRange}
             setTimeRange={setTimeRange}
@@ -226,9 +225,8 @@ const getIncomeItemData = (incomes = []) => {
 // =========================
 //
 
-
 const SummaryCards = ({ totalExpense, totalIncome, net }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">
     <Card title="Total Expenses" value={totalExpense} color="red" />
     <Card title="Total Income" value={totalIncome} color="green" />
     <Card
@@ -363,7 +361,15 @@ const PieChartCard = ({ data, total }) => {
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, "Total"]} />
+            {/* CHANGE: Use (value, name, entry) => ... */}
+            <Tooltip
+              formatter={(value, name, entry) => {
+                // each 'entry' is an object like:
+                // { payload: { category: 'Groceries', total: 100 }, ... }
+                const category = entry?.payload?.category ?? "No category";
+                return [`$${value.toFixed(2)}`, category];
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -416,7 +422,14 @@ const IncomeItemPieChart = ({ data }) => (
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, "Total"]} />
+            {/* CHANGE: Similarly, use the 'entry' param to get the item name */}
+            <Tooltip
+              formatter={(value, name, entry) => {
+                // entry.payload might look like: { item: 'Salary', total: 2000 }
+                const itemName = entry?.payload?.item ?? "No item";
+                return [`$${value.toFixed(2)}`, itemName];
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
