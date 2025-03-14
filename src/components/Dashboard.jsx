@@ -119,6 +119,7 @@ export default function Dashboard() {
 
       <main className="p-6 space-y-6">
         <SummaryCards
+        className="text-green-500"
           totalExpense={totalExpense}
           totalIncome={totalIncome}
           net={net}
@@ -246,7 +247,7 @@ const SummaryCards = ({ totalExpense, totalIncome, net }) => (
 const Card = ({ title, value, color }) => (
   <div className="bg-white rounded-xl shadow p-4">
     <p className="text-sm text-gray-500">{title}</p>
-    <h2 className={`text-2xl font-bold text-${color}-600`}>
+    <h2 className={`text-2xl font-bold text-${color}-500`}>
       ${value.toFixed(2)}
     </h2>
   </div>
@@ -300,60 +301,103 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
   </div>
 );
 
-const PieChartCard = ({ data, total }) => (
-  <div className="bg-white rounded-xl shadow p-4 flex flex-col">
-    <h2 className="text-lg font-semibold mb-4 text-center">
-      Expenses by Category
-    </h2>
+const PieChartCard = ({ data, total }) => {
+  const [chartSize, setChartSize] = useState({
+    outerRadius: 200,
+    innerRadius: 150,
+    height: 510,
+  });
 
-    <div className="flex justify-center items-center mb-6">
-      <ResponsiveContainer width="100%" height={510}>
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="total"
-            nameKey="category"
-            outerRadius={200}
-            innerRadius={150}
-            paddingAngle={4}
-            label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-          >
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, "Total"]} />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
 
-    <div className="space-y-4">
-      {data.map((item, index) => {
-        const percent = total > 0 ? (item.total / total) * 100 : 0;
-        return (
-          <div key={index} className="space-y-1">
-            <div className="flex justify-between text-sm font-medium">
-              <span>{item.category}</span>
-              <span>${item.total.toFixed(2)}</span>
+      if (width < 640) {
+        // Mobile
+        setChartSize({
+          outerRadius: 100,
+          innerRadius: 60,
+          height: 300,
+        });
+      } else if (width < 1028) {
+        // Tablet
+        setChartSize({
+          outerRadius: 150,
+          innerRadius: 100,
+          height: 400,
+        });
+      } else {
+        // Desktop
+        setChartSize({
+          outerRadius: 200,
+          innerRadius: 150,
+          height: 510,
+        });
+      }
+    };
+
+    // Initial call on mount
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return (
+    <div className="bg-white rounded-xl shadow p-4 flex flex-col">
+      <h2 className="text-lg font-semibold mb-4 text-center">
+        Expenses by Category
+      </h2>
+
+      <div className="flex justify-center items-center mb-6">
+        <ResponsiveContainer width="100%" height={chartSize.height}>
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="total"
+              nameKey="category"
+              outerRadius={chartSize.outerRadius}
+              innerRadius={chartSize.innerRadius}
+              paddingAngle={4}
+              label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, "Total"]} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="space-y-4">
+        {data.map((item, index) => {
+          const percent = total > 0 ? (item.total / total) * 100 : 0;
+          return (
+            <div key={index} className="space-y-1">
+              <div className="flex justify-between text-sm font-medium">
+                <span>{item.category}</span>
+                <span>${item.total.toFixed(2)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="h-3 rounded-full transition-all"
+                  style={{
+                    width: `${percent}%`,
+                    backgroundColor: COLORS[index % COLORS.length],
+                  }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="h-3 rounded-full transition-all"
-                style={{
-                  width: `${percent}%`,
-                  backgroundColor: COLORS[index % COLORS.length],
-                }}
-              />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const IncomeItemPieChart = ({ data }) => (
   <div className="bg-white rounded-xl shadow p-4">
