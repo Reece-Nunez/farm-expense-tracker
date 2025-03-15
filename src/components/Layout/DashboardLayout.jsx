@@ -19,7 +19,7 @@ export default function DashboardLayout() {
   return (
     <div className="h-screen w-screen flex flex-col">
       {/* Mobile Header (for screens < md) */}
-      <header className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+      <header className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-end">
         {/* Always a hamburger icon */}
         <button onClick={() => setShowSidebar(true)} className="text-gray-700">
           {/* Hamburger Icon */}
@@ -88,10 +88,14 @@ export default function DashboardLayout() {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="flex justify-end gap-4 m-3">
+          <div
+            className={`relative md:sticky md:top-0 flex justify-center md:justify-end m-0 md:m-3 z-10 md:z-50 transition-colors duration-300 ${
+              showSidebar
+            }`}
+          >
             <button
               onClick={handleAddExpense}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+              className="flex items-center m-1 gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
             >
               <PlusIcon className="w-5 h-5 text-white" />
               Add Expense
@@ -99,12 +103,13 @@ export default function DashboardLayout() {
 
             <button
               onClick={handleAddIncome}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+              className="flex items-center m-1 gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
             >
               <PlusIcon className="w-5 h-5 text-white" />
               Add Income
             </button>
           </div>
+
           <Outlet />
         </main>
       </div>
