@@ -1,4 +1,4 @@
-# 🌾 Farm Expense Tracker
+# 🌾 AgTrackr
 
 A simple, user-friendly web application built with **React**, **AWS Amplify**, and **Tailwind CSS**, designed to help farmers and small agricultural businesses track their farm-related expenses without the hassle of spreadsheets or piles of receipts.
 
@@ -135,4 +135,12 @@ LinkedIn | GitHub
 - **License & author** info
 - Clean and easy-to-read **Markdown structure**
 
-Let me know if you want me to add **Amplify Hosting deployment** steps or anything else!
+Features to add:
+1. Inventory tracker
+  - track livestock, chickens, food storage, etc.
+  - track where and how many livestock you have, what kind of livestock and also track field switching
+  - have activity log and health log
+2. Invoice creator
+  - create invoice
+  - send invoice via email
+3. Mileage tracker
