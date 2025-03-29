@@ -16,9 +16,11 @@ import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
+import { signOut } from "@aws-amplify/auth";
 
 // Your components
 import Dashboard from "./components/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
 import ExpenseTable from "./components/ExpenseTable";
 import ExpenseForm from "./components/ExpenseForm";
 import IncomeForm from "./components/IncomeForm";
@@ -26,6 +28,7 @@ import EditExpense from "./components/EditExpense";
 import IncomeTable from "./components/IncomeTable";
 import EditIncome from "./components/EditIncome";
 import Reports from "./components/Reports";
+import LandingPage from "./components/LandingPage"
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import GenericModal from "./components/GenericModal";
 import ImportExpensesCSV from "./components/ImportExpensesCSV";
@@ -33,6 +36,7 @@ import ImportIncomeCSV from "./components/ImportIncomeCSV";
 import { Expense, Income } from "./models";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import Profile from "./components/Profile";
+import About from "./components/About";
 import { fixOwnerField } from "./utils/fixOwnerField";
 
 
@@ -84,7 +88,7 @@ function AppContent() {
     // Fire it once when the app loads
     fixOwnerField();
   }, []);
-  
+
 
   // 2) Fetch & subscribe to expenses for the current user
   useEffect(() => {
@@ -146,6 +150,31 @@ function AppContent() {
 
     return () => incomeSub.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const AUTO_LOGOUT_TIME = 60 * 60 * 1000; // 30 minutes in milliseconds
+    let inactivityTimer;
+
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        toast("Logging out due to inactivity...");
+        signOut(); // Logs the user out
+      }, AUTO_LOGOUT_TIME);
+    };
+
+    // Events that count as user activity
+    const events = ["mousemove", "keydown", "scroll", "click"];
+
+    events.forEach((event) => window.addEventListener(event, resetTimer));
+    resetTimer(); // Start the initial timer
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+      clearTimeout(inactivityTimer);
+    };
+  }, []);
+
 
   // -------------- Expense Handlers --------------
   const handleExpenseSubmit = (formattedExpense) => {
@@ -355,9 +384,11 @@ function AppRoutes({
 }) {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="/about" element={<About />} />
 
-      <Route element={<DashboardLayout />}>
+      <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Expenses */}
@@ -407,9 +438,6 @@ function AppRoutes({
         {/* Analytics */}
         <Route path="/analytics" element={<AnalyticsDashboard />} />
       </Route>
-
-      {/* Catch-all: If no route, go to dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 }
@@ -420,25 +448,25 @@ function AppRoutes({
 function App() {
   return (
     <Router>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          backgroundColor: "#f3f4f6",
-        }}
-      >
-        <Authenticator>
-          {({ user }) => {
-            console.debug("[Authenticator] User signed in:", user);
-            return <AppContent />;
-          }}
-        </Authenticator>
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/*" element={<AuthenticatedAppContent />} />
+      </Routes>
     </Router>
   );
 }
+
+function AuthenticatedAppContent() {
+  return (
+    <Authenticator>
+      {({ user }) => {
+        if (!user) return null; // Wait until user is signed in
+        return <AppContent />;
+      }}
+    </Authenticator>
+  );
+}
+
+
 
 export default App;

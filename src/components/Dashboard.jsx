@@ -256,7 +256,7 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
       {["day", "week", "month"].map((range) => (
         <button
           key={range}
-          className={`px-3 py-1 rounded ${
+          className={`px-3 py-1 mx-1 rounded ${
             timeRange === range ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
           onClick={() => setTimeRange(range)}

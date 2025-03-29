@@ -14,9 +14,12 @@ import {
   LogoutIcon,
   UserIcon,
   PlusIcon,
+  ChevronRightIcon,
+  ChevronDownIcon
 } from "@heroicons/react/outline";
+import { House } from "@mui/icons-material";
 
-export default function Sidebar({ onCloseSidebar = () => {} }) {
+export default function Sidebar({ onCloseSidebar = () => { } }) {
   const navigate = useNavigate();
 
   const [profileImageUrl, setProfileImageUrl] = useState(
@@ -87,24 +90,54 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
   const handleSignOut = async () => {
     try {
       await signOut();
-      window.location.reload();
+      navigate('/')
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
-  // Our nav items
-  const navItems = [
-    { label: "Dashboard", icon: HomeIcon, route: "/dashboard" },
-    { label: "Expenses", icon: CreditCardIcon, route: "/expenses" },
-    { label: "Add Expense", icon: PlusIcon, route: "/add-expense" },
-    { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv" },
-    { label: "Income", icon: CurrencyDollarIcon, route: "/income" },
-    { label: "Add Income", icon: PlusIcon, route: "/add-income" },
-    { label: "Import Income CSV", icon: UploadIcon, route: "/import-income" },
-    { label: "Reports", icon: ChartBarIcon, route: "/reports" },
-    { label: "Profile", icon: UserIcon, route: "/profile" },
+  const groupedNavItems = [
+    {
+      label: "Expenses",
+      items: [
+        { label: "Expenses", icon: CreditCardIcon, route: "/expenses", color: "text-blue-600" },
+        { label: "Add Expense", icon: PlusIcon, route: "/add-expense", color: "text-blue-600" },
+      ],
+    },
+    {
+      label: "Income",
+      items: [
+        { label: "Income", icon: CurrencyDollarIcon, route: "/income", color: "text-green-600" },
+        { label: "Add Income", icon: PlusIcon, route: "/add-income", color: "text-green-600" },
+      ],
+    },
+    {
+      label: "CSV Import",
+      items: [
+        { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv", color: "text-blue-600" },
+        { label: "Import Income CSV", icon: UploadIcon, route: "/import-income", color: "text-green-600" },
+      ],
+    },
+    {
+      label: "Other",
+      items: [
+        { label: "Reports", icon: ChartBarIcon, route: "/reports", color: "text-yellow-600" },
+        { label: "Profile", icon: UserIcon, route: "/profile", color: "text-blue-800" },
+        {
+          label: "Homepage",
+          icon: () => (
+            <img
+              src="/src/assets/Favicon.png"
+              alt="Logo"
+              className="w-5 h-5 object-contain"
+            />
+          ),
+          route: "/",
+        }
+              ],
+    },
   ];
+
 
   // Helper for nav clicks
   const handleNavClick = (route) => {
@@ -131,38 +164,48 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
 
       {/* Nav Links */}
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map(({ label, icon: Icon, route }, idx) => {
-          // Conditional color logic
-          const iconColor =
-            label === "Add Income"
-              ? "text-green-600"
-              : label === "Add Expense"
-              ? "text-blue-600"
-              : label === "Reports"
-              ? "text-yellow-600"
-              : label === "Profile"
-              ? "text-blue-800"
-              : label === "Import Income CSV"
-              ? "text-green-600"
-              : label === "Import Expenses CSV"
-              ? "text-blue-600"
-              : label === "Income"
-              ? "text-green-600"
-              : label === "Expenses"
-              ? "text-blue-600"
-              :label === "Dashboard"
-              ? "text-orange-600"
-              : "text-gray-700";
+        <button
+          onClick={() => handleNavClick("/dashboard")}
+          className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        >
+          <HomeIcon className="w-5 h-5 text-orange-600" />
+          <span>Dashboard</span>
+        </button>
+        {groupedNavItems.map((group, groupIdx) => {
+          const [expanded, setExpanded] = useState(true); // expand by default, or toggle for collapsed
+          const isExpanded = expanded; // You could persist state per-group with a more complex setup
 
           return (
-            <button
-              key={idx}
-              onClick={() => handleNavClick(route)}
-              className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <Icon className={`w-5 h-5 ${iconColor}`} />
-              <span>{label}</span>
-            </button>
+            <div key={group.label}>
+              {/* Group Label */}
+              <button
+                className="flex justify-between items-center w-full text-left text-sm font-semibold text-gray-600 mb-1"
+                onClick={() => setExpanded(!expanded)}
+              >
+                <span>{group.label}</span>
+                {isExpanded ? (
+                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+
+              {/* Group Items */}
+              {isExpanded && (
+                <div className="space-y-1 ml-2">
+                  {group.items.map(({ label, icon: Icon, route, color }, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleNavClick(route)}
+                      className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <Icon className={`w-5 h-5 ${color}`} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
