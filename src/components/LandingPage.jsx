@@ -32,7 +32,7 @@ const LandingPage = () => {
         <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-4 gap-4 sm:gap-0">
           {/* Logo */}
           <a href='/' className="flex-shrink-0">
-            <img src="/src/assets/Transparent1.png" alt="AgTrackr Logo" className="h-12 sm:h-16" />
+            <img src="/src/components/assets/Transparent1.png" alt="AgTrackr Logo" className="h-12 sm:h-16" />
           </a>
 
           {/* About link */}
