@@ -39,6 +39,7 @@ import DashboardLayout from "./components/Layout/DashboardLayout";
 import Profile from "./components/Profile";
 import About from "./components/About";
 import { fixOwnerField } from "./utils/fixOwnerField";
+import Contact from "./components/Contact";
 
 
 
@@ -450,6 +451,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact/>} />
         <Route path="/*" element={<AuthenticatedAppContent />} />
       </Routes>
     </Router>

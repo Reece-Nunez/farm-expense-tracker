@@ -9,7 +9,8 @@
       "UnauthRoleName": "amplify-farmexpensetracker-main-94813-unauthRole",
       "StackName": "amplify-farmexpensetracker-main-94813",
       "StackId": "arn:aws:cloudformation:us-east-1:730335638958:stack/amplify-farmexpensetracker-main-94813/d2ec3ea0-eef9-11ef-b4b2-12b4b457fe5b",
-      "AmplifyAppId": "d1vmyzw49srl6b"
+      "AmplifyAppId": "d1vmyzw49srl6b",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-farmexpensetracker-main-94813-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
@@ -17,6 +18,16 @@
       },
       "storage": {
         "receipts": {}
+      },
+      "function": {
+        "sendEmail": {
+          "deploymentBucketName": "amplify-farmexpensetracker-main-94813-deployment",
+          "s3Key": "amplify-builds/sendEmail-774f6a39686872515553-build.zip"
+        }
+      },
+      "api": {
+        "farmexpensetracker": {},
+        "contactApi": {}
       }
     }
   },

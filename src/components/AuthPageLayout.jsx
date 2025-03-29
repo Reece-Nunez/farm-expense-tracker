@@ -9,9 +9,8 @@ const AuthPageLayout = ({ children }) => {
                     <img src={Logo} alt="AgTrackr Logo" className="h-12" />
                 </a>
                 <nav>
-                    <a href="/about" className="text-sm text-gray-700 hover:underline">
-                        About
-                    </a>
+                    <a href="/about" className="text-sm text-gray-700 hover:underline">About</a>
+                    <a href='/contact' className="text-sm text-gray-700 hover:underline">Contact Me</a>
                 </nav>
             </header>
 

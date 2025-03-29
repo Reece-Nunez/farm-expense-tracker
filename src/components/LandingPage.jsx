@@ -38,7 +38,8 @@ const LandingPage = () => {
 
           {/* About link */}
           <nav className="text-base text-gray-700">
-            <a href="/about">About</a>
+            <a href="/about" className='mx-1 hover:underline hover:text-green-900'>About</a>
+            <a href='/contact'className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
           </nav>
 
           {/* Login/Dashboard Button */}

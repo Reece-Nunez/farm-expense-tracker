@@ -7,7 +7,7 @@ export const Input = React.forwardRef(function InputWithRef(
   return (
     <input
       ref={ref}
-      className={`w-full border rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 ${className}`}
+      className={`w-full border rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-900 ${className}`}
       {...props}
     />
   );

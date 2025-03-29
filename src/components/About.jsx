@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
+import Logo from "./assets/Transparent1.png";
 
 const About = () => {
     const navigate = useNavigate();
@@ -27,22 +28,25 @@ const About = () => {
     return (
         <div className="w-full min-h-screen bg-gray-50 text-gray-800 p-6">
             <div className="max-w-7xl mx-auto grid grid-cols-1 gap-8">
-                <header className="w-full flex items-center justify-between px-6 py-4">
-                    <div className="flex justify-between flex-1">
-                        <a href='/'>
-                            <img src="/src/assets/Transparent1.png" alt="AgTrackr Logo" className="h-16" />
-                        </a>
-                        <nav className="flex items-center">
-                            <div>
-                                <div>
-                                    <a href='/about'>About</a>
-                                </div>
-                            </div>
-                        </nav>
-                        <Button onClick={handleLogin} className="text-lg px-3 rounded-2xl shadow-md">
-                            {user ? "Dashboard" : "Login"}
-                        </Button>
-                    </div>
+                <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-4 gap-4 sm:gap-0">
+                    {/* Logo */}
+                    <a href='/' className="flex-shrink-0">
+                        <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-16" />
+                    </a>
+
+                    {/* About link */}
+                    <nav className="text-base text-gray-700">
+                        <a href="/about" className='mx-1 hover:underline hover:text-green-900'>About</a>
+                        <a href='/contact' className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
+                    </nav>
+
+                    {/* Login/Dashboard Button */}
+                    <Button
+                        onClick={handleLogin}
+                        className="text-base sm:text-lg px-4 py-2 sm:px-6 sm:py-3 rounded-2xl shadow-md"
+                    >
+                        {user ? "Dashboard" : "Login"}
+                    </Button>
                 </header>
                 <div className="max-w-4xl py-12 mx-auto">
                     <h1 className="text-4xl font-bold mb-6 text-center">About AgTrackr</h1>
