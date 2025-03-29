@@ -384,9 +384,7 @@ function AppRoutes({
 }) {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
       <Route path="*" element={<Navigate to="/" />} />
-      <Route path="/about" element={<About />} />
 
       <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
         <Route path="/dashboard" element={<Dashboard />} />
@@ -450,6 +448,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
         <Route path="/*" element={<AuthenticatedAppContent />} />
       </Routes>
     </Router>
