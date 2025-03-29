@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
 import { ArrowDownIcon } from "@heroicons/react/outline";
+import Logo from "./assets/Transparent1.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const LandingPage = () => {
         <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-4 gap-4 sm:gap-0">
           {/* Logo */}
           <a href='/' className="flex-shrink-0">
-            <img src="/src/components/assets/Transparent1.png" alt="AgTrackr Logo" className="h-12 sm:h-16" />
+            <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-16" />
           </a>
 
           {/* About link */}

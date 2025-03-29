@@ -17,7 +17,8 @@ import {
   ChevronRightIcon,
   ChevronDownIcon
 } from "@heroicons/react/outline";
-import { House } from "@mui/icons-material";
+import Icon from "../assets/Favicon.png";
+
 
 export default function Sidebar({ onCloseSidebar = () => { } }) {
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           label: "Homepage",
           icon: () => (
             <img
-              src="/src/components/assets/Favicon.png"
+              src={Icon}
               alt="Logo"
               className="w-5 h-5 object-contain"
             />
