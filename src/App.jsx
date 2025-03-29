@@ -458,12 +458,21 @@ function App() {
 
 function AuthenticatedAppContent() {
   return (
-    <AuthPageLayout>
-      <Authenticator />
-    </AuthPageLayout>
-
+    <Authenticator>
+      {({ user }) =>
+        user ? (
+          <AppContent />
+        ) : (
+          <AuthPageLayout>
+            <Authenticator />
+          </AuthPageLayout>
+        )
+      }
+    </Authenticator>
   );
 }
+
+
 
 
 
