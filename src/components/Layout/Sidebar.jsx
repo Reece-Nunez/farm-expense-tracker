@@ -21,7 +21,7 @@ import { House } from "@mui/icons-material";
 
 export default function Sidebar({ onCloseSidebar = () => { } }) {
   const navigate = useNavigate();
-
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(
     "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
   );
@@ -127,14 +127,14 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           label: "Homepage",
           icon: () => (
             <img
-              src="/src/assets/Favicon.png"
+              src="/src/components/assets/Favicon.png"
               alt="Logo"
               className="w-5 h-5 object-contain"
             />
           ),
           route: "/",
         }
-              ],
+      ],
     },
   ];
 
@@ -146,16 +146,38 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full justify-between overflow-y-auto">
       {/* Profile display */}
-      <div className="p-4 border-b border-gray-200 flex flex-col items-center">
-        <img
-          src={profileImageUrl}
-          alt="Profile"
-          className="w-16 h-16 rounded-full object-cover mb-2"
-        />
-        <p className="text-sm">Hi, {username}</p>
+      <div className="p-4 border-b border-gray-200">
+        <button
+          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+          className="flex flex-col items-center w-full focus:outline-none"
+        >
+          <img
+            src={profileImageUrl}
+            alt="Profile"
+            className="w-16 h-16 rounded-full object-cover mb-1"
+          />
+          <p className="text-sm">Hi, {username}</p>
+          <ChevronDownIcon
+            className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${profileMenuOpen ? "rotate-180" : ""
+              }`}
+          />
+        </button>
+
+        {profileMenuOpen && (
+          <div className="mt-3 space-y-2">
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-red-500 hover:bg-red-600"
+            >
+              <LogoutIcon className="w-5 h-5" />
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
       </div>
+
 
       {/* App Name */}
       <div className="p-4 border-b border-gray-200 text-xl font-bold">
@@ -209,17 +231,6 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           );
         })}
       </nav>
-
-      {/* Sign Out */}
-      <div className="p-4 border-t border-gray-200 mb-20">
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-2 p-2 rounded-lg text-white bg-red-500 hover:bg-red-600"
-        >
-          <LogoutIcon className="w-5 h-5" />
-          <span>Logout</span>
-        </button>
-      </div>
     </div>
   );
 }
