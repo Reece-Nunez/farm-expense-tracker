@@ -6,7 +6,7 @@ const AuthPageLayout = ({ children }) => {
         <div className="min-h-screen w-full bg-gray-50 text-gray-800">
             <header className="w-full flex items-center justify-between px-6 py-4 shadow-sm bg-white">
                 <a href="/" className="flex items-center gap-2">
-                    <img src={Logo} alt="AgTrackr Logo" className="h-10" />
+                    <img src={Logo} alt="AgTrackr Logo" className="h-12" />
                 </a>
                 <nav>
                     <a href="/about" className="text-sm text-gray-700 hover:underline">
