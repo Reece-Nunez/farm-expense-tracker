@@ -8,6 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
+import AuthPageLayout from "./components/AuthPageLayout";
 import "@aws-amplify/ui-react/styles.css";
 import "../AuthOverides.css";
 import { Amplify } from "aws-amplify";
@@ -457,12 +458,10 @@ function App() {
 
 function AuthenticatedAppContent() {
   return (
-    <Authenticator>
-      {({ user }) => {
-        if (!user) return null; // Wait until user is signed in
-        return <AppContent />;
-      }}
-    </Authenticator>
+    <AuthPageLayout>
+      <Authenticator />
+    </AuthPageLayout>
+
   );
 }
 

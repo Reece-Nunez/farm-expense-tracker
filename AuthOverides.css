@@ -1,11 +1,12 @@
 
-/* 1) Center the Authenticator on the screen */
 [data-amplify-authenticator] {
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    background: #f3f4f6;
-  }
+  display: block;
+  margin: 0 auto;
+  max-width: 400px;
+  width: 100%;
+  background: #f3f4f6;
+}
+
   
   /* 2) The container that wraps each Auth step (Sign In, Create Account, etc.) */
   .amplify-tabs__list, .amplify-tabs__list--top, .amplify-tabs__list--equal {
