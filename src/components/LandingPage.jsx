@@ -4,22 +4,32 @@ import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
 import { ArrowDownIcon } from "@heroicons/react/outline";
 import Logo from "./assets/Transparent1.png";
+import { useLoading } from "../context/LoadingContext";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const { setIsLoading } = useLoading();
 
   const handleLogin = () => {
     navigate('/dashboard');
   };
 
+  const handleGoAbout = () => {
+    setIsLoading(true);
+    navigate("/about");
+  };
+
   useEffect(() => {
     const checkUser = async () => {
+      setIsLoading(true);
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (err) {
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -39,7 +49,7 @@ const LandingPage = () => {
           {/* About link */}
           <nav className="text-base text-gray-700">
             <a href="/about" className='mx-1 hover:underline hover:text-green-900'>About</a>
-            <a href='/contact'className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
+            <a href='/contact' className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
           </nav>
 
           {/* Login/Dashboard Button */}

@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
 import Logo from "../components/assets/Transparent1.png";
+import { useLoading } from "../context/LoadingContext";
 
 const About = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const { setIsLoading } = useLoading();
+
 
     const handleLogin = () => {
         navigate('/dashboard');
@@ -14,11 +17,14 @@ const About = () => {
 
     useEffect(() => {
         const checkUser = async () => {
+            setIslLoading(true);
             try {
                 const currentUser = await getCurrentUser();
                 setUser(currentUser);
             } catch (err) {
                 setUser(null);
+            } finally {
+                setIsLoading(false)
             }
         };
 
@@ -30,7 +36,7 @@ const About = () => {
       
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
-      
+        setIsLoading(true);
         try {
           const response = await fetch(
             "https://lj1sxlo8yg.execute-api.us-east-1.amazonaws.com/main/sendEmail",
@@ -54,6 +60,8 @@ const About = () => {
         } catch (err) {
           console.error("Network error:", err);
           alert("Network error");
+        } finally {
+            setIsLoading(false);
         }
       };
       
@@ -91,7 +99,7 @@ const About = () => {
 
                     <div className="bg-white p-6 rounded-xl shadow-md">
                         <form
-                            action="https://formsubmit.co/your@email.com" // Replace with your actual form handler
+                            onSubmit={handleSubmit}
                             method="POST"
                             className="space-y-6"
                         >

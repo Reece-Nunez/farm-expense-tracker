@@ -10,13 +10,17 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
   const [imageUrls, setImageUrls] = React.useState({});
   const [selectedImageUrl, setSelectedImageUrl] = React.useState(null);
 
+  const sortedExpenses = React.useMemo(() => {
+    return [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [expenses]);
+
   // Fetch receipt image URLs
   React.useEffect(() => {
     let isMounted = true;
 
     async function fetchImages() {
       const newImageUrls = {};
-      for (const exp of expenses) {
+      for (const exp of sortedExpenses) {
         if (exp.receiptImageKey) {
           try {
             const { url } = await getUrl({ path: exp.receiptImageKey });
@@ -37,7 +41,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     return () => {
       isMounted = false;
     };
-  }, [expenses]);
+  }, [sortedExpenses]);
 
   // Overlay for viewing full-size receipt images
   const FullSizeImageOverlay = ({ imageUrl, onClose }) => {
@@ -117,7 +121,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
         <div className="flex justify-end gap-3 mt-6">
           <Button
-            onClick={() => navigate(`/edit-expense/${expense.id}`)}
+            onClick={() => navigate(`/dashboard/edit-expense/${expense.id}`)}
             className="bg-blue-600 hover:bg-blue-700 text-white flex gap-2"
           >
             <PencilAltIcon className="h-4 w-4" />
@@ -147,10 +151,10 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
           Submitted Expenses
         </CardHeader>
         <CardContent>
-          {expenses.length > 0 ? (
+          {sortedExpenses.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {expenses.map((exp) => (
+                {sortedExpenses.map((exp) => (
                   <ExpenseCard key={exp.id} expense={exp} />
                 ))}
               </div>

@@ -22,7 +22,7 @@ export default function EditIncome() {
         const found = await DataStore.query(Income, id);
         if (!found) {
           toast.error("Income record not found!");
-          navigate("/income");
+          navigate("/dashboard/income");
           return;
         }
         setCurrentIncome(found);
@@ -45,7 +45,7 @@ export default function EditIncome() {
           })
         );
         toast.success("Income updated successfully!");
-        navigate("/income");
+        navigate("/dashboard/income");
       } catch (error) {
         console.error("[EditIncome] update error:", error);
         toast.error("Failed to update income.");

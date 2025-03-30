@@ -1,16 +1,18 @@
+// App.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserRouter as Router,
-  Route,
   Routes,
+  Route,
   Navigate,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
-import AuthPageLayout from "./components/AuthPageLayout";
+
 import "@aws-amplify/ui-react/styles.css";
 import "../AuthOverides.css";
+
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
 import { DataStore } from "@aws-amplify/datastore";
@@ -19,9 +21,24 @@ import { toast } from "react-hot-toast";
 import Modal from "react-modal";
 import { signOut } from "@aws-amplify/auth";
 
-// Your components
-import Dashboard from "./components/Dashboard";
+import { useLoading, LoadingProvider } from "./context/LoadingContext";
+import GlobalLoadingSpinner from "./components/GlobalLoadingSpinner";
+
+// Models
+import { Expense, Income } from "./models";
+
+// Custom
+import AuthPageLayout from "./components/AuthPageLayout";
 import PrivateRoute from "./components/PrivateRoute";
+import DashboardLayout from "./components/Layout/DashboardLayout";
+import AuthGate from "./components/AuthGate";
+import { fixOwnerField } from "./utils/fixOwnerField";
+
+// Pages
+import LandingPage from "./components/LandingPage";
+import About from "./components/About";
+import Contact from "./components/Contact";
+import Dashboard from "./components/Dashboard";
 import ExpenseTable from "./components/ExpenseTable";
 import ExpenseForm from "./components/ExpenseForm";
 import IncomeForm from "./components/IncomeForm";
@@ -29,28 +46,39 @@ import EditExpense from "./components/EditExpense";
 import IncomeTable from "./components/IncomeTable";
 import EditIncome from "./components/EditIncome";
 import Reports from "./components/Reports";
-import LandingPage from "./components/LandingPage"
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import GenericModal from "./components/GenericModal";
 import ImportExpensesCSV from "./components/ImportExpensesCSV";
 import ImportIncomeCSV from "./components/ImportIncomeCSV";
-import { Expense, Income } from "./models";
-import DashboardLayout from "./components/Layout/DashboardLayout";
 import Profile from "./components/Profile";
-import About from "./components/About";
-import { fixOwnerField } from "./utils/fixOwnerField";
-import Contact from "./components/Contact";
-
-
 
 // Amplify init
 Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
 
-// -------------------------
-// Main App Content
-// -------------------------
-function AppContent() {
+/**
+ * 1) The top-level App just sets up Providers + Router.
+ *    It does NOT call useNavigate/useLocation.
+ */
+export default function App() {
+  return (
+    <LoadingProvider>
+      <Authenticator.Provider>
+        <GlobalLoadingSpinner />
+        <Router>
+          {/* We render our "inner" app logic inside <Router> so hooks work */}
+          <AppInner />
+        </Router>
+      </Authenticator.Provider>
+    </LoadingProvider>
+  );
+}
+
+/**
+ * 2) AppInner has all your logic: states, side effects, useNavigate, etc.
+ *    Because AppInner is rendered inside <Router>, the React Router hooks
+ *    are safe to use (no "invalid hook call" error).
+ */
+function AppInner() {
   // -------------- State --------------
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -64,20 +92,24 @@ function AppContent() {
 
   // Generic confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => { });
+  const [confirmAction, setConfirmAction] = useState(() => {});
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // Generic delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => { });
+  const [deleteAction, setDeleteAction] = useState(() => {});
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
   const expenseFormRef = useRef(null);
   const incomeFormRef = useRef(null);
 
+  // We can safely call these router hooks here:
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Our loading context
+  const { setIsLoading } = useLoading();
 
   // -------------- Effects --------------
 
@@ -86,64 +118,56 @@ function AppContent() {
     setAuthChecked(true);
   }, []);
 
+  // 2) Fix the owner field once on app load
   useEffect(() => {
-    // Fire it once when the app loads
     fixOwnerField();
   }, []);
 
-
-  // 2) Fetch & subscribe to expenses for the current user
+  // 3) Fetch & subscribe to expenses
   useEffect(() => {
     async function fetchExpenses() {
+      setIsLoading(true);
       try {
-
         const session = await fetchAuthSession();
         const userSub = session.tokens.idToken.payload.sub;
         console.log("[fetchExpenses] Current user sub:", userSub);
 
-        // Query AFTER clearing
         const userExpenses = await DataStore.query(Expense, (e) =>
           e.userId.eq(userSub)
         );
-        console.log("[fetchExpenses] Type of userExpenses:", Array.isArray(userExpenses));
-        console.log("[fetchExpenses] JSON:", JSON.stringify(userExpenses, null, 2));
-
         setFetchedExpenses(userExpenses);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
-    // 1) fetch once
     fetchExpenses();
-
-    // 2) subscribe for real-time updates
     const expenseSub = DataStore.observe(Expense).subscribe((msg) => {
       if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
         fetchExpenses();
       }
     });
 
-    // cleanup subscription on unmount
     return () => expenseSub.unsubscribe();
-  }, []);
+  }, [setIsLoading]);
 
-
-  // 3) Fetch & subscribe to all incomes (no user filter?)
+  // 4) Fetch & subscribe to all incomes
   useEffect(() => {
     async function fetchIncome() {
+      setIsLoading(true);
       try {
         const allIncome = await DataStore.query(Income);
         setFetchedIncomes(allIncome);
       } catch (error) {
         console.error("[fetchIncome] Error:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
-    // fetch once
     fetchIncome();
-
-    // subscribe
     const incomeSub = DataStore.observe(Income).subscribe((msg) => {
       if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
         fetchIncome();
@@ -151,10 +175,11 @@ function AppContent() {
     });
 
     return () => incomeSub.unsubscribe();
-  }, []);
+  }, [setIsLoading]);
 
+  // 5) Auto logout after inactivity
   useEffect(() => {
-    const AUTO_LOGOUT_TIME = 60 * 60 * 1000; // 30 minutes in milliseconds
+    const AUTO_LOGOUT_TIME = 60 * 60 * 1000; // 1 hour
     let inactivityTimer;
 
     const resetTimer = () => {
@@ -165,11 +190,9 @@ function AppContent() {
       }, AUTO_LOGOUT_TIME);
     };
 
-    // Events that count as user activity
     const events = ["mousemove", "keydown", "scroll", "click"];
-
     events.forEach((event) => window.addEventListener(event, resetTimer));
-    resetTimer(); // Start the initial timer
+    resetTimer();
 
     return () => {
       events.forEach((event) => window.removeEventListener(event, resetTimer));
@@ -177,11 +200,11 @@ function AppContent() {
     };
   }, []);
 
-
   // -------------- Expense Handlers --------------
   const handleExpenseSubmit = (formattedExpense) => {
     setConfirmMessage("Are you sure you want to accept this expense?");
     setConfirmAction(() => async () => {
+      setIsLoading(true);
       try {
         const session = await fetchAuthSession();
         const userId = session.tokens.idToken.payload.sub;
@@ -213,8 +236,9 @@ function AppContent() {
         console.error("[handleExpenseSubmit] Error saving expense:", error);
         toast.error("Failed to save expense.");
       } finally {
+        setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => { });
+        setConfirmAction(() => {});
         setShowConfirmModal(false);
         expenseFormRef.current?.resetForm();
       }
@@ -223,12 +247,13 @@ function AppContent() {
   };
 
   const handleExpenseEdit = (expense) => {
-    navigate(`/edit-expense/${expense.id}`);
+    navigate(`/dashboard/edit-expense/${expense.id}`);
   };
 
   const handleExpenseDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this expense?");
     setDeleteAction(() => async () => {
+      setIsLoading(true);
       try {
         const record = await DataStore.query(Expense, id);
         if (!record) {
@@ -242,6 +267,7 @@ function AppContent() {
         console.error("[handleExpenseDelete] Error:", error);
         toast.error("Failed to delete expense.");
       } finally {
+        setIsLoading(false);
         setShowDeleteModal(false);
       }
     });
@@ -252,13 +278,13 @@ function AppContent() {
   const handleIncomeSubmit = (incomeData) => {
     setConfirmMessage("Are you sure you want to accept this income?");
     setConfirmAction(() => async () => {
+      setIsLoading(true);
       try {
         const session = await fetchAuthSession();
         const userId = session.tokens.idToken.payload.sub;
 
         let newIncome;
         if (editingIncome) {
-          // Update existing income
           newIncome = await DataStore.save(
             Income.copyOf(editingIncome, (updated) => {
               Object.assign(updated, incomeData);
@@ -268,12 +294,12 @@ function AppContent() {
           toast.success("Income updated successfully!");
           setEditingIncome(null);
         } else {
-          // Create new
           newIncome = await DataStore.save(
             new Income({ ...incomeData, userId })
           );
           toast.success("Income added successfully!");
         }
+
         // update local state
         setFetchedIncomes((prev) =>
           editingIncome
@@ -284,8 +310,9 @@ function AppContent() {
         console.error("[handleIncomeSubmit] Error:", error);
         toast.error("Failed to save income.");
       } finally {
+        setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => { });
+        setConfirmAction(() => {});
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
@@ -294,12 +321,13 @@ function AppContent() {
   };
 
   const handleIncomeEdit = (income) => {
-    navigate(`/edit-income/${income.id}`);
+    navigate(`/dashboard/edit-income/${income.id}`);
   };
 
   const handleIncomeDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this income?");
     setDeleteAction(() => async () => {
+      setIsLoading(true);
       try {
         const record = await DataStore.query(Income, id);
         if (!record) {
@@ -313,33 +341,100 @@ function AppContent() {
         console.error("[handleIncomeDelete] Error:", error);
         toast.error("Failed to delete income.");
       } finally {
+        setIsLoading(false);
         setShowDeleteModal(false);
       }
     });
     setShowDeleteModal(true);
   };
 
+  // -------------- Render --------------
+  // If auth check not done, show a quick loader
   if (!authChecked) {
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }
 
   return (
     <>
-      <AppRoutes
-        // Expense
-        fetchedExpenses={fetchedExpenses}
-        handleExpenseEdit={handleExpenseEdit}
-        handleExpenseDelete={handleExpenseDelete}
-        handleExpenseSubmit={handleExpenseSubmit}
-        expenseFormRef={expenseFormRef}
+      {/* Your nested routes: these define the site’s entire routing */}
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
 
-        // Income
-        fetchedIncomes={fetchedIncomes}
-        handleIncomeEdit={handleIncomeEdit}
-        handleIncomeDelete={handleIncomeDelete}
-        handleIncomeSubmit={handleIncomeSubmit}
-        incomeFormRef={incomeFormRef}
-      />
+        {/* Auth route */}
+        <Route element={<AuthPageLayout />}>
+          <Route path="/auth" element={<AuthGate />} />
+        </Route>
+
+        {/* Private /dashboard routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
+        >
+          {/* index => /dashboard */}
+          <Route index element={<Dashboard />} />
+
+          {/* Expenses */}
+          <Route
+            path="expenses"
+            element={
+              <ExpenseTable
+                expenses={fetchedExpenses}
+                onEdit={handleExpenseEdit}
+                onDelete={handleExpenseDelete}
+              />
+            }
+          />
+          <Route
+            path="add-expense"
+            element={
+              <ExpenseForm
+                ref={expenseFormRef}
+                onValidSubmit={handleExpenseSubmit}
+              />
+            }
+          />
+          <Route path="edit-expense/:id" element={<EditExpense />} />
+
+          {/* Income */}
+          <Route
+            path="income"
+            element={
+              <IncomeTable
+                incomes={fetchedIncomes}
+                onEdit={handleIncomeEdit}
+                onDelete={handleIncomeDelete}
+              />
+            }
+          />
+          <Route
+            path="add-income"
+            element={
+              <IncomeForm
+                ref={incomeFormRef}
+                onValidSubmit={handleIncomeSubmit}
+              />
+            }
+          />
+          <Route path="edit-income/:id" element={<EditIncome />} />
+
+          {/* Additional pages */}
+          <Route path="reports" element={<Reports />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="import-csv" element={<ImportExpensesCSV />} />
+          <Route path="import-income" element={<ImportIncomeCSV />} />
+        </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
@@ -367,115 +462,3 @@ function AppContent() {
     </>
   );
 }
-
-// -------------------------
-// Routing
-// -------------------------
-function AppRoutes({
-  fetchedExpenses,
-  handleExpenseEdit,
-  handleExpenseDelete,
-  handleExpenseSubmit,
-  expenseFormRef,
-
-  fetchedIncomes,
-  handleIncomeEdit,
-  handleIncomeDelete,
-  handleIncomeSubmit,
-  incomeFormRef,
-}) {
-  return (
-    <Routes>
-      <Route path="*" element={<Navigate to="/" />} />
-
-      <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* Expenses */}
-        <Route
-          path="/expenses"
-          element={
-            <ExpenseTable
-              expenses={fetchedExpenses}
-              onEdit={handleExpenseEdit}
-              onDelete={handleExpenseDelete}
-            />
-          }
-        />
-        <Route
-          path="/add-expense"
-          element={
-            <ExpenseForm ref={expenseFormRef} onValidSubmit={handleExpenseSubmit} />
-          }
-        />
-        <Route path="/edit-expense/:id" element={<EditExpense />} />
-
-        {/* Income */}
-        <Route
-          path="/income"
-          element={
-            <IncomeTable
-              incomes={fetchedIncomes}
-              onEdit={handleIncomeEdit}
-              onDelete={handleIncomeDelete}
-            />
-          }
-        />
-        <Route
-          path="/add-income"
-          element={
-            <IncomeForm ref={incomeFormRef} onValidSubmit={handleIncomeSubmit} />
-          }
-        />
-        <Route path="/edit-income/:id" element={<EditIncome />} />
-        <Route path="/reports" element={<Reports />} />
-
-        {/* Profile & CSV */}
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/import-csv" element={<ImportExpensesCSV />} />
-        <Route path="/import-income" element={<ImportIncomeCSV />} />
-
-        {/* Analytics */}
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
-      </Route>
-    </Routes>
-  );
-}
-
-// -------------------------
-// Main Export
-// -------------------------
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact/>} />
-        <Route path="/*" element={<AuthenticatedAppContent />} />
-      </Routes>
-    </Router>
-  );
-}
-
-function AuthenticatedAppContent() {
-  return (
-    <Authenticator>
-      {({ user }) =>
-        user ? (
-          <AppContent />
-        ) : (
-          <AuthPageLayout>
-            <Authenticator />
-          </AuthPageLayout>
-        )
-      }
-    </Authenticator>
-  );
-}
-
-
-
-
-
-export default App;

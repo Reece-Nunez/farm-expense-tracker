@@ -7,9 +7,13 @@ import { PencilAltIcon, TrashIcon } from "@heroicons/react/outline";
 export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
   const navigate = useNavigate();
 
+  const sortedIncomes = React.useMemo(() => {
+      return [...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, [incomes]);
+
   const MobileIncomeCards = () => (
     <div className="block md:hidden space-y-6">
-      {incomes.map((inc) => {
+      {sortedIncomes.map((inc) => {
         const dateDisplay = inc.date
           ? new Date(inc.date).toLocaleDateString()
           : "";
@@ -83,7 +87,7 @@ export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
 
   const DesktopIncomeTable = () => (
     <div className="hidden md:block space-y-6">
-      {incomes.map((inc) => {
+      {sortedIncomes.map((inc) => {
         const dateDisplay = inc.date
           ? new Date(inc.date).toLocaleDateString()
           : "";
@@ -161,7 +165,7 @@ export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
         Submitted Income
       </CardHeader>
       <CardContent>
-        {incomes.length ? (
+        {sortedIncomes.length ? (
           <>
             <MobileIncomeCards />
 

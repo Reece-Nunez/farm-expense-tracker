@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense, Income } from "@/models";
+import { useLoading } from "../context/LoadingContext";
 
 // =========================
 // 🎨 Chart Colors
@@ -56,6 +57,7 @@ export default function Dashboard() {
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [recentIncomes, setRecentIncomes] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
+  const { setIsLoading } = useLoading();
 
   useEffect(() => {
     fetchData();
@@ -65,6 +67,7 @@ export default function Dashboard() {
   // FETCH DATA
   // -------------------------
   const fetchData = async () => {
+    setIsLoading(true);
     try {
       const [allExpenses, allIncomes] = await Promise.all([
         DataStore.query(Expense),
@@ -84,6 +87,8 @@ export default function Dashboard() {
       setIncomes(allIncomes);
     } catch (err) {
       console.error("Error fetching data for Dashboard:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 

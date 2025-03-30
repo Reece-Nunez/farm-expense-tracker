@@ -22,7 +22,7 @@
       "function": {
         "sendEmail": {
           "deploymentBucketName": "amplify-farmexpensetracker-main-94813-deployment",
-          "s3Key": "amplify-builds/sendEmail-774f6a39686872515553-build.zip"
+          "s3Key": "amplify-builds/sendEmail-664c2b2f686e596d4148-build.zip"
         }
       },
       "api": {

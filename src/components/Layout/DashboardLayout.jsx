@@ -1,3 +1,4 @@
+// DashboardLayout.jsx
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -5,15 +6,14 @@ import { PlusIcon } from "@heroicons/react/outline";
 
 export default function DashboardLayout() {
   const [showSidebar, setShowSidebar] = useState(false);
-
   const navigate = useNavigate();
 
   const handleAddExpense = () => {
-    navigate("/add-expense");
+    navigate("/dashboard/add-expense");
   };
 
   const handleAddIncome = () => {
-    navigate("/add-income");
+    navigate("/dashboard/add-income");
   };
 
   return (
@@ -22,7 +22,6 @@ export default function DashboardLayout() {
       <header className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-end">
         {/* Always a hamburger icon */}
         <button onClick={() => setShowSidebar(true)} className="text-gray-700">
-          {/* Hamburger Icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -30,10 +29,7 @@ export default function DashboardLayout() {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
@@ -42,7 +38,7 @@ export default function DashboardLayout() {
 
       {/* Main container */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Overlay (click to close sidebar) */}
+        {/* Overlay (click to close sidebar on mobile) */}
         {showSidebar && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
@@ -50,7 +46,7 @@ export default function DashboardLayout() {
           />
         )}
 
-        {/* SIDEBAR: slides in from the right on mobile */}
+        {/* SIDEBAR */}
         <aside
           className={`
             fixed top-0 right-0 z-20 h-full w-64 bg-white border-l border-gray-200
@@ -73,25 +69,22 @@ export default function DashboardLayout() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
             </button>
           </div>
-          {/* Your existing sidebar navigation items */}
+
+          {/* The actual sidebar nav items */}
           <Sidebar onCloseSidebar={() => setShowSidebar(false)} />
         </aside>
 
-        {/* Main content */}
+        {/* MAIN CONTENT */}
         <main className="flex-1 overflow-y-auto">
+          {/* Buttons to add Expense/Income, pinned at the top */}
           <div
-            className={`relative md:sticky md:top-0 flex justify-center md:justify-end m-0 md:m-3 z-10 md:z-50 transition-colors duration-300 ${
-              showSidebar
-            }`}
+            className={`relative md:sticky md:top-0 flex justify-center md:justify-end m-0 md:m-3 z-10 md:z-50`}
           >
             <button
               onClick={handleAddExpense}
@@ -110,6 +103,7 @@ export default function DashboardLayout() {
             </button>
           </div>
 
+          {/* Where nested routes render */}
           <Outlet />
         </main>
       </div>

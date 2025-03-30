@@ -131,7 +131,7 @@ export default function ImportIncomeCSV() {
       );
 
       toast.success(`Successfully imported ${saved.length} income records!`);
-      navigate("/income");
+      navigate("/dashboard/income");
     } catch (err) {
       console.error("Error saving Income to DataStore:", err);
       toast.error("Failed to save income records.");

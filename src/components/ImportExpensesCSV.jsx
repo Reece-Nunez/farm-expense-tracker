@@ -151,7 +151,7 @@ export default function ImportExpensesCSV() {
       );
 
       toast.success(`Imported ${saved.length} expenses!`);
-      navigate("/expenses");
+      navigate("/dashboard/expenses");
     } catch (err) {
       console.error("Error saving expenses:", err);
       toast.error("Failed to save expenses.");

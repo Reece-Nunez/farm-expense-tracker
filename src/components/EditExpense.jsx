@@ -21,7 +21,7 @@ export default function EditExpense() {
         const found = await DataStore.query(Expense, id);
         if (!found) {
           toast.error("Expense not found!");
-          navigate("/expenses");
+          navigate("/dashboard/expenses");
           return;
         }
         setCurrentExpense(found);
@@ -49,7 +49,7 @@ export default function EditExpense() {
           })
         );
         toast.success("Expense updated successfully!");
-        navigate("/expenses");
+        navigate("/dashboard/expenses");
       } catch (error) {
         console.error("[EditExpense] update error:", error);
         toast.error("Failed to update expense.");

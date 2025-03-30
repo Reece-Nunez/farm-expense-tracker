@@ -5,6 +5,7 @@ import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { getUrl } from "aws-amplify/storage";
 import { User } from "../../models";
+import Logo from "../assets/Transparent1.png";
 import {
   HomeIcon,
   CurrencyDollarIcon,
@@ -101,29 +102,29 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
     {
       label: "Expenses",
       items: [
-        { label: "Expenses", icon: CreditCardIcon, route: "/expenses", color: "text-blue-600" },
-        { label: "Add Expense", icon: PlusIcon, route: "/add-expense", color: "text-blue-600" },
+        { label: "Expenses", icon: CreditCardIcon, route: "/dashboard/expenses", color: "text-blue-600" },
+        { label: "Add Expense", icon: PlusIcon, route: "/dashboard/add-expense", color: "text-blue-600" },
       ],
     },
     {
       label: "Income",
       items: [
-        { label: "Income", icon: CurrencyDollarIcon, route: "/income", color: "text-green-600" },
-        { label: "Add Income", icon: PlusIcon, route: "/add-income", color: "text-green-600" },
+        { label: "Income", icon: CurrencyDollarIcon, route: "/dashboard/income", color: "text-green-600" },
+        { label: "Add Income", icon: PlusIcon, route: "/dashboard/add-income", color: "text-green-600" },
       ],
     },
     {
       label: "CSV Import",
       items: [
-        { label: "Import Expenses CSV", icon: UploadIcon, route: "/import-csv", color: "text-blue-600" },
-        { label: "Import Income CSV", icon: UploadIcon, route: "/import-income", color: "text-green-600" },
+        { label: "Import Expenses CSV", icon: UploadIcon, route: "/dashboard/import-csv", color: "text-blue-600" },
+        { label: "Import Income CSV", icon: UploadIcon, route: "/dashboard/import-income", color: "text-green-600" },
       ],
     },
     {
       label: "Other",
       items: [
-        { label: "Reports", icon: ChartBarIcon, route: "/reports", color: "text-yellow-600" },
-        { label: "Profile", icon: UserIcon, route: "/profile", color: "text-blue-800" },
+        { label: "Reports", icon: ChartBarIcon, route: "/dashboard/reports", color: "text-yellow-600" },
+        { label: "Profile", icon: UserIcon, route: "/dashboard/profile", color: "text-blue-800" },
         {
           label: "Homepage",
           icon: () => (
@@ -182,7 +183,9 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
 
       {/* App Name */}
       <div className="p-4 border-b border-gray-200 text-xl font-bold">
-        Harvest-Hub
+        <a href='/' className="flex-shrink-0">
+          <img src={Logo} alt="AgTrackr Logo" className="h-10 sm:h-12" />
+        </a>
       </div>
 
       {/* Nav Links */}

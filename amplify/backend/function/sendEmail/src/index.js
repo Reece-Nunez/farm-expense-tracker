@@ -6,7 +6,7 @@ exports.handler = async (event) => {
 
   const params = {
     Destination: {
-      ToAddresses: ['your@email.com'],
+      ToAddresses: ['reece@nunezdev.com'],
     },
     Message: {
       Body: {

@@ -1,18 +1,16 @@
+// PrivateRoute.jsx
 import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { Authenticator } from "@aws-amplify/ui-react";
+import { Navigate } from "react-router-dom";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 export default function PrivateRoute({ children }) {
-  const location = useLocation();
+  const { user } = useAuthenticator((context) => [context.user]);
 
-  return (
-    <Authenticator>
-      {({ user }) => {
-        if (!user) {
-          return <Navigate to="/" state={{ from: location }} />;
-        }
-        return children;
-      }}
-    </Authenticator>
-  );
+  // If there's no user, they're not signed in.
+  if (!user) {
+    return <Navigate to="/auth" />;
+  }
+
+  // Otherwise, render whatever is inside <PrivateRoute> ... </PrivateRoute>
+  return children;
 }
