@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
 import { ArrowDownIcon } from "@heroicons/react/outline";
-import Logo from "./assets/Transparent1.png";
-import { useLoading } from "../context/LoadingContext";
+import Logo from "../assets/Transparent1.png";
+import { useLoading } from "../../context/LoadingContext";
 
 const LandingPage = () => {
   const navigate = useNavigate();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from "aws-amplify/auth";
-import Logo from "./assets/Transparent1.png";
+import Logo from "../assets/Transparent1.png";
 
 const About = () => {
     const navigate = useNavigate();

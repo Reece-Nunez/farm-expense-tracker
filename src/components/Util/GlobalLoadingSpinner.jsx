@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { useLoading } from "../context/LoadingContext";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function GlobalLoadingSpinner() {
   const { isLoading } = useLoading();

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense, Income } from "@/models";
-import { useLoading } from "../context/LoadingContext";
+import { useLoading } from "../../context/LoadingContext";
 
 // =========================
 // 🎨 Chart Colors

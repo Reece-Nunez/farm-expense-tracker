@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DataStore } from "@aws-amplify/datastore";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { uploadData, getUrl, remove } from "aws-amplify/storage";
-import { User } from "../models";
+import { User } from "../../models";
 
 export default function Profile() {
   const [userRecord, setUserRecord] = useState(null);

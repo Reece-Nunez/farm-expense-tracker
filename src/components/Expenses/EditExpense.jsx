@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense } from "@/models";
-import ExpenseForm from "@/components/ExpenseForm";
+import ExpenseForm from "@/components/Expenses/ExpenseForm";
 import { toast } from "react-hot-toast";
-import GenericModal from "./GenericModal";
+import GenericModal from "../Util/GenericModal";
 
 export default function EditExpense() {
   const { id } = useParams();

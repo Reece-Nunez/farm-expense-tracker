@@ -2,10 +2,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DataStore } from "@aws-amplify/datastore";
-import { Income } from "../models";
+import { Income } from "../../models";
 import IncomeForm from "./IncomeForm";
 import { toast } from "react-hot-toast";
-import GenericModal from "./GenericModal";
+import GenericModal from "../Util/GenericModal";
 
 export default function EditIncome() {
   const { id } = useParams();

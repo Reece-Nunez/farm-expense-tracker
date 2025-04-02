@@ -22,34 +22,33 @@ import Modal from "react-modal";
 import { signOut } from "@aws-amplify/auth";
 
 import { useLoading, LoadingProvider } from "./context/LoadingContext";
-import GlobalLoadingSpinner from "./components/GlobalLoadingSpinner";
+import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
 
 // Models
 import { Expense, Income } from "./models";
 
 // Custom
-import AuthPageLayout from "./components/AuthPageLayout";
-import PrivateRoute from "./components/PrivateRoute";
+import AuthPageLayout from "./components/Auth/AuthPageLayout";
+import PrivateRoute from "./components/Auth/PrivateRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
-import AuthGate from "./components/AuthGate";
+import AuthGate from "./components/Auth/AuthGate";
 import { fixOwnerField } from "./utils/fixOwnerField";
 
 // Pages
-import LandingPage from "./components/LandingPage";
-import About from "./components/About";
-import Contact from "./components/Contact";
-import Dashboard from "./components/Dashboard";
-import ExpenseTable from "./components/ExpenseTable";
-import ExpenseForm from "./components/ExpenseForm";
-import IncomeForm from "./components/IncomeForm";
-import EditExpense from "./components/EditExpense";
-import IncomeTable from "./components/IncomeTable";
-import EditIncome from "./components/EditIncome";
-import Reports from "./components/Reports";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import ImportExpensesCSV from "./components/ImportExpensesCSV";
-import ImportIncomeCSV from "./components/ImportIncomeCSV";
-import Profile from "./components/Profile";
+import LandingPage from "./components/Main/LandingPage";
+import About from "./components/Main/About";
+import Contact from "./components/Main/Contact";
+import Dashboard from "./components/Main/Dashboard";
+import ExpenseTable from "./components/Expenses/ExpenseTable";
+import ExpenseForm from "./components/Expenses/ExpenseForm";
+import IncomeForm from "./components/Income/IncomeForm";
+import EditExpense from "./components/Expenses/EditExpense";
+import IncomeTable from "./components/Income/IncomeTable";
+import EditIncome from "./components/Income/EditIncome";
+import Reports from "./components/Other/Reports";
+import ImportExpensesCSV from "./components/CSV/ImportExpensesCSV";
+import ImportIncomeCSV from "./components/CSV/ImportIncomeCSV";
+import Profile from "./components/Other/Profile";
 
 // Amplify init
 Amplify.configure({ ...awsExports });
@@ -426,7 +425,6 @@ function AppInner() {
 
           {/* Additional pages */}
           <Route path="reports" element={<Reports />} />
-          <Route path="analytics" element={<AnalyticsDashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="import-csv" element={<ImportExpensesCSV />} />
           <Route path="import-income" element={<ImportIncomeCSV />} />

@@ -170,6 +170,13 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
         {profileMenuOpen && (
           <div className="mt-3 space-y-2">
             <button
+              onClick={() => handleNavClick("/dashboard/profile")}
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <UserIcon className="w-5 h-5" />
+              <span>Profile</span>
+            </button>
+            <button
               onClick={handleSignOut}
               className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-red-500 hover:bg-red-600"
             >
@@ -178,6 +185,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
             </button>
           </div>
         )}
+
       </div>
 
 
