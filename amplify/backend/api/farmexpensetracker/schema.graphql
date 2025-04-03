@@ -111,9 +111,11 @@ type MedicalRecord @model
   ]) {
   id: ID!
   livestockID: ID! @index(name: "byLivestock")
-  date: AWSDate!
-  description: String!
+  type: String!
+  notes: String
+  date: AWSDate
   medicine: String
+  livestock: Livestock @belongsTo(fields: ["livestockID"])
 }
 
 type ChickenFlock @model

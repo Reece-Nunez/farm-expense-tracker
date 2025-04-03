@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCow, faEgg, faTractor, faWarehouse  } from "@fortawesome/free-solid-svg-icons";
+import { faCow, faEgg, faTractor, faWarehouse, faFaceLaughBeam  } from "@fortawesome/free-solid-svg-icons";
 
 const sections = [
   { name: "Livestock", route: "/dashboard/inventory/livestock", icon: faCow },
@@ -29,7 +29,7 @@ const InventoryDashboard = () => {
         ))}
       </div>
       <div className="text-center mt-20">
-        <h1>Please be paitent, this is a new feature and is not 100% ready yet.</h1>
+        <h1>Please be paitent, this is a new feature and is not 100% ready yet, but feel free to test it out and give feedback! <FontAwesomeIcon icon={faFaceLaughBeam} /> </h1>
       </div>
     </div>
     

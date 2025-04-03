@@ -881,18 +881,25 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "date": {
                     "name": "date",
                     "isArray": false,
                     "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "description": {
-                    "name": "description",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "medicine": {
@@ -901,6 +908,21 @@ export const schema = {
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "livestock": {
+                    "name": "livestock",
+                    "isArray": false,
+                    "type": {
+                        "model": "Livestock"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "livestockID"
+                        ]
+                    }
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -939,15 +961,6 @@ export const schema = {
                         "name": "byLivestock",
                         "fields": [
                             "livestockID"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "gsi-Livestock.medicalRecords",
-                        "fields": [
-                            "livestockMedicalRecordsId"
                         ]
                     }
                 },
@@ -1363,5 +1376,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "47a39c00849be9a9f1fd53acc6128280"
+    "version": "01bf028a58df7ac8cfbae38ddbf256c9"
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DataStore } from "@aws-amplify/datastore";
 import { Livestock, Field, LivestockFamily } from "../../models";
 import { useNavigate } from "react-router-dom";
+import ResponsiveLivestockTable from "../Livestock/ResponsiveLivestockTable";
 
 const LivestockManager = () => {
     const [livestock, setLivestock] = useState([]);
@@ -36,13 +37,13 @@ const LivestockManager = () => {
     const resolveLivestockWithLocation = async (animal) => {
         const location = animal.fieldID ? await DataStore.query(Field, animal.fieldID) : null;
         return { ...animal, location };
-      };      
+    };
 
-      const fetchLivestock = async () => {
+    const fetchLivestock = async () => {
         const all = await DataStore.query(Livestock);
         const enriched = await Promise.all(all.map(resolveLivestockWithLocation));
         setLivestock(enriched);
-      };      
+    };
 
     const fetchFields = async () => {
         const allFields = await DataStore.query(Field);
@@ -60,76 +61,76 @@ const LivestockManager = () => {
 
     const handleAddOrUpdateAnimal = async () => {
         const { name, species, breed, birthdate, weight, gender, locationId } = newAnimal;
-      
+
         try {
-          let savedAnimal;
-      
-          if (editingId) {
-            const original = await DataStore.query(Livestock, editingId);
-            savedAnimal = await DataStore.save(
-              Livestock.copyOf(original, updated => {
-                updated.name = name;
-                updated.species = species;
-                updated.breed = breed;
-                updated.birthdate = birthdate;
-                updated.weight = parseFloat(weight);
-                updated.gender = gender;
-      
+            let savedAnimal;
+
+            if (editingId) {
+                const original = await DataStore.query(Livestock, editingId);
+                savedAnimal = await DataStore.save(
+                    Livestock.copyOf(original, updated => {
+                        updated.name = name;
+                        updated.species = species;
+                        updated.breed = breed;
+                        updated.birthdate = birthdate;
+                        updated.weight = parseFloat(weight);
+                        updated.gender = gender;
+
+                        if (locationId) {
+                            updated.fieldID = locationId;
+                        } else {
+                            // Avoid setting null which triggers `location.id` non-null error
+                            delete updated.fieldID;
+                        }
+                    })
+                );
+
+                const existingLinks = families.filter(f => f.childID === editingId);
+                await Promise.all(existingLinks.map(link => DataStore.delete(link)));
+            } else {
+                const animalInput = {
+                    name,
+                    species,
+                    breed,
+                    birthdate,
+                    weight: parseFloat(weight),
+                    gender,
+                };
+
                 if (locationId) {
-                  updated.fieldID = locationId;
-                } else {
-                  // Avoid setting null which triggers `location.id` non-null error
-                  delete updated.fieldID;
+                    animalInput.fieldID = locationId;
                 }
-              })
-            );
-      
-            const existingLinks = families.filter(f => f.childID === editingId);
-            await Promise.all(existingLinks.map(link => DataStore.delete(link)));
-          } else {
-            const animalInput = {
-              name,
-              species,
-              breed,
-              birthdate,
-              weight: parseFloat(weight),
-              gender,
-            };
-      
-            if (locationId) {
-              animalInput.fieldID = locationId;
+
+                savedAnimal = await DataStore.save(new Livestock(animalInput));
             }
-      
-            savedAnimal = await DataStore.save(new Livestock(animalInput));
-          }
-          const checkField = await DataStore.query(Field, locationId);
-          console.log("Field from DataStore:", checkField);
-          
-          for (const parentId of selectedParents) {
-            await DataStore.save(
-              new LivestockFamily({
-                parentID: parentId,
-                childID: savedAnimal.id,
-              })
-            );
-          }
-      
-          setNewAnimal({
-            name: "",
-            species: "",
-            breed: "",
-            birthdate: "",
-            weight: "",
-            gender: "",
-            locationId: ""
-          });
-          setSelectedParents([]);
-          setEditingId(null);
+            const checkField = await DataStore.query(Field, locationId);
+            console.log("Field from DataStore:", checkField);
+
+            for (const parentId of selectedParents) {
+                await DataStore.save(
+                    new LivestockFamily({
+                        parentID: parentId,
+                        childID: savedAnimal.id,
+                    })
+                );
+            }
+
+            setNewAnimal({
+                name: "",
+                species: "",
+                breed: "",
+                birthdate: "",
+                weight: "",
+                gender: "",
+                locationId: ""
+            });
+            setSelectedParents([]);
+            setEditingId(null);
         } catch (err) {
-          console.error("Error saving animal:", err);
+            console.error("Error saving animal:", err);
         }
-      };
-      
+    };
+
 
 
     const handleEdit = async (animal) => {
@@ -183,10 +184,15 @@ const LivestockManager = () => {
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="p-6 w-full max-w-screen-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">Livestock Manager</h2>
-            <div className="mb-6 bg-gray-50 p-4 rounded-lg border">
-                <h3 className="text-xl font-semibold mb-2">{editingId ? "Edit Animal" : "Add New Animal"}</h3>
+
+            {/* -------- FORM -------- */}
+            <div className="mb-8 bg-gray-50 p-4 rounded-lg border shadow-sm">
+                <h3 className="text-xl font-semibold mb-4">
+                    {editingId ? "Edit Animal" : "Add New Animal"}
+                </h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input name="name" value={newAnimal.name} onChange={handleChange} placeholder="Name" className="p-2 border rounded" />
                     <input name="species" value={newAnimal.species} onChange={handleChange} placeholder="Species" className="p-2 border rounded" />
@@ -199,7 +205,7 @@ const LivestockManager = () => {
                         <option value="Female">Female</option>
                         <option value="Unknown">Unknown</option>
                     </select>
-                    <select name="locationId" value={newAnimal.locationId} onChange={handleChange}>
+                    <select name="locationId" value={newAnimal.locationId} onChange={handleChange} className="p-2 border rounded">
                         <option value="">Select Field (Optional)</option>
                         {fields.map((f) => (
                             <option key={f.id} value={f.id}>
@@ -227,68 +233,29 @@ const LivestockManager = () => {
 
                 <button
                     onClick={handleAddOrUpdateAnimal}
-                    className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    className="mt-4 mx-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
                     {editingId ? "Update Animal" : "Add Animal"}
                 </button>
+                <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}
+                >
+                    Back To Inventory
+                </button>
             </div>
 
+            {/* -------- TABLE -------- */}
             <h3 className="text-xl font-semibold mb-2">Current Livestock</h3>
-            <div className="overflow-x-auto">
-                <table className="min-w-full border">
-                    <thead className="bg-gray-100">
-                        <tr>
-                            <th className="px-4 py-2 border">Name</th>
-                            <th className="px-4 py-2 border">Species</th>
-                            <th className="px-4 py-2 border">Breed</th>
-                            <th className="px-4 py-2 border">Birthdate</th>
-                            <th className="px-4 py-2 border">Weight</th>
-                            <th className="px-4 py-2 border">Field</th>
-                            <th className="px-4 py-2 border">Parents</th>
-                            <th className="px-4 py-2 border">Offspring</th>
-                            <th className="px-4 py-2 border">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {livestock.map((animal) => (
-                            <tr key={animal.id} className="text-center">
-                                <td className="border px-4 py-2">{animal.name}</td>
-                                <td className="border px-4 py-2">{animal.species}</td>
-                                <td className="border px-4 py-2">{animal.breed}</td>
-                                <td className="border px-4 py-2">{animal.birthdate}</td>
-                                <td className="border px-4 py-2">
-                                    {isNaN(animal.weight) ? "-" : animal.weight}
-                                </td>
-                                <td className="border px-4 py-2">{animal.location?.name || "-"}</td>
-                                <td className="border px-4 py-2">{getParents(animal.id)}</td>
-                                <td className="border px-4 py-2">{getChildren(animal.id)}</td>
-                                <td className="border px-4 py-2 space-x-2">
-                                    <button
-                                        onClick={() => handleEdit(animal)}
-                                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(animal.id)}
-                                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => handleViewProfile(animal.id)}
-                                        className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-                                    >
-                                        View
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <ResponsiveLivestockTable
+                livestock={livestock}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onView={handleViewProfile}
+                getParents={getParents}
+                getChildren={getChildren}
+            />
         </div>
     );
+
 };
 
 export default LivestockManager;

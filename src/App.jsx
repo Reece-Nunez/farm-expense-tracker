@@ -58,6 +58,8 @@ import FieldManager from "./components/Inventory/FieldManager";
 import InventoryItemManager from "./components/Inventory/InventoryItemManager";
 import DebugComponent from "./components/Util/DebugComponent";
 import ClearDataStoreOnce from "./components/Util/ClearDataStoreOnce";
+import LivestockMedicalRecords from "./components/Livestock/LivestockMedicalRecords";
+import LivestockMedicalForm from "./components/Livestock/LivestockMedicalForm";
 
 // Amplify init
 Amplify.configure({ ...awsExports });
@@ -392,6 +394,11 @@ function AppInner() {
           <Route path="inventory/chickens" element={<ChickenManager />} />
           <Route path="inventory/fields" element={<FieldManager />} />
           <Route path="inventory/items" element={<InventoryItemManager />} />
+          <Route
+            path="inventory/livestock/:animalId/medical-records"
+            element={<LivestockMedicalRecords />}
+          />
+          <Route path="inventory/livestock/:animalId/medical-records/new" element={<LivestockMedicalForm />} />
 
           {/* index => /dashboard */}
           <Route index element={<Dashboard />} />

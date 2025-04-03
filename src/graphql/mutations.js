@@ -579,9 +579,27 @@ export const createMedicalRecord = /* GraphQL */ `
     createMedicalRecord(input: $input, condition: $condition) {
       id
       livestockID
+      type
+      notes
       date
-      description
       medicine
+      livestock {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -601,9 +619,27 @@ export const updateMedicalRecord = /* GraphQL */ `
     updateMedicalRecord(input: $input, condition: $condition) {
       id
       livestockID
+      type
+      notes
       date
-      description
       medicine
+      livestock {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -623,9 +659,27 @@ export const deleteMedicalRecord = /* GraphQL */ `
     deleteMedicalRecord(input: $input, condition: $condition) {
       id
       livestockID
+      type
+      notes
       date
-      description
       medicine
+      livestock {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       _version

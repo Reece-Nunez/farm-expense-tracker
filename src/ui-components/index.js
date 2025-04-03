@@ -16,8 +16,6 @@ export { default as InventoryItemCreateForm } from "./InventoryItemCreateForm";
 export { default as InventoryItemUpdateForm } from "./InventoryItemUpdateForm";
 export { default as LivestockCreateForm } from "./LivestockCreateForm";
 export { default as LivestockUpdateForm } from "./LivestockUpdateForm";
-export { default as MedicalRecordCreateForm } from "./MedicalRecordCreateForm";
-export { default as MedicalRecordUpdateForm } from "./MedicalRecordUpdateForm";
 export { default as UserCreateForm } from "./UserCreateForm";
 export { default as UserUpdateForm } from "./UserUpdateForm";
 export { default as studioTheme } from "./studioTheme";

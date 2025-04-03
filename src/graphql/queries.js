@@ -568,9 +568,27 @@ export const getMedicalRecord = /* GraphQL */ `
     getMedicalRecord(id: $id) {
       id
       livestockID
+      type
+      notes
       date
-      description
       medicine
+      livestock {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -592,8 +610,9 @@ export const listMedicalRecords = /* GraphQL */ `
       items {
         id
         livestockID
+        type
+        notes
         date
-        description
         medicine
         createdAt
         updatedAt
@@ -626,8 +645,9 @@ export const syncMedicalRecords = /* GraphQL */ `
       items {
         id
         livestockID
+        type
+        notes
         date
-        description
         medicine
         createdAt
         updatedAt
@@ -1086,8 +1106,9 @@ export const medicalRecordsByLivestockID = /* GraphQL */ `
       items {
         id
         livestockID
+        type
+        notes
         date
-        description
         medicine
         createdAt
         updatedAt

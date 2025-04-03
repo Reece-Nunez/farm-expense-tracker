@@ -279,9 +279,11 @@ type EagerMedicalRecord = {
   };
   readonly id: string;
   readonly livestockID: string;
-  readonly date: string;
-  readonly description: string;
+  readonly type: string;
+  readonly notes?: string | null;
+  readonly date?: string | null;
   readonly medicine?: string | null;
+  readonly livestock?: Livestock | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly livestockMedicalRecordsId?: string | null;
@@ -294,9 +296,11 @@ type LazyMedicalRecord = {
   };
   readonly id: string;
   readonly livestockID: string;
-  readonly date: string;
-  readonly description: string;
+  readonly type: string;
+  readonly notes?: string | null;
+  readonly date?: string | null;
   readonly medicine?: string | null;
+  readonly livestock: AsyncItem<Livestock | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly livestockMedicalRecordsId?: string | null;
