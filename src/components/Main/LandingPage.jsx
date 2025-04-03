@@ -66,7 +66,7 @@ const LandingPage = () => {
             Track Every Penny. Grow Every Acre.
           </h1>
           <p className="text-base sm:text-xl max-w-3xl text-gray-600">
-            AgTrax helps farmers easily track expenses, analyze spending, and grow profits with powerful yet simple tools.
+            AgTrackr helps farmers easily track expenses, analyze spending, and grow profits with powerful yet simple tools.
           </p>
         </section>
 

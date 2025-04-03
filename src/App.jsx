@@ -52,7 +52,7 @@ import ImportIncomeCSV from "./components/CSV/ImportIncomeCSV";
 import Profile from "./components/Other/Profile";
 import LivestockManager from "./components/Inventory/LivestockManager";
 import InventoryDashboard from "./components/Inventory/InventoryDashboard";
-import LivestockProfile from "./components/Inventory/LivestockProfile";
+import LivestockProfile from "./components/Livestock/LivestockProfile";
 import ChickenManager from "./components/Inventory/ChickenManager";
 import FieldManager from "./components/Inventory/FieldManager";
 import InventoryItemManager from "./components/Inventory/InventoryItemManager";

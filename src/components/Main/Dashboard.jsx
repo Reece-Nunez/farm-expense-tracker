@@ -28,7 +28,7 @@ const COLORS = [
   "#FF9F40",
   "#8D99AE",
   "#2B2D42",
-  "#EF233C",
+  "#B5CDA3",
   "#FDCB82",
   "#70C1B3",
   "#247BA0",
