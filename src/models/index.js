@@ -4,11 +4,18 @@ import { schema } from './schema';
 
 
 
-const { User, Expense, Income, LineItem } = initSchema(schema);
+const { User, Expense, Income, Field, Livestock, LivestockFamily, MedicalRecord, ChickenFlock, EggLog, InventoryItem, LineItem } = initSchema(schema);
 
 export {
   User,
   Expense,
   Income,
+  Field,
+  Livestock,
+  LivestockFamily,
+  MedicalRecord,
+  ChickenFlock,
+  EggLog,
+  InventoryItem,
   LineItem
 };

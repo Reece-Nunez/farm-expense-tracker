@@ -58,3 +58,98 @@ type Income
   item: String
   notes: String
 }
+
+type Field @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
+  ]) {
+  id: ID!
+  name: String!
+  acres: Float
+  notes: String
+  livestock: [Livestock] @hasMany(indexName: "byField", fields: ["id"])
+}
+
+type Livestock @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
+  ]) {
+  id: ID!
+  name: String
+  species: String!
+  breed: String
+  birthdate: AWSDate
+  weight: Float
+  gender: String
+  # NOTE: fieldID is optional, but location.id is required if location is returned by the resolver.
+  # So avoid setting fieldID = null — omit the field entirely to prevent Amplify update mutation errors.
+  fieldID: ID @index(name: "byField")
+  location: Field @belongsTo(fields: ["fieldID"])
+  parents: [LivestockFamily] @hasMany(indexName: "byChild", fields: ["id"])
+  children: [LivestockFamily] @hasMany(indexName: "byParent", fields: ["id"])
+  medicalRecords: [MedicalRecord] @hasMany
+}
+
+
+type LivestockFamily @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+  ]) {
+  id: ID!
+  parentID: ID! @index(name: "byParent")
+  childID: ID! @index(name: "byChild")
+}
+
+
+type MedicalRecord @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+  ]) {
+  id: ID!
+  livestockID: ID! @index(name: "byLivestock")
+  date: AWSDate!
+  description: String!
+  medicine: String
+}
+
+type ChickenFlock @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+  ]) {
+  id: ID!
+  breed: String!
+  count: Int!
+  eggLogs: [EggLog] @hasMany
+  notes: String
+}
+
+type EggLog @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+  ]) {
+  id: ID!
+  date: AWSDate!
+  eggsCollected: Int!
+  chickenFlockID: ID! @index(name: "byChickenFlock")
+}
+
+type InventoryItem @model
+  @auth(rules: [
+    { allow: owner, ownerField: "owner" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
+  ]) {
+  id: ID!
+  name: String!
+  type: String!
+  quantity: Int
+  location: String
+  acquiredDate: AWSDate
+  notes: String
+}
+

@@ -292,6 +292,600 @@ export const syncIncomes = /* GraphQL */ `
     }
   }
 `;
+export const getField = /* GraphQL */ `
+  query GetField($id: ID!) {
+    getField(id: $id) {
+      id
+      name
+      acres
+      notes
+      livestock {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listFields = /* GraphQL */ `
+  query ListFields(
+    $filter: ModelFieldFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listFields(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        acres
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncFields = /* GraphQL */ `
+  query SyncFields(
+    $filter: ModelFieldFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncFields(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        name
+        acres
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getLivestock = /* GraphQL */ `
+  query GetLivestock($id: ID!) {
+    getLivestock(id: $id) {
+      id
+      name
+      species
+      breed
+      birthdate
+      weight
+      gender
+      fieldID
+      location {
+        id
+        name
+        acres
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      parents {
+        nextToken
+        startedAt
+        __typename
+      }
+      children {
+        nextToken
+        startedAt
+        __typename
+      }
+      medicalRecords {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listLivestocks = /* GraphQL */ `
+  query ListLivestocks(
+    $filter: ModelLivestockFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listLivestocks(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncLivestocks = /* GraphQL */ `
+  query SyncLivestocks(
+    $filter: ModelLivestockFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncLivestocks(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getLivestockFamily = /* GraphQL */ `
+  query GetLivestockFamily($id: ID!) {
+    getLivestockFamily(id: $id) {
+      id
+      parentID
+      childID
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listLivestockFamilies = /* GraphQL */ `
+  query ListLivestockFamilies(
+    $filter: ModelLivestockFamilyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listLivestockFamilies(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        parentID
+        childID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncLivestockFamilies = /* GraphQL */ `
+  query SyncLivestockFamilies(
+    $filter: ModelLivestockFamilyFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncLivestockFamilies(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        parentID
+        childID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getMedicalRecord = /* GraphQL */ `
+  query GetMedicalRecord($id: ID!) {
+    getMedicalRecord(id: $id) {
+      id
+      livestockID
+      date
+      description
+      medicine
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      livestockMedicalRecordsId
+      owner
+      __typename
+    }
+  }
+`;
+export const listMedicalRecords = /* GraphQL */ `
+  query ListMedicalRecords(
+    $filter: ModelMedicalRecordFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listMedicalRecords(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        livestockID
+        date
+        description
+        medicine
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        livestockMedicalRecordsId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncMedicalRecords = /* GraphQL */ `
+  query SyncMedicalRecords(
+    $filter: ModelMedicalRecordFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncMedicalRecords(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        livestockID
+        date
+        description
+        medicine
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        livestockMedicalRecordsId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getChickenFlock = /* GraphQL */ `
+  query GetChickenFlock($id: ID!) {
+    getChickenFlock(id: $id) {
+      id
+      breed
+      count
+      eggLogs {
+        nextToken
+        startedAt
+        __typename
+      }
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listChickenFlocks = /* GraphQL */ `
+  query ListChickenFlocks(
+    $filter: ModelChickenFlockFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listChickenFlocks(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        breed
+        count
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncChickenFlocks = /* GraphQL */ `
+  query SyncChickenFlocks(
+    $filter: ModelChickenFlockFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncChickenFlocks(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        breed
+        count
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getEggLog = /* GraphQL */ `
+  query GetEggLog($id: ID!) {
+    getEggLog(id: $id) {
+      id
+      date
+      eggsCollected
+      chickenFlockID
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      chickenFlockEggLogsId
+      owner
+      __typename
+    }
+  }
+`;
+export const listEggLogs = /* GraphQL */ `
+  query ListEggLogs(
+    $filter: ModelEggLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listEggLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        date
+        eggsCollected
+        chickenFlockID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        chickenFlockEggLogsId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncEggLogs = /* GraphQL */ `
+  query SyncEggLogs(
+    $filter: ModelEggLogFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncEggLogs(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        date
+        eggsCollected
+        chickenFlockID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        chickenFlockEggLogsId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const getInventoryItem = /* GraphQL */ `
+  query GetInventoryItem($id: ID!) {
+    getInventoryItem(id: $id) {
+      id
+      name
+      type
+      quantity
+      location
+      acquiredDate
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listInventoryItems = /* GraphQL */ `
+  query ListInventoryItems(
+    $filter: ModelInventoryItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listInventoryItems(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        type
+        quantity
+        location
+        acquiredDate
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const syncInventoryItems = /* GraphQL */ `
+  query SyncInventoryItems(
+    $filter: ModelInventoryItemFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncInventoryItems(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        name
+        type
+        quantity
+        location
+        acquiredDate
+        notes
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
 export const expensesByUserId = /* GraphQL */ `
   query ExpensesByUserId(
     $userId: ID!
@@ -361,6 +955,181 @@ export const incomesByUserId = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userIncomeId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const livestocksByFieldID = /* GraphQL */ `
+  query LivestocksByFieldID(
+    $fieldID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelLivestockFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    livestocksByFieldID(
+      fieldID: $fieldID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        fieldID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const livestockFamiliesByParentID = /* GraphQL */ `
+  query LivestockFamiliesByParentID(
+    $parentID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelLivestockFamilyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    livestockFamiliesByParentID(
+      parentID: $parentID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        parentID
+        childID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const livestockFamiliesByChildID = /* GraphQL */ `
+  query LivestockFamiliesByChildID(
+    $childID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelLivestockFamilyFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    livestockFamiliesByChildID(
+      childID: $childID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        parentID
+        childID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const medicalRecordsByLivestockID = /* GraphQL */ `
+  query MedicalRecordsByLivestockID(
+    $livestockID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelMedicalRecordFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    medicalRecordsByLivestockID(
+      livestockID: $livestockID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        livestockID
+        date
+        description
+        medicine
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        livestockMedicalRecordsId
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+  }
+`;
+export const eggLogsByChickenFlockID = /* GraphQL */ `
+  query EggLogsByChickenFlockID(
+    $chickenFlockID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelEggLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    eggLogsByChickenFlockID(
+      chickenFlockID: $chickenFlockID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        date
+        eggsCollected
+        chickenFlockID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        chickenFlockEggLogsId
         owner
         __typename
       }

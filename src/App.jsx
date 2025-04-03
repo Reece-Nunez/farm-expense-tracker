@@ -33,6 +33,7 @@ import PrivateRoute from "./components/Auth/PrivateRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import AuthGate from "./components/Auth/AuthGate";
 import { fixOwnerField } from "./utils/fixOwnerField";
+import GenericModal from "./components/Util/GenericModal";
 
 // Pages
 import LandingPage from "./components/Main/LandingPage";
@@ -49,6 +50,14 @@ import Reports from "./components/Other/Reports";
 import ImportExpensesCSV from "./components/CSV/ImportExpensesCSV";
 import ImportIncomeCSV from "./components/CSV/ImportIncomeCSV";
 import Profile from "./components/Other/Profile";
+import LivestockManager from "./components/Inventory/LivestockManager";
+import InventoryDashboard from "./components/Inventory/InventoryDashboard";
+import LivestockProfile from "./components/Inventory/LivestockProfile";
+import ChickenManager from "./components/Inventory/ChickenManager";
+import FieldManager from "./components/Inventory/FieldManager";
+import InventoryItemManager from "./components/Inventory/InventoryItemManager";
+import DebugComponent from "./components/Util/DebugComponent";
+import ClearDataStoreOnce from "./components/Util/ClearDataStoreOnce";
 
 // Amplify init
 Amplify.configure({ ...awsExports });
@@ -91,12 +100,12 @@ function AppInner() {
 
   // Generic confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // Generic delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => {});
+  const [deleteAction, setDeleteAction] = useState(() => { });
   const [deleteMessage, setDeleteMessage] = useState("");
 
   // Form refs
@@ -237,7 +246,7 @@ function AppInner() {
       } finally {
         setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         expenseFormRef.current?.resetForm();
       }
@@ -311,7 +320,7 @@ function AppInner() {
       } finally {
         setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
@@ -361,6 +370,7 @@ function AppInner() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/util/debug" element={<DebugComponent />} />
 
         {/* Auth route */}
         <Route element={<AuthPageLayout />}>
@@ -376,6 +386,13 @@ function AppInner() {
             </PrivateRoute>
           }
         >
+          <Route path="inventory" element={<InventoryDashboard />} />
+          <Route path="inventory/livestock" element={<LivestockManager />} />
+          <Route path="inventory/livestock/:animalId" element={<LivestockProfile />} />
+          <Route path="inventory/chickens" element={<ChickenManager />} />
+          <Route path="inventory/fields" element={<FieldManager />} />
+          <Route path="inventory/items" element={<InventoryItemManager />} />
+
           {/* index => /dashboard */}
           <Route index element={<Dashboard />} />
 

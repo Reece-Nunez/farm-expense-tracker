@@ -1,6 +1,6 @@
 import { ModelInit, MutableModel, __modelMeta__, ManagedIdentifier } from "@aws-amplify/datastore";
 // @ts-ignore
-import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/datastore";
+import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@aws-amplify/datastore";
 
 
 
@@ -158,4 +158,258 @@ export declare type Income = LazyLoading extends LazyLoadingDisabled ? EagerInco
 
 export declare const Income: (new (init: ModelInit<Income>) => Income) & {
   copyOf(source: Income, mutator: (draft: MutableModel<Income>) => MutableModel<Income> | void): Income;
+}
+
+type EagerField = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Field, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly acres?: number | null;
+  readonly notes?: string | null;
+  readonly livestock?: (Livestock | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyField = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Field, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly acres?: number | null;
+  readonly notes?: string | null;
+  readonly livestock: AsyncCollection<Livestock>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Field = LazyLoading extends LazyLoadingDisabled ? EagerField : LazyField
+
+export declare const Field: (new (init: ModelInit<Field>) => Field) & {
+  copyOf(source: Field, mutator: (draft: MutableModel<Field>) => MutableModel<Field> | void): Field;
+}
+
+type EagerLivestock = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Livestock, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name?: string | null;
+  readonly species: string;
+  readonly breed?: string | null;
+  readonly birthdate?: string | null;
+  readonly weight?: number | null;
+  readonly gender?: string | null;
+  readonly fieldID?: string | null;
+  readonly location?: Field | null;
+  readonly parents?: (LivestockFamily | null)[] | null;
+  readonly children?: (LivestockFamily | null)[] | null;
+  readonly medicalRecords?: (MedicalRecord | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyLivestock = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Livestock, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name?: string | null;
+  readonly species: string;
+  readonly breed?: string | null;
+  readonly birthdate?: string | null;
+  readonly weight?: number | null;
+  readonly gender?: string | null;
+  readonly fieldID?: string | null;
+  readonly location: AsyncItem<Field | undefined>;
+  readonly parents: AsyncCollection<LivestockFamily>;
+  readonly children: AsyncCollection<LivestockFamily>;
+  readonly medicalRecords: AsyncCollection<MedicalRecord>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Livestock = LazyLoading extends LazyLoadingDisabled ? EagerLivestock : LazyLivestock
+
+export declare const Livestock: (new (init: ModelInit<Livestock>) => Livestock) & {
+  copyOf(source: Livestock, mutator: (draft: MutableModel<Livestock>) => MutableModel<Livestock> | void): Livestock;
+}
+
+type EagerLivestockFamily = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<LivestockFamily, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly parentID: string;
+  readonly childID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyLivestockFamily = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<LivestockFamily, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly parentID: string;
+  readonly childID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type LivestockFamily = LazyLoading extends LazyLoadingDisabled ? EagerLivestockFamily : LazyLivestockFamily
+
+export declare const LivestockFamily: (new (init: ModelInit<LivestockFamily>) => LivestockFamily) & {
+  copyOf(source: LivestockFamily, mutator: (draft: MutableModel<LivestockFamily>) => MutableModel<LivestockFamily> | void): LivestockFamily;
+}
+
+type EagerMedicalRecord = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MedicalRecord, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly livestockID: string;
+  readonly date: string;
+  readonly description: string;
+  readonly medicine?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly livestockMedicalRecordsId?: string | null;
+}
+
+type LazyMedicalRecord = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<MedicalRecord, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly livestockID: string;
+  readonly date: string;
+  readonly description: string;
+  readonly medicine?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly livestockMedicalRecordsId?: string | null;
+}
+
+export declare type MedicalRecord = LazyLoading extends LazyLoadingDisabled ? EagerMedicalRecord : LazyMedicalRecord
+
+export declare const MedicalRecord: (new (init: ModelInit<MedicalRecord>) => MedicalRecord) & {
+  copyOf(source: MedicalRecord, mutator: (draft: MutableModel<MedicalRecord>) => MutableModel<MedicalRecord> | void): MedicalRecord;
+}
+
+type EagerChickenFlock = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ChickenFlock, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly breed: string;
+  readonly count: number;
+  readonly eggLogs?: (EggLog | null)[] | null;
+  readonly notes?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyChickenFlock = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ChickenFlock, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly breed: string;
+  readonly count: number;
+  readonly eggLogs: AsyncCollection<EggLog>;
+  readonly notes?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type ChickenFlock = LazyLoading extends LazyLoadingDisabled ? EagerChickenFlock : LazyChickenFlock
+
+export declare const ChickenFlock: (new (init: ModelInit<ChickenFlock>) => ChickenFlock) & {
+  copyOf(source: ChickenFlock, mutator: (draft: MutableModel<ChickenFlock>) => MutableModel<ChickenFlock> | void): ChickenFlock;
+}
+
+type EagerEggLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EggLog, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly date: string;
+  readonly eggsCollected: number;
+  readonly chickenFlockID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly chickenFlockEggLogsId?: string | null;
+}
+
+type LazyEggLog = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<EggLog, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly date: string;
+  readonly eggsCollected: number;
+  readonly chickenFlockID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+  readonly chickenFlockEggLogsId?: string | null;
+}
+
+export declare type EggLog = LazyLoading extends LazyLoadingDisabled ? EagerEggLog : LazyEggLog
+
+export declare const EggLog: (new (init: ModelInit<EggLog>) => EggLog) & {
+  copyOf(source: EggLog, mutator: (draft: MutableModel<EggLog>) => MutableModel<EggLog> | void): EggLog;
+}
+
+type EagerInventoryItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<InventoryItem, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly quantity?: number | null;
+  readonly location?: string | null;
+  readonly acquiredDate?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyInventoryItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<InventoryItem, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly quantity?: number | null;
+  readonly location?: string | null;
+  readonly acquiredDate?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type InventoryItem = LazyLoading extends LazyLoadingDisabled ? EagerInventoryItem : LazyInventoryItem
+
+export declare const InventoryItem: (new (init: ModelInit<InventoryItem>) => InventoryItem) & {
+  copyOf(source: InventoryItem, mutator: (draft: MutableModel<InventoryItem>) => MutableModel<InventoryItem> | void): InventoryItem;
 }

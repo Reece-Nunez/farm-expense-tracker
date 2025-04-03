@@ -18,6 +18,8 @@ import {
   ChevronRightIcon,
   ChevronDownIcon
 } from "@heroicons/react/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
 
 
@@ -124,7 +126,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
       label: "Other",
       items: [
         { label: "Reports", icon: ChartBarIcon, route: "/dashboard/reports", color: "text-yellow-600" },
-        { label: "Profile", icon: UserIcon, route: "/dashboard/profile", color: "text-blue-800" },
+        {
+          label: "Inventory (New)",
+          icon: () => <FontAwesomeIcon icon={faBoxesStacked} className="w-5 h-5 text-brown-800" />,
+          route: "/dashboard/inventory",
+        },
         {
           label: "Homepage",
           icon: () => (
@@ -135,9 +141,10 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
             />
           ),
           route: "/",
-        }
+        },
+        //{ label: "Debug", icon: PlusIcon, route: "/util/debug", color: "text-red-300"},
       ],
-    },
+    }
   ];
 
 
@@ -202,7 +209,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           onClick={() => handleNavClick("/dashboard")}
           className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
         >
-          <HomeIcon className="w-5 h-5 text-orange-600" />
+          <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-orange-600" />
           <span>Dashboard</span>
         </button>
         {groupedNavItems.map((group, groupIdx) => {

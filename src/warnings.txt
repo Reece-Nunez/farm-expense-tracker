@@ -1,0 +1,89 @@
+LivestockManager.jsx:85 [WARN] 04:48.798 DataStore 
+{recoverySuggestion: 'Ensure app code is up to date, auth directives exi… https://github.com/aws-amplify/amplify-js/issues', localModel: {…}, message: "Cannot return null for non-nullable type: 'ID' within parent 'Field' (/createLivestock/location/id)", operation: 'Create', errorType: 'BadRecord', …}
+cause
+: 
+locations
+: 
+null
+message
+: 
+"Cannot return null for non-nullable type: 'ID' within parent 'Field' (/createLivestock/location/id)"
+path
+: 
+Array(3)
+0
+: 
+"createLivestock"
+1
+: 
+"location"
+2
+: 
+"id"
+length
+: 
+3
+[[Prototype]]
+: 
+Array(0)
+[[Prototype]]
+: 
+Object
+errorInfo
+: 
+undefined
+errorType
+: 
+"BadRecord"
+localModel
+: 
+birthdate
+: 
+"2023-02-02"
+breed
+: 
+"Black Angus"
+fieldID
+: 
+"5084fe89-8536-467e-8737-2a88483cb030"
+gender
+: 
+"Female"
+id
+: 
+"ab1ce879-74b9-4a65-bf76-ad4a51119de4"
+name
+: 
+"Naomi"
+species
+: 
+"Cow"
+weight
+: 
+800
+_version
+: 
+undefined
+[[Prototype]]
+: 
+Object
+message
+: 
+"Cannot return null for non-nullable type: 'ID' within parent 'Field' (/createLivestock/location/id)"
+operation
+: 
+"Create"
+process
+: 
+"mutate"
+recoverySuggestion
+: 
+"Ensure app code is up to date, auth directives exist and are correct on each model, and that server-side data has not been invalidated by a schema change. If the problem persists, search for or create an issue: https://github.com/aws-amplify/amplify-js/issues"
+remoteModel
+: 
+null
+[[Prototype]]
+: 
+Object
+await in (anonymous)		
+handleAddOrUpdateAnimal	@	LivestockManager.jsx:85
