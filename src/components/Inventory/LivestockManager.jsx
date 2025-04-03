@@ -194,8 +194,14 @@ const LivestockManager = () => {
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input name="name" value={newAnimal.name} onChange={handleChange} placeholder="Name" className="p-2 border rounded" />
-                    <input name="species" value={newAnimal.species} onChange={handleChange} placeholder="Species" className="p-2 border rounded" />
+                    <input name="name" value={newAnimal.name} onChange={handleChange} placeholder="Animal's Name" className="p-2 border rounded" />
+                    <select name="species" value={newAnimal.species} onChange={handleChange} placeholder="Species" className="p-2 border rounded">
+                    <option value="">Select Species</option>
+                        <option value="Cow">Cow</option>
+                        <option value="Pig">Pig</option>
+                        <option value="Goat">Goat</option>
+                        <option value="Sheep">Sheep</option>
+                    </select>
                     <input name="breed" value={newAnimal.breed} onChange={handleChange} placeholder="Breed" className="p-2 border rounded" />
                     <input type="date" name="birthdate" value={newAnimal.birthdate} onChange={handleChange} className="p-2 border rounded" />
                     <input name="weight" value={newAnimal.weight} onChange={handleChange} placeholder="Weight (lbs)" className="p-2 border rounded" />

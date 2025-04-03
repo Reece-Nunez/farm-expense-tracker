@@ -77,36 +77,61 @@ const InventoryDashboard = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">Farm Inventory Dashboard</h1>
-
-      {/* Analytics Summary */}
+  
+      {/* Analytics Summary - now acts as nav buttons */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-brown-100 p-4 rounded-lg text-center shadow">
+  
+        {/* Livestock */}
+        <div
+          className="bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
+          onClick={() => navigate("/dashboard/inventory/livestock")}
+        >
           <FontAwesomeIcon icon={faCow} className="text-brown-600 text-2xl mb-2" />
           <p className="font-bold text-lg">{analytics.livestock}</p>
           <p className="text-sm">Livestock</p>
         </div>
-        <div className="bg-yellow-100 p-4 rounded-lg text-center shadow">
+  
+        {/* Chicken Flocks */}
+        <div
+          className="bg-yellow-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400"
+          onClick={() => navigate("/dashboard/inventory/chickens")}
+        >
           <FontAwesomeIcon icon={faEgg} className="text-yellow-600 text-2xl mb-2" />
           <p className="font-bold text-lg">{analytics.chickens}</p>
           <p className="text-sm">Chicken Flocks</p>
         </div>
-        <div className="bg-green-100 p-4 rounded-lg text-center shadow">
+  
+        {/* Fields */}
+        <div
+          className="bg-green-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-green-400"
+          onClick={() => navigate("/dashboard/inventory/fields")}
+        >
           <FontAwesomeIcon icon={faWheatAwn} className="text-green-600 text-2xl mb-2" />
           <p className="font-bold text-lg">{analytics.fields}</p>
           <p className="text-sm">Fields</p>
         </div>
-        <div className="bg-gray-100 p-4 rounded-lg text-center shadow">
+  
+        {/* Equipment */}
+        <div
+          className="bg-gray-300 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-gray-400"
+          onClick={() => navigate("/dashboard/inventory/equipment")}
+        >
           <FontAwesomeIcon icon={faTractor} className="text-gray-600 text-2xl mb-2" />
           <p className="font-bold text-lg">{analytics.items}</p>
           <p className="text-sm">Equipment</p>
         </div>
-        <div className="col-span-2 md:col-span-4 bg-indigo-100 p-4 rounded-lg text-center shadow">
+  
+        {/* Total Acreage */}
+        <div
+          className="col-span-2 md:col-span-4 bg-indigo-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-indigo-400"
+          onClick={() => navigate("/dashboard/inventory/fields")}
+        >
           <FontAwesomeIcon icon={faMap} className="text-indigo-600 text-2xl mb-2" />
           <p className="font-bold text-xl">{analytics.totalAcres.toFixed(1)} acres</p>
           <p className="text-sm">Total Acreage</p>
         </div>
       </div>
-
+  
       {/* Advanced Analytics */}
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-4">Livestock by Species</h2>
@@ -118,7 +143,7 @@ const InventoryDashboard = () => {
           ))}
         </ul>
       </div>
-
+  
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-4">Egg Collection Summary</h2>
         <ul className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -129,7 +154,7 @@ const InventoryDashboard = () => {
           ))}
         </ul>
       </div>
-
+  
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-4">Field Utilization</h2>
         <ul className="space-y-2">
@@ -140,21 +165,7 @@ const InventoryDashboard = () => {
           ))}
         </ul>
       </div>
-
-      {/* Navigation Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {sections.map(({ name, route, icon }) => (
-          <button
-            key={name}
-            onClick={() => navigate(route)}
-            className="rounded-2xl shadow-lg p-6 bg-white hover:bg-gray-100 transition text-lg font-semibold border border-gray-200 flex items-center space-x-4"
-          >
-            <FontAwesomeIcon icon={icon} className="text-2xl" />
-            <span>{name}</span>
-          </button>
-        ))}
-      </div>
-
+  
       <div className="text-center mt-20 text-gray-600">
         <p>
           This feature is in early access, please be patient — we’d love your feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
@@ -162,6 +173,7 @@ const InventoryDashboard = () => {
       </div>
     </div>
   );
+  
 };
 
 export default InventoryDashboard;

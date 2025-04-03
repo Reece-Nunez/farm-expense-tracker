@@ -48,13 +48,13 @@ export default function EditExpense() {
             updated.grandTotal = formattedExpense.grandTotal;
           })
         );
-        toast.success("Expense updated successfully!");
         navigate("/dashboard/expenses");
       } catch (error) {
         console.error("[EditExpense] update error:", error);
         toast.error("Failed to update expense.");
       } finally {
         setShowConfirm(false);
+        toast.success("Expense updated successfully!");
       }
     });
     setShowConfirm(true);
