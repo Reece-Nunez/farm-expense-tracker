@@ -320,6 +320,7 @@ type EagerChickenFlock = {
   readonly id: string;
   readonly breed: string;
   readonly count: number;
+  readonly hasRooster?: boolean | null;
   readonly eggLogs?: (EggLog | null)[] | null;
   readonly notes?: string | null;
   readonly createdAt?: string | null;
@@ -334,6 +335,7 @@ type LazyChickenFlock = {
   readonly id: string;
   readonly breed: string;
   readonly count: number;
+  readonly hasRooster?: boolean | null;
   readonly eggLogs: AsyncCollection<EggLog>;
   readonly notes?: string | null;
   readonly createdAt?: string | null;

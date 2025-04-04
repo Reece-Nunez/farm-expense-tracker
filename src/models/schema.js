@@ -1023,6 +1023,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "hasRooster": {
+                    "name": "hasRooster",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "eggLogs": {
                     "name": "eggLogs",
                     "isArray": true,
@@ -1376,5 +1383,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "01bf028a58df7ac8cfbae38ddbf256c9"
+    "version": "1026389cd1649d90af1eafb31b5b463d"
 };

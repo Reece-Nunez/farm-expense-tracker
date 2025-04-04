@@ -126,6 +126,7 @@ type ChickenFlock @model
   id: ID!
   breed: String!
   count: Int!
+  hasRooster: Boolean
   eggLogs: [EggLog] @hasMany
   notes: String
 }

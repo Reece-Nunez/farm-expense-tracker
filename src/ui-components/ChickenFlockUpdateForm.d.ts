@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { ChickenFlock } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -25,11 +25,13 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type ChickenFlockUpdateFormInputValues = {
     breed?: string;
     count?: number;
+    hasRooster?: boolean;
     notes?: string;
 };
 export declare type ChickenFlockUpdateFormValidationValues = {
     breed?: ValidationFunction<string>;
     count?: ValidationFunction<number>;
+    hasRooster?: ValidationFunction<boolean>;
     notes?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -37,6 +39,7 @@ export declare type ChickenFlockUpdateFormOverridesProps = {
     ChickenFlockUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     breed?: PrimitiveOverrideProps<TextFieldProps>;
     count?: PrimitiveOverrideProps<TextFieldProps>;
+    hasRooster?: PrimitiveOverrideProps<SwitchFieldProps>;
     notes?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type ChickenFlockUpdateFormProps = React.PropsWithChildren<{

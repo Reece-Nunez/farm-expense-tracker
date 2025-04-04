@@ -6,7 +6,13 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SwitchField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { ChickenFlock } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { DataStore } from "aws-amplify/datastore";
@@ -24,21 +30,25 @@ export default function ChickenFlockCreateForm(props) {
   const initialValues = {
     breed: "",
     count: "",
+    hasRooster: false,
     notes: "",
   };
   const [breed, setBreed] = React.useState(initialValues.breed);
   const [count, setCount] = React.useState(initialValues.count);
+  const [hasRooster, setHasRooster] = React.useState(initialValues.hasRooster);
   const [notes, setNotes] = React.useState(initialValues.notes);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setBreed(initialValues.breed);
     setCount(initialValues.count);
+    setHasRooster(initialValues.hasRooster);
     setNotes(initialValues.notes);
     setErrors({});
   };
   const validations = {
     breed: [{ type: "Required" }],
     count: [{ type: "Required" }],
+    hasRooster: [],
     notes: [],
   };
   const runValidationTasks = async (
@@ -69,6 +79,7 @@ export default function ChickenFlockCreateForm(props) {
         let modelFields = {
           breed,
           count,
+          hasRooster,
           notes,
         };
         const validationResponses = await Promise.all(
@@ -126,6 +137,7 @@ export default function ChickenFlockCreateForm(props) {
             const modelFields = {
               breed: value,
               count,
+              hasRooster,
               notes,
             };
             const result = onChange(modelFields);
@@ -156,6 +168,7 @@ export default function ChickenFlockCreateForm(props) {
             const modelFields = {
               breed,
               count: value,
+              hasRooster,
               notes,
             };
             const result = onChange(modelFields);
@@ -171,6 +184,33 @@ export default function ChickenFlockCreateForm(props) {
         hasError={errors.count?.hasError}
         {...getOverrideProps(overrides, "count")}
       ></TextField>
+      <SwitchField
+        label="Has rooster"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={hasRooster}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              breed,
+              count,
+              hasRooster: value,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.hasRooster ?? value;
+          }
+          if (errors.hasRooster?.hasError) {
+            runValidationTasks("hasRooster", value);
+          }
+          setHasRooster(value);
+        }}
+        onBlur={() => runValidationTasks("hasRooster", hasRooster)}
+        errorMessage={errors.hasRooster?.errorMessage}
+        hasError={errors.hasRooster?.hasError}
+        {...getOverrideProps(overrides, "hasRooster")}
+      ></SwitchField>
       <TextField
         label="Notes"
         isRequired={false}
@@ -182,6 +222,7 @@ export default function ChickenFlockCreateForm(props) {
             const modelFields = {
               breed,
               count,
+              hasRooster,
               notes: value,
             };
             const result = onChange(modelFields);

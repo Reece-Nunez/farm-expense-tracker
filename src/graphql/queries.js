@@ -670,6 +670,7 @@ export const getChickenFlock = /* GraphQL */ `
       id
       breed
       count
+      hasRooster
       eggLogs {
         nextToken
         startedAt
@@ -697,6 +698,7 @@ export const listChickenFlocks = /* GraphQL */ `
         id
         breed
         count
+        hasRooster
         notes
         createdAt
         updatedAt
@@ -729,6 +731,7 @@ export const syncChickenFlocks = /* GraphQL */ `
         id
         breed
         count
+        hasRooster
         notes
         createdAt
         updatedAt

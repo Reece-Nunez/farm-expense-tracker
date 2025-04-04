@@ -700,6 +700,7 @@ export const createChickenFlock = /* GraphQL */ `
       id
       breed
       count
+      hasRooster
       eggLogs {
         nextToken
         startedAt
@@ -725,6 +726,7 @@ export const updateChickenFlock = /* GraphQL */ `
       id
       breed
       count
+      hasRooster
       eggLogs {
         nextToken
         startedAt
@@ -750,6 +752,7 @@ export const deleteChickenFlock = /* GraphQL */ `
       id
       breed
       count
+      hasRooster
       eggLogs {
         nextToken
         startedAt

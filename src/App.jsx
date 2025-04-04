@@ -393,7 +393,7 @@ function AppInner() {
           <Route path="inventory/livestock/:animalId" element={<LivestockProfile />} />
           <Route path="inventory/chickens" element={<ChickenManager />} />
           <Route path="inventory/fields" element={<FieldManager />} />
-          <Route path="inventory/items" element={<InventoryItemManager />} />
+          <Route path="inventory/inventory-items" element={<InventoryItemManager />} />
           <Route
             path="inventory/livestock/:animalId/medical-records"
             element={<LivestockMedicalRecords />}

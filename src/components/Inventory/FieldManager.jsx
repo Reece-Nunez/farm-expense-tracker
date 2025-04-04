@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DataStore } from "@aws-amplify/datastore";
 import { Field, Livestock } from "../../models";
 
@@ -7,6 +8,7 @@ const FieldManager = () => {
   const [livestock, setLivestock] = useState([]);
   const [fieldForm, setFieldForm] = useState({ name: "", acres: "", notes: "" });
   const [editingId, setEditingId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFields();
@@ -132,6 +134,10 @@ const FieldManager = () => {
           );
         })}
       </div>
+      <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}
+      >
+        Back To Inventory
+      </button>
     </div>
   );
 };

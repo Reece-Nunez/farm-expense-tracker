@@ -1,4 +1,3 @@
-// InventoryDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -114,7 +113,7 @@ const InventoryDashboard = () => {
         {/* Equipment */}
         <div
           className="bg-gray-300 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-gray-400"
-          onClick={() => navigate("/dashboard/inventory/equipment")}
+          onClick={() => navigate("/dashboard/inventory/inventory-items")}
         >
           <FontAwesomeIcon icon={faTractor} className="text-gray-600 text-2xl mb-2" />
           <p className="font-bold text-lg">{analytics.items}</p>
