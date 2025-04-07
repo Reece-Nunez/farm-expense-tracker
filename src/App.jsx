@@ -63,6 +63,7 @@ import LivestockMedicalForm from "./components/Livestock/LivestockMedicalForm";
 
 // Amplify init
 Amplify.configure({ ...awsExports });
+DataStore.start();
 Modal.setAppElement("#root");
 
 /**
