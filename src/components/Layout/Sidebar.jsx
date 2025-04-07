@@ -93,12 +93,15 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
 
   const handleSignOut = async () => {
     try {
+      await DataStore.stop();
+      await DataStore.clear();
       await signOut();
-      navigate('/')
+      navigate('/');
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
+  
 
   const groupedNavItems = [
     {

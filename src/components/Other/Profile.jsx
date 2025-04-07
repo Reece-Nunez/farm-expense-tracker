@@ -28,6 +28,7 @@ export default function Profile() {
 
         // Query for a User record by sub
         const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(userSub));
+        console.log(foundUser, userSub);
         if (foundUser) {
           setUserRecord(foundUser);
           setUsername(foundUser.username || "");

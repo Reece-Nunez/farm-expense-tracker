@@ -1,6 +1,6 @@
 type User @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -21,7 +21,7 @@ type User @model
 
 type Expense @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
@@ -45,7 +45,7 @@ type LineItem {
 type Income
   @model
   @auth(rules: [
-      { allow: owner, ownerField: "owner"},
+      { allow: owner, ownerField: "userId"},
       { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -61,7 +61,7 @@ type Income
 
 type Field @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
@@ -73,7 +73,7 @@ type Field @model
 
 type Livestock @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
@@ -95,7 +95,7 @@ type Livestock @model
 
 type LivestockFamily @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -106,7 +106,7 @@ type LivestockFamily @model
 
 type MedicalRecord @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -120,7 +120,7 @@ type MedicalRecord @model
 
 type ChickenFlock @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -133,7 +133,7 @@ type ChickenFlock @model
 
 type EggLog @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -144,7 +144,7 @@ type EggLog @model
 
 type InventoryItem @model
   @auth(rules: [
-    { allow: owner, ownerField: "owner" },
+    { allow: owner, ownerField: "userId" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!

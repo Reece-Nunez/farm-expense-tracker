@@ -15,6 +15,7 @@ import {
 import { DataStore } from "@aws-amplify/datastore";
 import { Expense, Income } from "@/models";
 import { useLoading } from "../../context/LoadingContext";
+import { fetchAuthSession } from "@aws-amplify/auth";
 
 // =========================
 // 🎨 Chart Colors
@@ -63,15 +64,20 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+
+
   // -------------------------
   // FETCH DATA
   // -------------------------
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const session = await fetchAuthSession();
+      const userSub = session?.tokens?.idToken?.payload?.sub;
       const [allExpenses, allIncomes] = await Promise.all([
-        DataStore.query(Expense),
-        DataStore.query(Income),
+
+        DataStore.query(Expense, (e) => e.userId.eq(userSub)),
+        DataStore.query(Income, (i) => i.userId.eq(userSub)),
       ]);
 
       const sortedExpenses = [...allExpenses].sort(
@@ -261,9 +267,8 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
       {["day", "week", "month"].map((range) => (
         <button
           key={range}
-          className={`px-3 py-1 mx-1 rounded ${
-            timeRange === range ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
+          className={`px-3 py-1 mx-1 rounded ${timeRange === range ? "bg-blue-600 text-white" : "bg-gray-200"
+            }`}
           onClick={() => setTimeRange(range)}
         >
           {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -483,9 +488,8 @@ const RecentList = ({ title, items, isExpense = false }) => (
               </p>
             </div>
             <p
-              className={`text-sm font-bold ${
-                isExpense ? "text-red-500" : "text-green-600"
-              }`}
+              className={`text-sm font-bold ${isExpense ? "text-red-500" : "text-green-600"
+                }`}
             >
               {isExpense
                 ? `-$${item.grandTotal?.toFixed(2)}`
