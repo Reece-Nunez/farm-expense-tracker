@@ -14,7 +14,6 @@ export const getUser = /* GraphQL */ `
       profilePictureKey
       role
       preferences
-      owner
       expenses {
         nextToken
         startedAt
@@ -30,6 +29,7 @@ export const getUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
+      userId
       __typename
     }
   }
@@ -52,12 +52,12 @@ export const listUsers = /* GraphQL */ `
         profilePictureKey
         role
         preferences
-        owner
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        userId
         __typename
       }
       nextToken
@@ -90,12 +90,12 @@ export const syncUsers = /* GraphQL */ `
         profilePictureKey
         role
         preferences
-        owner
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        userId
         __typename
       }
       nextToken
@@ -128,7 +128,6 @@ export const getExpense = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userExpensesId
-      owner
       __typename
     }
   }
@@ -154,7 +153,6 @@ export const listExpenses = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userExpensesId
-        owner
         __typename
       }
       nextToken
@@ -190,7 +188,6 @@ export const syncExpenses = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userExpensesId
-        owner
         __typename
       }
       nextToken
@@ -217,7 +214,6 @@ export const getIncome = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userIncomeId
-      owner
       __typename
     }
   }
@@ -245,7 +241,6 @@ export const listIncomes = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userIncomeId
-        owner
         __typename
       }
       nextToken
@@ -283,7 +278,6 @@ export const syncIncomes = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userIncomeId
-        owner
         __typename
       }
       nextToken
@@ -309,7 +303,7 @@ export const getField = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -331,7 +325,7 @@ export const listFields = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -363,7 +357,7 @@ export const syncFields = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -393,7 +387,7 @@ export const getLivestock = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       parents {
@@ -416,7 +410,7 @@ export const getLivestock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -442,7 +436,7 @@ export const listLivestocks = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -478,7 +472,7 @@ export const syncLivestocks = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -498,7 +492,7 @@ export const getLivestockFamily = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -523,7 +517,7 @@ export const listLivestockFamilies = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -554,7 +548,7 @@ export const syncLivestockFamilies = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -586,7 +580,7 @@ export const getMedicalRecord = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       createdAt
@@ -595,7 +589,7 @@ export const getMedicalRecord = /* GraphQL */ `
       _deleted
       _lastChangedAt
       livestockMedicalRecordsId
-      owner
+      userId
       __typename
     }
   }
@@ -620,7 +614,7 @@ export const listMedicalRecords = /* GraphQL */ `
         _deleted
         _lastChangedAt
         livestockMedicalRecordsId
-        owner
+        userId
         __typename
       }
       nextToken
@@ -655,7 +649,7 @@ export const syncMedicalRecords = /* GraphQL */ `
         _deleted
         _lastChangedAt
         livestockMedicalRecordsId
-        owner
+        userId
         __typename
       }
       nextToken
@@ -682,7 +676,7 @@ export const getChickenFlock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -705,7 +699,7 @@ export const listChickenFlocks = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -738,7 +732,7 @@ export const syncChickenFlocks = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -760,7 +754,7 @@ export const getEggLog = /* GraphQL */ `
       _deleted
       _lastChangedAt
       chickenFlockEggLogsId
-      owner
+      userId
       __typename
     }
   }
@@ -783,7 +777,7 @@ export const listEggLogs = /* GraphQL */ `
         _deleted
         _lastChangedAt
         chickenFlockEggLogsId
-        owner
+        userId
         __typename
       }
       nextToken
@@ -816,7 +810,7 @@ export const syncEggLogs = /* GraphQL */ `
         _deleted
         _lastChangedAt
         chickenFlockEggLogsId
-        owner
+        userId
         __typename
       }
       nextToken
@@ -840,7 +834,7 @@ export const getInventoryItem = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -865,7 +859,7 @@ export const listInventoryItems = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -900,7 +894,7 @@ export const syncInventoryItems = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -938,7 +932,6 @@ export const expensesByUserId = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userExpensesId
-        owner
         __typename
       }
       nextToken
@@ -978,7 +971,6 @@ export const incomesByUserId = /* GraphQL */ `
         _deleted
         _lastChangedAt
         userIncomeId
-        owner
         __typename
       }
       nextToken
@@ -1016,7 +1008,7 @@ export const livestocksByFieldID = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -1049,7 +1041,7 @@ export const livestockFamiliesByParentID = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -1082,7 +1074,7 @@ export const livestockFamiliesByChildID = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       nextToken
@@ -1119,7 +1111,7 @@ export const medicalRecordsByLivestockID = /* GraphQL */ `
         _deleted
         _lastChangedAt
         livestockMedicalRecordsId
-        owner
+        userId
         __typename
       }
       nextToken
@@ -1154,7 +1146,7 @@ export const eggLogsByChickenFlockID = /* GraphQL */ `
         _deleted
         _lastChangedAt
         chickenFlockEggLogsId
-        owner
+        userId
         __typename
       }
       nextToken

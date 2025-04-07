@@ -39,7 +39,6 @@ type EagerUser = {
   readonly profilePictureKey?: string | null;
   readonly role?: string | null;
   readonly preferences?: string | null;
-  readonly owner?: string | null;
   readonly expenses?: (Expense | null)[] | null;
   readonly income?: (Income | null)[] | null;
   readonly createdAt?: string | null;
@@ -61,7 +60,6 @@ type LazyUser = {
   readonly profilePictureKey?: string | null;
   readonly role?: string | null;
   readonly preferences?: string | null;
-  readonly owner?: string | null;
   readonly expenses: AsyncCollection<Expense>;
   readonly income: AsyncCollection<Income>;
   readonly createdAt?: string | null;

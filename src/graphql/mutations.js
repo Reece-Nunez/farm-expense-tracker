@@ -17,7 +17,6 @@ export const createUser = /* GraphQL */ `
       profilePictureKey
       role
       preferences
-      owner
       expenses {
         nextToken
         startedAt
@@ -33,6 +32,7 @@ export const createUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
+      userId
       __typename
     }
   }
@@ -53,7 +53,6 @@ export const updateUser = /* GraphQL */ `
       profilePictureKey
       role
       preferences
-      owner
       expenses {
         nextToken
         startedAt
@@ -69,6 +68,7 @@ export const updateUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
+      userId
       __typename
     }
   }
@@ -89,7 +89,6 @@ export const deleteUser = /* GraphQL */ `
       profilePictureKey
       role
       preferences
-      owner
       expenses {
         nextToken
         startedAt
@@ -105,6 +104,7 @@ export const deleteUser = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
+      userId
       __typename
     }
   }
@@ -136,7 +136,6 @@ export const createExpense = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userExpensesId
-      owner
       __typename
     }
   }
@@ -168,7 +167,6 @@ export const updateExpense = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userExpensesId
-      owner
       __typename
     }
   }
@@ -200,7 +198,6 @@ export const deleteExpense = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userExpensesId
-      owner
       __typename
     }
   }
@@ -226,7 +223,6 @@ export const createIncome = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userIncomeId
-      owner
       __typename
     }
   }
@@ -252,7 +248,6 @@ export const updateIncome = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userIncomeId
-      owner
       __typename
     }
   }
@@ -278,7 +273,6 @@ export const deleteIncome = /* GraphQL */ `
       _deleted
       _lastChangedAt
       userIncomeId
-      owner
       __typename
     }
   }
@@ -303,7 +297,7 @@ export const createField = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -328,7 +322,7 @@ export const updateField = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -353,7 +347,7 @@ export const deleteField = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -382,7 +376,7 @@ export const createLivestock = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       parents {
@@ -405,7 +399,7 @@ export const createLivestock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -434,7 +428,7 @@ export const updateLivestock = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       parents {
@@ -457,7 +451,7 @@ export const updateLivestock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -486,7 +480,7 @@ export const deleteLivestock = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       parents {
@@ -509,7 +503,7 @@ export const deleteLivestock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -528,7 +522,7 @@ export const createLivestockFamily = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -547,7 +541,7 @@ export const updateLivestockFamily = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -566,7 +560,7 @@ export const deleteLivestockFamily = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -597,7 +591,7 @@ export const createMedicalRecord = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       createdAt
@@ -606,7 +600,7 @@ export const createMedicalRecord = /* GraphQL */ `
       _deleted
       _lastChangedAt
       livestockMedicalRecordsId
-      owner
+      userId
       __typename
     }
   }
@@ -637,7 +631,7 @@ export const updateMedicalRecord = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       createdAt
@@ -646,7 +640,7 @@ export const updateMedicalRecord = /* GraphQL */ `
       _deleted
       _lastChangedAt
       livestockMedicalRecordsId
-      owner
+      userId
       __typename
     }
   }
@@ -677,7 +671,7 @@ export const deleteMedicalRecord = /* GraphQL */ `
         _version
         _deleted
         _lastChangedAt
-        owner
+        userId
         __typename
       }
       createdAt
@@ -686,7 +680,7 @@ export const deleteMedicalRecord = /* GraphQL */ `
       _deleted
       _lastChangedAt
       livestockMedicalRecordsId
-      owner
+      userId
       __typename
     }
   }
@@ -712,7 +706,7 @@ export const createChickenFlock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -738,7 +732,7 @@ export const updateChickenFlock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -764,7 +758,7 @@ export const deleteChickenFlock = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -785,7 +779,7 @@ export const createEggLog = /* GraphQL */ `
       _deleted
       _lastChangedAt
       chickenFlockEggLogsId
-      owner
+      userId
       __typename
     }
   }
@@ -806,7 +800,7 @@ export const updateEggLog = /* GraphQL */ `
       _deleted
       _lastChangedAt
       chickenFlockEggLogsId
-      owner
+      userId
       __typename
     }
   }
@@ -827,7 +821,7 @@ export const deleteEggLog = /* GraphQL */ `
       _deleted
       _lastChangedAt
       chickenFlockEggLogsId
-      owner
+      userId
       __typename
     }
   }
@@ -850,7 +844,7 @@ export const createInventoryItem = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -873,7 +867,7 @@ export const updateInventoryItem = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }
@@ -896,7 +890,7 @@ export const deleteInventoryItem = /* GraphQL */ `
       _version
       _deleted
       _lastChangedAt
-      owner
+      userId
       __typename
     }
   }

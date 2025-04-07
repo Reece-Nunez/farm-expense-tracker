@@ -32,7 +32,6 @@ export declare type UserUpdateFormInputValues = {
     profilePictureKey?: string;
     role?: string;
     preferences?: string;
-    owner?: string;
 };
 export declare type UserUpdateFormValidationValues = {
     sub?: ValidationFunction<string>;
@@ -44,7 +43,6 @@ export declare type UserUpdateFormValidationValues = {
     profilePictureKey?: ValidationFunction<string>;
     role?: ValidationFunction<string>;
     preferences?: ValidationFunction<string>;
-    owner?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type UserUpdateFormOverridesProps = {
@@ -58,7 +56,6 @@ export declare type UserUpdateFormOverridesProps = {
     profilePictureKey?: PrimitiveOverrideProps<TextFieldProps>;
     role?: PrimitiveOverrideProps<TextFieldProps>;
     preferences?: PrimitiveOverrideProps<TextAreaFieldProps>;
-    owner?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type UserUpdateFormProps = React.PropsWithChildren<{
     overrides?: UserUpdateFormOverridesProps | undefined | null;

@@ -38,7 +38,6 @@ export default function UserUpdateForm(props) {
     profilePictureKey: "",
     role: "",
     preferences: "",
-    owner: "",
   };
   const [sub, setSub] = React.useState(initialValues.sub);
   const [username, setUsername] = React.useState(initialValues.username);
@@ -53,7 +52,6 @@ export default function UserUpdateForm(props) {
   const [preferences, setPreferences] = React.useState(
     initialValues.preferences
   );
-  const [owner, setOwner] = React.useState(initialValues.owner);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = userRecord
@@ -73,7 +71,6 @@ export default function UserUpdateForm(props) {
         ? cleanValues.preferences
         : JSON.stringify(cleanValues.preferences)
     );
-    setOwner(cleanValues.owner);
     setErrors({});
   };
   const [userRecord, setUserRecord] = React.useState(userModelProp);
@@ -97,7 +94,6 @@ export default function UserUpdateForm(props) {
     profilePictureKey: [],
     role: [],
     preferences: [{ type: "JSON" }],
-    owner: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -134,7 +130,6 @@ export default function UserUpdateForm(props) {
           profilePictureKey,
           role,
           preferences,
-          owner,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -199,7 +194,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.sub ?? value;
@@ -232,7 +226,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.username ?? value;
@@ -265,7 +258,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -298,7 +290,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.farmName ?? value;
@@ -331,7 +322,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.phone ?? value;
@@ -364,7 +354,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.aboutMe ?? value;
@@ -397,7 +386,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey: value,
               role,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.profilePictureKey ?? value;
@@ -432,7 +420,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role: value,
               preferences,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -465,7 +452,6 @@ export default function UserUpdateForm(props) {
               profilePictureKey,
               role,
               preferences: value,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.preferences ?? value;
@@ -480,39 +466,6 @@ export default function UserUpdateForm(props) {
         hasError={errors.preferences?.hasError}
         {...getOverrideProps(overrides, "preferences")}
       ></TextAreaField>
-      <TextField
-        label="Owner"
-        isRequired={false}
-        isReadOnly={false}
-        value={owner}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              sub,
-              username,
-              email,
-              farmName,
-              phone,
-              aboutMe,
-              profilePictureKey,
-              role,
-              preferences,
-              owner: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.owner ?? value;
-          }
-          if (errors.owner?.hasError) {
-            runValidationTasks("owner", value);
-          }
-          setOwner(value);
-        }}
-        onBlur={() => runValidationTasks("owner", owner)}
-        errorMessage={errors.owner?.errorMessage}
-        hasError={errors.owner?.hasError}
-        {...getOverrideProps(overrides, "owner")}
-      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

@@ -35,6 +35,10 @@ export default function AuthGate() {
     }
   }, [user]);
 
+  if (user) {
+    return <div style={{ padding: 20 }}>Loading dashboard...</div>;
+  }
+
   return (
     <div style={{ marginTop: "2rem" }}>
       <Authenticator />
