@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import Papa from "papaparse";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { DataStore } from "@aws-amplify/datastore";
-import { fetchAuthSession } from "@aws-amplify/auth";
-import { Expense } from "@/models";
+import { generateClient } from "aws-amplify/api";
+import { createExpense as createExpenseMutation } from "@/graphql/mutations";
+import { getCurrentUser } from "@/utils/getCurrentUser";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CloudUploadIcon } from "@heroicons/react/outline";
-
 import ColumnMapper from "./ColumnMapper";
 import CsvReview from "./CsvReview";
 
@@ -19,7 +18,7 @@ const expectedFields = [
   { key: "item", label: "Item", required: true },
   { key: "cost", label: "Unit Cost", required: true },
   { key: "quantity", label: "Quantity", required: true },
-  { key: "description", label: "Description", required: false }
+  { key: "description", label: "Description", required: false },
 ];
 
 export default function ImportExpensesCSV() {
@@ -28,17 +27,14 @@ export default function ImportExpensesCSV() {
   const [csvHeaders, setCsvHeaders] = useState([]);
   const [mapping, setMapping] = useState(null);
   const [mappedRows, setMappedRows] = useState([]);
-
   const [file, setFile] = useState(null);
   const [parsing, setParsing] = useState(false);
   const navigate = useNavigate();
 
-  // Handle file selection
   const handleFileChange = (e) => {
     setFile(e.target.files?.[0] || null);
   };
 
-  // Handle initial CSV import + parsing
   const handleImport = () => {
     if (!file) {
       toast.error("Please select a CSV file.");
@@ -55,10 +51,7 @@ export default function ImportExpensesCSV() {
           const headers = results.meta.fields || [];
           setCsvHeaders(headers);
 
-          const validRows = results.data.filter(
-            (row) => row.Date || row.date // just in case headers differ
-          );
-
+          const validRows = results.data.filter((row) => row.Date || row.date);
           setCsvData(validRows);
 
           const initialMapping = expectedFields.reduce((acc, field) => {
@@ -79,11 +72,10 @@ export default function ImportExpensesCSV() {
         console.error("PapaParse error:", error);
         toast.error("Error reading CSV.");
         setParsing(false);
-      }
+      },
     });
   };
 
-  // Handle column mapping complete
   const handleMappingComplete = (map) => {
     setMapping(map);
 
@@ -100,7 +92,6 @@ export default function ImportExpensesCSV() {
     setStep("review");
   };
 
-  // Group line items into expenses based on date + vendor
   const groupLineItemsToExpenses = (rows, userId) => {
     const grouped = {};
 
@@ -113,8 +104,8 @@ export default function ImportExpensesCSV() {
           date: row.date,
           vendor: row.vendor,
           description: row.description || "",
-          receiptImageKey: "", // assuming no image import in CSV
-          lineItems: []
+          receiptImageKey: "",
+          lineItems: [],
         };
       }
 
@@ -127,30 +118,35 @@ export default function ImportExpensesCSV() {
         item: row.item,
         unitCost,
         quantity,
-        lineTotal
+        lineTotal,
       });
     });
 
-    // After grouping, calculate grandTotal for each expense
     return Object.values(grouped).map((expense) => {
       const grandTotal = expense.lineItems.reduce((sum, li) => sum + li.lineTotal, 0);
       return { ...expense, grandTotal };
     });
   };
 
-  // Handle review submit (saving data to DataStore)
   const handleReviewSubmit = async (finalRows) => {
     try {
-      const session = await fetchAuthSession();
-      const userId = session.tokens.idToken.payload.sub;
+      const client = generateClient();
+      const user = await getCurrentUser();
+      if (!user) return;
 
+      const userId = user.id;
       const expensesToSave = groupLineItemsToExpenses(finalRows, userId);
 
-      const saved = await Promise.all(
-        expensesToSave.map((exp) => DataStore.save(new Expense(exp)))
+      await Promise.all(
+        expensesToSave.map((exp) =>
+          client.graphql({
+            query: createExpenseMutation,
+            variables: { input: exp },
+          })
+        )
       );
 
-      toast.success(`Imported ${saved.length} expenses!`);
+      toast.success(`Imported ${expensesToSave.length} expenses!`);
       navigate("/dashboard/expenses");
     } catch (err) {
       console.error("Error saving expenses:", err);
@@ -158,19 +154,15 @@ export default function ImportExpensesCSV() {
     }
   };
 
-  // Back handlers
   const handleBackToUpload = () => setStep("upload");
   const handleBackToMapping = () => setStep("mapping");
 
-  // Steps
   let content;
   if (step === "upload") {
     content = (
       <>
         <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Select CSV File
-          </label>
+          <label className="block text-gray-700 font-medium mb-2">Select CSV File</label>
           <input
             type="file"
             accept=".csv"
@@ -195,9 +187,7 @@ export default function ImportExpensesCSV() {
         </div>
       </>
     );
-  }
-
-  if (step === "mapping") {
+  } else if (step === "mapping") {
     content = (
       <ColumnMapper
         csvHeaders={csvHeaders}
@@ -206,9 +196,7 @@ export default function ImportExpensesCSV() {
         onBack={handleBackToUpload}
       />
     );
-  }
-
-  if (step === "review") {
+  } else if (step === "review") {
     content = (
       <CsvReview
         mappedData={mappedRows}

@@ -7,9 +7,11 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { InventoryItem } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { getInventoryItem } from "../graphql/queries";
+import { updateInventoryItem } from "../graphql/mutations";
+const client = generateClient();
 export default function InventoryItemUpdateForm(props) {
   const {
     id: idProp,
@@ -23,6 +25,7 @@ export default function InventoryItemUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     name: "",
     type: "",
     quantity: "",
@@ -30,6 +33,7 @@ export default function InventoryItemUpdateForm(props) {
     acquiredDate: "",
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
   const [type, setType] = React.useState(initialValues.type);
   const [quantity, setQuantity] = React.useState(initialValues.quantity);
@@ -43,6 +47,7 @@ export default function InventoryItemUpdateForm(props) {
     const cleanValues = inventoryItemRecord
       ? { ...initialValues, ...inventoryItemRecord }
       : initialValues;
+    setSub(cleanValues.sub);
     setName(cleanValues.name);
     setType(cleanValues.type);
     setQuantity(cleanValues.quantity);
@@ -57,7 +62,12 @@ export default function InventoryItemUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(InventoryItem, idProp)
+        ? (
+            await client.graphql({
+              query: getInventoryItem.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getInventoryItem
         : inventoryItemModelProp;
       setInventoryItemRecord(record);
     };
@@ -65,6 +75,7 @@ export default function InventoryItemUpdateForm(props) {
   }, [idProp, inventoryItemModelProp]);
   React.useEffect(resetStateValues, [inventoryItemRecord]);
   const validations = {
+    sub: [{ type: "Required" }],
     name: [{ type: "Required" }],
     type: [{ type: "Required" }],
     quantity: [],
@@ -98,12 +109,13 @@ export default function InventoryItemUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           name,
           type,
-          quantity,
-          location,
-          acquiredDate,
-          notes,
+          quantity: quantity ?? null,
+          location: location ?? null,
+          acquiredDate: acquiredDate ?? null,
+          notes: notes ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -133,23 +145,58 @@ export default function InventoryItemUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            InventoryItem.copyOf(inventoryItemRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateInventoryItem.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: inventoryItemRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "InventoryItemUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              name,
+              type,
+              quantity,
+              location,
+              acquiredDate,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Name"
         isRequired={true}
@@ -159,6 +206,7 @@ export default function InventoryItemUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name: value,
               type,
               quantity,
@@ -188,6 +236,7 @@ export default function InventoryItemUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type: value,
               quantity,
@@ -221,6 +270,7 @@ export default function InventoryItemUpdateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity: value,
@@ -250,6 +300,7 @@ export default function InventoryItemUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,
@@ -280,6 +331,7 @@ export default function InventoryItemUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,
@@ -309,6 +361,7 @@ export default function InventoryItemUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,

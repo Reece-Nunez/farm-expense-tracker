@@ -4,25 +4,7 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@a
 
 
 
-type EagerLineItem = {
-  readonly category: string;
-  readonly item: string;
-  readonly unitCost: number;
-  readonly quantity: number;
-  readonly lineTotal?: number | null;
-}
 
-type LazyLineItem = {
-  readonly category: string;
-  readonly item: string;
-  readonly unitCost: number;
-  readonly quantity: number;
-  readonly lineTotal?: number | null;
-}
-
-export declare type LineItem = LazyLoading extends LazyLoadingDisabled ? EagerLineItem : LazyLineItem
-
-export declare const LineItem: (new (init: ModelInit<LineItem>) => LineItem)
 
 type EagerUser = {
   readonly [__modelMeta__]: {
@@ -78,16 +60,17 @@ type EagerExpense = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly userId: string;
   readonly date: string;
   readonly vendor: string;
   readonly grandTotal?: number | null;
   readonly description?: string | null;
   readonly receiptImageKey?: string | null;
-  readonly lineItems: LineItem[];
+  readonly lineItems?: (LineItem | null)[] | null;
+  readonly user?: User | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
-  readonly userExpensesId?: string | null;
 }
 
 type LazyExpense = {
@@ -96,16 +79,17 @@ type LazyExpense = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly userId: string;
   readonly date: string;
   readonly vendor: string;
   readonly grandTotal?: number | null;
   readonly description?: string | null;
   readonly receiptImageKey?: string | null;
-  readonly lineItems: LineItem[];
+  readonly lineItems: AsyncCollection<LineItem>;
+  readonly user: AsyncItem<User | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
-  readonly userExpensesId?: string | null;
 }
 
 export declare type Expense = LazyLoading extends LazyLoadingDisabled ? EagerExpense : LazyExpense
@@ -114,12 +98,51 @@ export declare const Expense: (new (init: ModelInit<Expense>) => Expense) & {
   copyOf(source: Expense, mutator: (draft: MutableModel<Expense>) => MutableModel<Expense> | void): Expense;
 }
 
+type EagerLineItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<LineItem, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly expenseID: string;
+  readonly item?: string | null;
+  readonly category?: string | null;
+  readonly quantity?: number | null;
+  readonly unitCost?: number | null;
+  readonly lineTotal?: number | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyLineItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<LineItem, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly expenseID: string;
+  readonly item?: string | null;
+  readonly category?: string | null;
+  readonly quantity?: number | null;
+  readonly unitCost?: number | null;
+  readonly lineTotal?: number | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type LineItem = LazyLoading extends LazyLoadingDisabled ? EagerLineItem : LazyLineItem
+
+export declare const LineItem: (new (init: ModelInit<LineItem>) => LineItem) & {
+  copyOf(source: LineItem, mutator: (draft: MutableModel<LineItem>) => MutableModel<LineItem> | void): LineItem;
+}
+
 type EagerIncome = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Income, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly userId: string;
   readonly date: string;
   readonly quantity: number;
@@ -128,9 +151,9 @@ type EagerIncome = {
   readonly amount: number;
   readonly item?: string | null;
   readonly notes?: string | null;
+  readonly user?: User | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
-  readonly userIncomeId?: string | null;
 }
 
 type LazyIncome = {
@@ -139,6 +162,7 @@ type LazyIncome = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly userId: string;
   readonly date: string;
   readonly quantity: number;
@@ -147,9 +171,9 @@ type LazyIncome = {
   readonly amount: number;
   readonly item?: string | null;
   readonly notes?: string | null;
+  readonly user: AsyncItem<User | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
-  readonly userIncomeId?: string | null;
 }
 
 export declare type Income = LazyLoading extends LazyLoadingDisabled ? EagerIncome : LazyIncome
@@ -164,6 +188,7 @@ type EagerField = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name: string;
   readonly acres?: number | null;
   readonly notes?: string | null;
@@ -178,6 +203,7 @@ type LazyField = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name: string;
   readonly acres?: number | null;
   readonly notes?: string | null;
@@ -198,6 +224,7 @@ type EagerLivestock = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name?: string | null;
   readonly species: string;
   readonly breed?: string | null;
@@ -219,6 +246,7 @@ type LazyLivestock = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name?: string | null;
   readonly species: string;
   readonly breed?: string | null;
@@ -246,6 +274,7 @@ type EagerLivestockFamily = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly parentID: string;
   readonly childID: string;
   readonly createdAt?: string | null;
@@ -258,6 +287,7 @@ type LazyLivestockFamily = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly parentID: string;
   readonly childID: string;
   readonly createdAt?: string | null;
@@ -276,6 +306,7 @@ type EagerMedicalRecord = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly livestockID: string;
   readonly type: string;
   readonly notes?: string | null;
@@ -293,6 +324,7 @@ type LazyMedicalRecord = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly livestockID: string;
   readonly type: string;
   readonly notes?: string | null;
@@ -316,6 +348,7 @@ type EagerChickenFlock = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly breed: string;
   readonly count: number;
   readonly hasRooster?: boolean | null;
@@ -331,6 +364,7 @@ type LazyChickenFlock = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly breed: string;
   readonly count: number;
   readonly hasRooster?: boolean | null;
@@ -352,6 +386,7 @@ type EagerEggLog = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly date: string;
   readonly eggsCollected: number;
   readonly chickenFlockID: string;
@@ -366,6 +401,7 @@ type LazyEggLog = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly date: string;
   readonly eggsCollected: number;
   readonly chickenFlockID: string;
@@ -386,6 +422,7 @@ type EagerInventoryItem = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name: string;
   readonly type: string;
   readonly quantity?: number | null;
@@ -402,6 +439,7 @@ type LazyInventoryItem = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly sub: string;
   readonly name: string;
   readonly type: string;
   readonly quantity?: number | null;

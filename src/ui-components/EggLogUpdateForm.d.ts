@@ -6,7 +6,6 @@
 
 import * as React from "react";
 import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { EggLog } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,11 +22,13 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type EggLogUpdateFormInputValues = {
+    sub?: string;
     date?: string;
     eggsCollected?: number;
     chickenFlockID?: string;
 };
 export declare type EggLogUpdateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     date?: ValidationFunction<string>;
     eggsCollected?: ValidationFunction<number>;
     chickenFlockID?: ValidationFunction<string>;
@@ -35,6 +36,7 @@ export declare type EggLogUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type EggLogUpdateFormOverridesProps = {
     EggLogUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     date?: PrimitiveOverrideProps<TextFieldProps>;
     eggsCollected?: PrimitiveOverrideProps<TextFieldProps>;
     chickenFlockID?: PrimitiveOverrideProps<TextFieldProps>;
@@ -43,7 +45,7 @@ export declare type EggLogUpdateFormProps = React.PropsWithChildren<{
     overrides?: EggLogUpdateFormOverridesProps | undefined | null;
 } & {
     id?: string;
-    eggLog?: EggLog;
+    eggLog?: any;
     onSubmit?: (fields: EggLogUpdateFormInputValues) => EggLogUpdateFormInputValues;
     onSuccess?: (fields: EggLogUpdateFormInputValues) => void;
     onError?: (fields: EggLogUpdateFormInputValues, errorMessage: string) => void;

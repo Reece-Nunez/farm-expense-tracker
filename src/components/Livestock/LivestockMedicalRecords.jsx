@@ -1,122 +1,158 @@
-// src/components/Inventory/LivestockMedicalRecords.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { DataStore } from "@aws-amplify/datastore";
-import { Livestock, MedicalRecord } from "../../models";
+import { toast } from "react-hot-toast";
+import { generateClient } from "aws-amplify/api";
+import { getLivestock } from "@/graphql/queries";
+import { listMedicalRecords } from "@/graphql/queries";
 
 const LivestockMedicalRecords = () => {
-    const { animalId } = useParams();
-    const navigate = useNavigate();
+  const { animalId } = useParams();
+  const navigate = useNavigate();
 
-    const [animal, setAnimal] = useState(null);
-    const [records, setRecords] = useState([]);
-    const [filteredRecords, setFilteredRecords] = useState([]);
-    const [filterType, setFilterType] = useState("");
-    const [filterDate, setFilterDate] = useState("");
+  const [animal, setAnimal] = useState(null);
+  const [records, setRecords] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState([]);
+  const [filterType, setFilterType] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const client = generateClient();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const a = await DataStore.query(Livestock, animalId);
-            setAnimal(a);
-
-            const all = await DataStore.query(MedicalRecord, (r) => r.livestockID.eq(animalId));
-            setRecords(all);
-            setFilteredRecords(all);
-        };
-        fetchData();
-    }, [animalId]);
-
-    useEffect(() => {
-        let filtered = records;
-
-        if (filterType) {
-            filtered = filtered.filter((r) => r.type.toLowerCase().includes(filterType.toLowerCase()));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: animalData } = await clientgraphql({
+          query: getLivestock,
+          variables: { id: animalId },
+        });
+        
+        if (!animalData?.getLivestock) {
+          toast.error("Animal not found.");
+          navigate(-1);
+          return;
         }
-        if (filterDate) {
-            filtered = filtered.filter((r) => r.date === filterDate);
-        }
-        setFilteredRecords(filtered);
-    }, [filterType, filterDate, records]);
 
-    const handleAddRecord = () => {
-        navigate(`/dashboard/inventory/livestock/${animalId}/medical-records/new`);
+        setAnimal(animalData.getLivestock);
+
+        const { data: recordData } = await clientgraphql({
+          query: listMedicalRecords,
+          variables: {
+            filter: { livestockID: { eq: animalId } },
+            limit: 1000,
+          },
+        });
+              
+
+        const items = recordData?.listMedicalRecords?.items || [];
+        setRecords(items);
+        setFilteredRecords(items);
+      } catch (err) {
+        console.error("[LivestockMedicalRecords] Fetch error:", err);
+        toast.error("Error loading records.");
+      }
     };
 
-    const navigateBack = () => {
-        navigate(-1)
+    fetchData();
+  }, [animalId, navigate]);
+
+  useEffect(() => {
+    let result = [...records];
+
+    if (filterType) {
+      result = result.filter((r) =>
+        r.type?.toLowerCase().includes(filterType.toLowerCase())
+      );
     }
 
-    return (
-        <div className="p-6 max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">
-                Medical Records for {animal?.name} ({records.length})
-            </h2>
+    if (filterDate) {
+      result = result.filter((r) => r.date === filterDate);
+    }
 
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-                <input
-                    type="text"
-                    placeholder="Filter by Type"
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="p-2 border rounded"
-                />
-                <input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    className="p-2 border rounded"
-                />
-                <button
-                    onClick={handleAddRecord}
-                    className="ml-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                    Add Medical Record
-                </button>
-            </div>
+    setFilteredRecords(result);
+  }, [filterType, filterDate, records]);
 
-            {filteredRecords.length === 0 ? (
-                <p className="text-gray-500">No medical records found.</p>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full border">
-                        <thead className="bg-gray-100">
-                            <tr>
-                                <th className="px-4 py-2 border">Date</th>
-                                <th className="px-4 py-2 border">Type</th>
-                                <th className="px-4 py-2 border">Medicine</th>
-                                <th className="px-4 py-2 border">Notes</th>
-                                <th className="px-4 py-2 border">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredRecords.map((record) => (
-                                <tr key={record.id} className="text-center">
-                                    <td className="border px-4 py-2">{record.date}</td>
-                                    <td className="border px-4 py-2">{record.type}</td>
-                                    <td className="border px-4 py-2">{record.medicine || "-"}</td>
-                                    <td className="border px-4 py-2">{record.notes || "-"}</td>
-                                    <td className="border px-4 py-2">
-                                        <button
-                                            className="px-2 py-1 text-sm bg-blue-600 text-white rounded mr-2 hover:bg-blue-700"
-                                            onClick={() => navigate(`/dashboard/inventory/livestock/${animalId}/medical-records/${record.id}`)}
-                                        >
-                                            Edit
-                                        </button>
-                                        {/* Delete logic can go here later */}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-            <div>
-                <button className="px-4 py-2 text-md bg-blue-600 text-white rounded mr-2 hover:bg-blue-700 mt-4" onClick={navigateBack}>
-                    Back
-                </button>
-            </div>
+  const handleAddRecord = () =>
+    navigate(`/dashboard/inventory/livestock/${animalId}/medical-records/new`);
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-3xl font-bold mb-6">
+        Medical Records for {animal?.name}{" "}
+        <span className="text-gray-500 font-normal">
+          ({filteredRecords.length})
+        </span>
+      </h2>
+
+      <div className="flex flex-wrap gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Filter by Type"
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="p-2 border rounded w-full md:w-auto"
+        />
+        <input
+          type="date"
+          value={filterDate}
+          onChange={(e) => setFilterDate(e.target.value)}
+          className="p-2 border rounded w-full md:w-auto"
+        />
+        <button
+          onClick={handleAddRecord}
+          className="ml-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        >
+          Add Medical Record
+        </button>
+      </div>
+
+      {filteredRecords.length === 0 ? (
+        <p className="text-gray-500 text-center mt-10">No records found.</p>
+      ) : (
+        <div className="overflow-x-auto border rounded shadow">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 border">Date</th>
+                <th className="px-4 py-2 border">Type</th>
+                <th className="px-4 py-2 border">Medicine</th>
+                <th className="px-4 py-2 border">Notes</th>
+                <th className="px-4 py-2 border text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((record) => (
+                <tr key={record.id} className="hover:bg-gray-50">
+                  <td className="border px-4 py-2">{record.date}</td>
+                  <td className="border px-4 py-2">{record.type}</td>
+                  <td className="border px-4 py-2">{record.medicine || "-"}</td>
+                  <td className="border px-4 py-2">{record.notes || "-"}</td>
+                  <td className="border px-4 py-2 text-center">
+                    <button
+                      className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                      onClick={() =>
+                        navigate(
+                          `/dashboard/inventory/livestock/${animalId}/medical-records/${record.id}`
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-    );
+      )}
+
+      <div className="text-center mt-6">
+        <button
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default LivestockMedicalRecords;

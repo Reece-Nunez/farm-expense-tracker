@@ -10,8 +10,6 @@ export { default as EggLogCreateForm } from "./EggLogCreateForm";
 export { default as EggLogUpdateForm } from "./EggLogUpdateForm";
 export { default as FieldCreateForm } from "./FieldCreateForm";
 export { default as FieldUpdateForm } from "./FieldUpdateForm";
-export { default as IncomeCreateForm } from "./IncomeCreateForm";
-export { default as IncomeUpdateForm } from "./IncomeUpdateForm";
 export { default as InventoryItemCreateForm } from "./InventoryItemCreateForm";
 export { default as InventoryItemUpdateForm } from "./InventoryItemUpdateForm";
 export { default as LivestockCreateForm } from "./LivestockCreateForm";

@@ -1,6 +1,6 @@
 type User @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
@@ -13,41 +13,51 @@ type User @model
   profilePictureKey: String
   role: String
   preferences: AWSJSON
-  expenses: [Expense] @hasMany
-  income: [Income] @hasMany
+  expenses: [Expense] @hasMany(indexName: "byUser", fields: ["id"])
+  income: [Income] @hasMany(indexName: "byUser", fields: ["id"])
 }
-
 
 type Expense @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
+  sub: String!
   userId: ID! @index(name: "byUser")
   date: AWSDate!
   vendor: String!
   grandTotal: Float
   description: String
   receiptImageKey: String
-  lineItems: [LineItem!]!
+  lineItems: [LineItem] @hasMany(indexName: "byExpenseID", fields: ["id"])
+  user: User @belongsTo(fields: ["userId"])
 }
 
-type LineItem {
-  category: String!     
-  item: String!         
-  unitCost: Float!      
-  quantity: Int!        
+type LineItem @model
+@auth(rules: [
+    { allow: owner, ownerField: "sub" },
+    { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
+  ]) {
+  id: ID!
+  sub: String!
+  expenseID: ID! @index(name: "byExpenseID")
+  expense: Expense @belongsTo(fields: ["expenseID"])
+  item: String
+  category: String
+  quantity: Int
+  unitCost: Float
   lineTotal: Float
 }
 
-type Income
-  @model
+
+type Income @model
   @auth(rules: [
-      { allow: owner, ownerField: "userId"},
+      { allow: owner, ownerField: "sub"},
       { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   userId: ID! @index(name: "byUser")
   date: AWSDate!
   quantity: Int!
@@ -56,14 +66,16 @@ type Income
   amount: Float!
   item: String
   notes: String
+  user: User @belongsTo(fields: ["userId"])
 }
 
 type Field @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
+  sub: String!
   name: String!
   acres: Float
   notes: String
@@ -72,18 +84,17 @@ type Field @model
 
 type Livestock @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] }
   ]) {
   id: ID!
+  sub: String!
   name: String
   species: String!
   breed: String
   birthdate: AWSDate
   weight: Float
   gender: String
-  # NOTE: fieldID is optional, but location.id is required if location is returned by the resolver.
-  # So avoid setting fieldID = null — omit the field entirely to prevent Amplify update mutation errors.
   fieldID: ID @index(name: "byField")
   location: Field @belongsTo(fields: ["fieldID"])
   parents: [LivestockFamily] @hasMany(indexName: "byChild", fields: ["id"])
@@ -91,24 +102,24 @@ type Livestock @model
   medicalRecords: [MedicalRecord] @hasMany
 }
 
-
 type LivestockFamily @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   parentID: ID! @index(name: "byParent")
   childID: ID! @index(name: "byChild")
 }
 
-
 type MedicalRecord @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   livestockID: ID! @index(name: "byLivestock")
   type: String!
   notes: String
@@ -119,10 +130,11 @@ type MedicalRecord @model
 
 type ChickenFlock @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   breed: String!
   count: Int!
   hasRooster: Boolean
@@ -132,10 +144,11 @@ type ChickenFlock @model
 
 type EggLog @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   date: AWSDate!
   eggsCollected: Int!
   chickenFlockID: ID! @index(name: "byChickenFlock")
@@ -143,10 +156,11 @@ type EggLog @model
 
 type InventoryItem @model
   @auth(rules: [
-    { allow: owner, ownerField: "userId" },
+    { allow: owner, ownerField: "sub" },
     { allow: groups, groups: ["Admins"], operations: [create, read, update, delete] },
   ]) {
   id: ID!
+  sub: String!
   name: String!
   type: String!
   quantity: Int
@@ -154,4 +168,3 @@ type InventoryItem @model
   acquiredDate: AWSDate
   notes: String
 }
-

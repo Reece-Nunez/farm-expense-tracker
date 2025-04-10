@@ -13,9 +13,10 @@ import {
   SwitchField,
   TextField,
 } from "@aws-amplify/ui-react";
-import { ChickenFlock } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { createChickenFlock } from "../graphql/mutations";
+const client = generateClient();
 export default function ChickenFlockCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -28,17 +29,20 @@ export default function ChickenFlockCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     breed: "",
     count: "",
     hasRooster: false,
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [breed, setBreed] = React.useState(initialValues.breed);
   const [count, setCount] = React.useState(initialValues.count);
   const [hasRooster, setHasRooster] = React.useState(initialValues.hasRooster);
   const [notes, setNotes] = React.useState(initialValues.notes);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
+    setSub(initialValues.sub);
     setBreed(initialValues.breed);
     setCount(initialValues.count);
     setHasRooster(initialValues.hasRooster);
@@ -46,6 +50,7 @@ export default function ChickenFlockCreateForm(props) {
     setErrors({});
   };
   const validations = {
+    sub: [{ type: "Required" }],
     breed: [{ type: "Required" }],
     count: [{ type: "Required" }],
     hasRooster: [],
@@ -77,6 +82,7 @@ export default function ChickenFlockCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           breed,
           count,
           hasRooster,
@@ -110,7 +116,14 @@ export default function ChickenFlockCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(new ChickenFlock(modelFields));
+          await client.graphql({
+            query: createChickenFlock.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -119,13 +132,42 @@ export default function ChickenFlockCreateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "ChickenFlockCreateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              breed,
+              count,
+              hasRooster,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Breed"
         isRequired={true}
@@ -135,6 +177,7 @@ export default function ChickenFlockCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               breed: value,
               count,
               hasRooster,
@@ -166,6 +209,7 @@ export default function ChickenFlockCreateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count: value,
               hasRooster,
@@ -193,6 +237,7 @@ export default function ChickenFlockCreateForm(props) {
           let value = e.target.checked;
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count,
               hasRooster: value,
@@ -220,6 +265,7 @@ export default function ChickenFlockCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count,
               hasRooster,

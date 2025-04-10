@@ -22,6 +22,7 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type LivestockCreateFormInputValues = {
+    sub?: string;
     name?: string;
     species?: string;
     breed?: string;
@@ -30,6 +31,7 @@ export declare type LivestockCreateFormInputValues = {
     gender?: string;
 };
 export declare type LivestockCreateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     species?: ValidationFunction<string>;
     breed?: ValidationFunction<string>;
@@ -40,6 +42,7 @@ export declare type LivestockCreateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type LivestockCreateFormOverridesProps = {
     LivestockCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     species?: PrimitiveOverrideProps<TextFieldProps>;
     breed?: PrimitiveOverrideProps<TextFieldProps>;

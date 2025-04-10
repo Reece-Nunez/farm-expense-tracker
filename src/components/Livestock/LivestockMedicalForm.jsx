@@ -1,32 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { DataStore } from "@aws-amplify/datastore";
-import { MedicalRecord, Livestock } from "../../models";
 import { toast } from "react-hot-toast";
-
+import { getLivestock } from "@/graphql/queries";
+import { createMedicalRecord } from "@/graphql/mutations";
+import { generateClient } from "aws-amplify/api";
 const LivestockMedicalForm = () => {
   const { animalId } = useParams();
   const navigate = useNavigate();
+
   const [animal, setAnimal] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     type: "",
     date: "",
     notes: "",
     medicine: ""
   });
-  const [loading, setLoading] = useState(false);
+  const client = generateClient();
 
   useEffect(() => {
     const fetchAnimal = async () => {
-      const found = await DataStore.query(Livestock, animalId);
-      if (!found) {
-        toast.error("Animal not found");
-        navigate(-1);
+      try {
+        const { data } = await client.graphql({
+          query: getLivestock,
+          variables: { id: animalId },
+        });
+        if (!data?.getLivestock) {
+          toast.error("Animal not found.");
+          navigate(-1);
+          return;
+        }
+        setAnimal(data.getLivestock);
+      } catch (err) {
+        toast.error("Error fetching animal.");
+        console.error("[LivestockMedicalForm] fetch error:", err);
       }
-      setAnimal(found);
     };
     fetchAnimal();
   }, [animalId, navigate]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,43 +47,54 @@ const LivestockMedicalForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.type || !form.date) {
       toast.error("Type and Date are required.");
       return;
     }
+
     setLoading(true);
+
     try {
-      await DataStore.save(
-        new MedicalRecord({
-          ...form,
-          livestockID: animalId
-        })
-      );
-      toast.success("Medical record added.");
+      const input = {
+        type: form.type,
+        date: form.date,
+        notes: form.notes,
+        medicine: form.medicine,
+        livestockID: animalId
+      };
+      await client.graphql({
+        query: createMedicalRecord,
+        variables: { input },
+      });
+      toast.success("Medical record saved.");
       navigate(`/dashboard/inventory/livestock/${animalId}`);
     } catch (err) {
+      console.error("[LivestockMedicalForm] save error:", err);
       toast.error("Failed to save record.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!animal) return <div className="p-6">Loading...</div>;
+  if (!animal) {
+    return <div className="p-6 text-center">Loading animal data...</div>;
+  }
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">
         Add Medical Record for {animal.name}
       </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block font-medium text-sm mb-1">Type *</label>
+          <label className="block text-sm font-medium mb-1">Type *</label>
           <select
             name="type"
             value={form.type}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
             required
           >
             <option value="">Select Type</option>
@@ -82,51 +105,55 @@ const LivestockMedicalForm = () => {
             <option value="Other">Other</option>
           </select>
         </div>
+
         <div>
-          <label className="block font-medium text-sm mb-1">Date *</label>
+          <label className="block text-sm font-medium mb-1">Date *</label>
           <input
             type="date"
             name="date"
             value={form.date}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
             required
           />
         </div>
+
         <div>
-          <label className="block font-medium text-sm mb-1">Medicine</label>
+          <label className="block text-sm font-medium mb-1">Medicine</label>
           <input
             type="text"
             name="medicine"
             value={form.medicine}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
-            placeholder="Name of medicine used (optional)"
+            className="w-full p-2 border rounded"
+            placeholder="Optional"
           />
         </div>
+
         <div>
-          <label className="block font-medium text-sm mb-1">Notes</label>
+          <label className="block text-sm font-medium mb-1">Notes</label>
           <textarea
             name="notes"
             value={form.notes}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
             rows={4}
-            placeholder="Any additional notes..."
+            placeholder="Optional notes or observations"
           ></textarea>
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex gap-3 mt-4">
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded disabled:opacity-50"
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Record"}
           </button>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
           >
             Cancel
           </button>

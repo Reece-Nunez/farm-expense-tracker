@@ -7,9 +7,11 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { Livestock } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { getLivestock } from "../graphql/queries";
+import { updateLivestock } from "../graphql/mutations";
+const client = generateClient();
 export default function LivestockUpdateForm(props) {
   const {
     id: idProp,
@@ -23,6 +25,7 @@ export default function LivestockUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     name: "",
     species: "",
     breed: "",
@@ -30,6 +33,7 @@ export default function LivestockUpdateForm(props) {
     weight: "",
     gender: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
   const [species, setSpecies] = React.useState(initialValues.species);
   const [breed, setBreed] = React.useState(initialValues.breed);
@@ -41,6 +45,7 @@ export default function LivestockUpdateForm(props) {
     const cleanValues = livestockRecord
       ? { ...initialValues, ...livestockRecord }
       : initialValues;
+    setSub(cleanValues.sub);
     setName(cleanValues.name);
     setSpecies(cleanValues.species);
     setBreed(cleanValues.breed);
@@ -54,7 +59,12 @@ export default function LivestockUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Livestock, idProp)
+        ? (
+            await client.graphql({
+              query: getLivestock.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getLivestock
         : livestockModelProp;
       setLivestockRecord(record);
     };
@@ -62,6 +72,7 @@ export default function LivestockUpdateForm(props) {
   }, [idProp, livestockModelProp]);
   React.useEffect(resetStateValues, [livestockRecord]);
   const validations = {
+    sub: [{ type: "Required" }],
     name: [],
     species: [{ type: "Required" }],
     breed: [],
@@ -95,12 +106,13 @@ export default function LivestockUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          name,
+          sub,
+          name: name ?? null,
           species,
-          breed,
-          birthdate,
-          weight,
-          gender,
+          breed: breed ?? null,
+          birthdate: birthdate ?? null,
+          weight: weight ?? null,
+          gender: gender ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -130,23 +142,58 @@ export default function LivestockUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            Livestock.copyOf(livestockRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateLivestock.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: livestockRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "LivestockUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              name,
+              species,
+              breed,
+              birthdate,
+              weight,
+              gender,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Name"
         isRequired={false}
@@ -156,6 +203,7 @@ export default function LivestockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name: value,
               species,
               breed,
@@ -185,6 +233,7 @@ export default function LivestockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               species: value,
               breed,
@@ -214,6 +263,7 @@ export default function LivestockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               species,
               breed: value,
@@ -244,6 +294,7 @@ export default function LivestockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               species,
               breed,
@@ -277,6 +328,7 @@ export default function LivestockUpdateForm(props) {
             : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               species,
               breed,
@@ -306,6 +358,7 @@ export default function LivestockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               species,
               breed,

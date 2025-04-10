@@ -6,7 +6,6 @@
 
 import * as React from "react";
 import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { ChickenFlock } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,12 +22,14 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type ChickenFlockUpdateFormInputValues = {
+    sub?: string;
     breed?: string;
     count?: number;
     hasRooster?: boolean;
     notes?: string;
 };
 export declare type ChickenFlockUpdateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     breed?: ValidationFunction<string>;
     count?: ValidationFunction<number>;
     hasRooster?: ValidationFunction<boolean>;
@@ -37,6 +38,7 @@ export declare type ChickenFlockUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ChickenFlockUpdateFormOverridesProps = {
     ChickenFlockUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     breed?: PrimitiveOverrideProps<TextFieldProps>;
     count?: PrimitiveOverrideProps<TextFieldProps>;
     hasRooster?: PrimitiveOverrideProps<SwitchFieldProps>;
@@ -46,7 +48,7 @@ export declare type ChickenFlockUpdateFormProps = React.PropsWithChildren<{
     overrides?: ChickenFlockUpdateFormOverridesProps | undefined | null;
 } & {
     id?: string;
-    chickenFlock?: ChickenFlock;
+    chickenFlock?: any;
     onSubmit?: (fields: ChickenFlockUpdateFormInputValues) => ChickenFlockUpdateFormInputValues;
     onSuccess?: (fields: ChickenFlockUpdateFormInputValues) => void;
     onError?: (fields: ChickenFlockUpdateFormInputValues, errorMessage: string) => void;

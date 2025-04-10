@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DataStore } from "@aws-amplify/datastore";
-import { Field, Livestock } from "../../models";
+import { generateClient } from "aws-amplify/api";
+import { getCurrentUser } from "../../utils/getCurrentUser";
+import {
+  listFields,
+  listLivestocks
+} from "../../graphql/queries";
+import {
+  updateField as updateFieldMutation,
+  createField as createFieldMutation,
+  deleteField as deleteFieldMutation
+} from "../../graphql/mutations";
 
 const FieldManager = () => {
   const [fields, setFields] = useState([]);
@@ -9,22 +18,43 @@ const FieldManager = () => {
   const [fieldForm, setFieldForm] = useState({ name: "", acres: "", notes: "" });
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
+  const client = generateClient();
+
 
   useEffect(() => {
-    fetchFields();
-    fetchLivestock();
-    const sub = DataStore.observe(Field).subscribe(fetchFields);
-    return () => sub.unsubscribe();
+    const init = async () => {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) return;
+      await fetchFields(currentUser.id);
+      await fetchLivestock(currentUser.id);
+    };
+    init();
   }, []);
 
-  const fetchFields = async () => {
-    const result = await DataStore.query(Field);
-    setFields(result);
+  const fetchFields = async (userId) => {
+    try {
+      const result = await client.graphql({
+        query: listFields,
+        variables: { filter: { userId: { eq: userId } } }
+      });
+      
+      setFields(result.data.listFields.items);
+    } catch (error) {
+      console.error("Error fetching fields:", error);
+    }
   };
 
-  const fetchLivestock = async () => {
-    const result = await DataStore.query(Livestock);
-    setLivestock(result);
+  const fetchLivestock = async (userId) => {
+    try {
+      const result = await client.graphql({
+        query: listLivestocks,
+        variables: { filter: { userId: { eq: userId } } }
+      });
+      
+      setLivestock(result.data.listLivestocks.items);
+    } catch (error) {
+      console.error("Error fetching livestock:", error);
+    }
   };
 
   const handleChange = (e) => {
@@ -34,26 +64,27 @@ const FieldManager = () => {
   const handleSave = async () => {
     const { name, acres, notes } = fieldForm;
     try {
+      const user = await getCurrentUser();
+      if (!user) throw new Error("User not found");
+
+      const input = {
+        name,
+        acres: parseFloat(acres),
+        notes,
+        userId: user.id,
+      };
+
       if (editingId) {
-        const original = await DataStore.query(Field, editingId);
-        await DataStore.save(
-          Field.copyOf(original, updated => {
-            updated.name = name;
-            updated.acres = parseFloat(acres);
-            updated.notes = notes;
-          })
-        );
+        input.id = editingId;
+        await client.graphql({ query: updateFieldMutation, variables: { input } });
       } else {
-        await DataStore.save(
-          new Field({
-            name,
-            acres: parseFloat(acres),
-            notes
-          })
-        );
+        await client.graphql({ query: createFieldMutation, variables: { input } });
       }
+      
+
       setFieldForm({ name: "", acres: "", notes: "" });
       setEditingId(null);
+      await fetchFields(user.id);
     } catch (err) {
       console.error("Error saving field:", err);
     }
@@ -67,15 +98,19 @@ const FieldManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this field?")) return;
     try {
-      const toDelete = await DataStore.query(Field, id);
-      await DataStore.delete(toDelete);
+      await client.graphql({
+        query: deleteFieldMutation,
+        variables: { input: { id } }
+      });
+            const user = await getCurrentUser();
+      await fetchFields(user.id);
     } catch (err) {
       console.error("Error deleting field:", err);
     }
   };
 
   const getLivestockInField = (fieldId) => {
-    return livestock.filter((l) => l.location?.id === fieldId);
+    return livestock.filter((l) => l.fieldID === fieldId);
   };
 
   return (
@@ -89,10 +124,7 @@ const FieldManager = () => {
           <input name="acres" value={fieldForm.acres} onChange={handleChange} placeholder="Acres" className="p-2 border rounded" type="number" step="any" />
           <textarea name="notes" value={fieldForm.notes} onChange={handleChange} placeholder="Notes (Optional)" className="p-2 border rounded md:col-span-2" />
         </div>
-        <button
-          onClick={handleSave}
-          className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
+        <button onClick={handleSave} className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
           {editingId ? "Update Field" : "Add Field"}
         </button>
       </div>
@@ -110,14 +142,8 @@ const FieldManager = () => {
                   {field.notes && <p className="text-sm text-gray-500 mt-1 italic">{field.notes}</p>}
                 </div>
                 <div className="space-x-2">
-                  <button
-                    onClick={() => handleEdit(field)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >Edit</button>
-                  <button
-                    onClick={() => handleDelete(field.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  >Delete</button>
+                  <button onClick={() => handleEdit(field)} className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
+                  <button onClick={() => handleDelete(field.id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
                 </div>
               </div>
               {fieldLivestock.length > 0 && (
@@ -134,8 +160,8 @@ const FieldManager = () => {
           );
         })}
       </div>
-      <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}
-      >
+
+      <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}>
         Back To Inventory
       </button>
     </div>

@@ -6,7 +6,6 @@
 
 import * as React from "react";
 import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { InventoryItem } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,6 +22,7 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type InventoryItemUpdateFormInputValues = {
+    sub?: string;
     name?: string;
     type?: string;
     quantity?: number;
@@ -31,6 +31,7 @@ export declare type InventoryItemUpdateFormInputValues = {
     notes?: string;
 };
 export declare type InventoryItemUpdateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     type?: ValidationFunction<string>;
     quantity?: ValidationFunction<number>;
@@ -41,6 +42,7 @@ export declare type InventoryItemUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type InventoryItemUpdateFormOverridesProps = {
     InventoryItemUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     type?: PrimitiveOverrideProps<TextFieldProps>;
     quantity?: PrimitiveOverrideProps<TextFieldProps>;
@@ -52,7 +54,7 @@ export declare type InventoryItemUpdateFormProps = React.PropsWithChildren<{
     overrides?: InventoryItemUpdateFormOverridesProps | undefined | null;
 } & {
     id?: string;
-    inventoryItem?: InventoryItem;
+    inventoryItem?: any;
     onSubmit?: (fields: InventoryItemUpdateFormInputValues) => InventoryItemUpdateFormInputValues;
     onSuccess?: (fields: InventoryItemUpdateFormInputValues) => void;
     onError?: (fields: InventoryItemUpdateFormInputValues, errorMessage: string) => void;

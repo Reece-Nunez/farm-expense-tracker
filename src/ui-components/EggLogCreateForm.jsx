@@ -7,9 +7,10 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { EggLog } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { createEggLog } from "../graphql/mutations";
+const client = generateClient();
 export default function EggLogCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -22,10 +23,12 @@ export default function EggLogCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     date: "",
     eggsCollected: "",
     chickenFlockID: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [date, setDate] = React.useState(initialValues.date);
   const [eggsCollected, setEggsCollected] = React.useState(
     initialValues.eggsCollected
@@ -35,12 +38,14 @@ export default function EggLogCreateForm(props) {
   );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
+    setSub(initialValues.sub);
     setDate(initialValues.date);
     setEggsCollected(initialValues.eggsCollected);
     setChickenFlockID(initialValues.chickenFlockID);
     setErrors({});
   };
   const validations = {
+    sub: [{ type: "Required" }],
     date: [{ type: "Required" }],
     eggsCollected: [{ type: "Required" }],
     chickenFlockID: [{ type: "Required" }],
@@ -71,6 +76,7 @@ export default function EggLogCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           date,
           eggsCollected,
           chickenFlockID,
@@ -103,7 +109,14 @@ export default function EggLogCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(new EggLog(modelFields));
+          await client.graphql({
+            query: createEggLog.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -112,13 +125,41 @@ export default function EggLogCreateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "EggLogCreateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              date,
+              eggsCollected,
+              chickenFlockID,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Date"
         isRequired={true}
@@ -129,6 +170,7 @@ export default function EggLogCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               date: value,
               eggsCollected,
               chickenFlockID,
@@ -159,6 +201,7 @@ export default function EggLogCreateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               date,
               eggsCollected: value,
               chickenFlockID,
@@ -185,6 +228,7 @@ export default function EggLogCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               date,
               eggsCollected,
               chickenFlockID: value,

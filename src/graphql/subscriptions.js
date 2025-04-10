@@ -4,9 +4,9 @@
 export const onCreateUser = /* GraphQL */ `
   subscription OnCreateUser(
     $filter: ModelSubscriptionUserFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateUser(filter: $filter, userId: $userId) {
+    onCreateUser(filter: $filter, sub: $sub) {
       id
       sub
       username
@@ -19,20 +19,14 @@ export const onCreateUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -40,9 +34,9 @@ export const onCreateUser = /* GraphQL */ `
 export const onUpdateUser = /* GraphQL */ `
   subscription OnUpdateUser(
     $filter: ModelSubscriptionUserFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateUser(filter: $filter, userId: $userId) {
+    onUpdateUser(filter: $filter, sub: $sub) {
       id
       sub
       username
@@ -55,20 +49,14 @@ export const onUpdateUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -76,9 +64,9 @@ export const onUpdateUser = /* GraphQL */ `
 export const onDeleteUser = /* GraphQL */ `
   subscription OnDeleteUser(
     $filter: ModelSubscriptionUserFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteUser(filter: $filter, userId: $userId) {
+    onDeleteUser(filter: $filter, sub: $sub) {
       id
       sub
       username
@@ -91,20 +79,14 @@ export const onDeleteUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -112,10 +94,11 @@ export const onDeleteUser = /* GraphQL */ `
 export const onCreateExpense = /* GraphQL */ `
   subscription OnCreateExpense(
     $filter: ModelSubscriptionExpenseFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateExpense(filter: $filter, userId: $userId) {
+    onCreateExpense(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       vendor
@@ -123,19 +106,26 @@ export const onCreateExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
       __typename
     }
   }
@@ -143,10 +133,11 @@ export const onCreateExpense = /* GraphQL */ `
 export const onUpdateExpense = /* GraphQL */ `
   subscription OnUpdateExpense(
     $filter: ModelSubscriptionExpenseFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateExpense(filter: $filter, userId: $userId) {
+    onUpdateExpense(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       vendor
@@ -154,19 +145,26 @@ export const onUpdateExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
       __typename
     }
   }
@@ -174,10 +172,11 @@ export const onUpdateExpense = /* GraphQL */ `
 export const onDeleteExpense = /* GraphQL */ `
   subscription OnDeleteExpense(
     $filter: ModelSubscriptionExpenseFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteExpense(filter: $filter, userId: $userId) {
+    onDeleteExpense(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       vendor
@@ -185,19 +184,125 @@ export const onDeleteExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
+      __typename
+    }
+  }
+`;
+export const onCreateLineItem = /* GraphQL */ `
+  subscription OnCreateLineItem(
+    $filter: ModelSubscriptionLineItemFilterInput
+    $sub: String
+  ) {
+    onCreateLineItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateLineItem = /* GraphQL */ `
+  subscription OnUpdateLineItem(
+    $filter: ModelSubscriptionLineItemFilterInput
+    $sub: String
+  ) {
+    onUpdateLineItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteLineItem = /* GraphQL */ `
+  subscription OnDeleteLineItem(
+    $filter: ModelSubscriptionLineItemFilterInput
+    $sub: String
+  ) {
+    onDeleteLineItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -205,10 +310,11 @@ export const onDeleteExpense = /* GraphQL */ `
 export const onCreateIncome = /* GraphQL */ `
   subscription OnCreateIncome(
     $filter: ModelSubscriptionIncomeFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateIncome(filter: $filter, userId: $userId) {
+    onCreateIncome(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       quantity
@@ -217,12 +323,23 @@ export const onCreateIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -230,10 +347,11 @@ export const onCreateIncome = /* GraphQL */ `
 export const onUpdateIncome = /* GraphQL */ `
   subscription OnUpdateIncome(
     $filter: ModelSubscriptionIncomeFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateIncome(filter: $filter, userId: $userId) {
+    onUpdateIncome(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       quantity
@@ -242,12 +360,23 @@ export const onUpdateIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -255,10 +384,11 @@ export const onUpdateIncome = /* GraphQL */ `
 export const onDeleteIncome = /* GraphQL */ `
   subscription OnDeleteIncome(
     $filter: ModelSubscriptionIncomeFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteIncome(filter: $filter, userId: $userId) {
+    onDeleteIncome(filter: $filter, sub: $sub) {
       id
+      sub
       userId
       date
       quantity
@@ -267,12 +397,23 @@ export const onDeleteIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -280,24 +421,20 @@ export const onDeleteIncome = /* GraphQL */ `
 export const onCreateField = /* GraphQL */ `
   subscription OnCreateField(
     $filter: ModelSubscriptionFieldFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateField(filter: $filter, userId: $userId) {
+    onCreateField(filter: $filter, sub: $sub) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -305,24 +442,20 @@ export const onCreateField = /* GraphQL */ `
 export const onUpdateField = /* GraphQL */ `
   subscription OnUpdateField(
     $filter: ModelSubscriptionFieldFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateField(filter: $filter, userId: $userId) {
+    onUpdateField(filter: $filter, sub: $sub) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -330,24 +463,20 @@ export const onUpdateField = /* GraphQL */ `
 export const onDeleteField = /* GraphQL */ `
   subscription OnDeleteField(
     $filter: ModelSubscriptionFieldFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteField(filter: $filter, userId: $userId) {
+    onDeleteField(filter: $filter, sub: $sub) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -355,10 +484,11 @@ export const onDeleteField = /* GraphQL */ `
 export const onCreateLivestock = /* GraphQL */ `
   subscription OnCreateLivestock(
     $filter: ModelSubscriptionLivestockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateLivestock(filter: $filter, userId: $userId) {
+    onCreateLivestock(filter: $filter, sub: $sub) {
       id
+      sub
       name
       species
       breed
@@ -368,38 +498,28 @@ export const onCreateLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -407,10 +527,11 @@ export const onCreateLivestock = /* GraphQL */ `
 export const onUpdateLivestock = /* GraphQL */ `
   subscription OnUpdateLivestock(
     $filter: ModelSubscriptionLivestockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateLivestock(filter: $filter, userId: $userId) {
+    onUpdateLivestock(filter: $filter, sub: $sub) {
       id
+      sub
       name
       species
       breed
@@ -420,38 +541,28 @@ export const onUpdateLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -459,10 +570,11 @@ export const onUpdateLivestock = /* GraphQL */ `
 export const onDeleteLivestock = /* GraphQL */ `
   subscription OnDeleteLivestock(
     $filter: ModelSubscriptionLivestockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteLivestock(filter: $filter, userId: $userId) {
+    onDeleteLivestock(filter: $filter, sub: $sub) {
       id
+      sub
       name
       species
       breed
@@ -472,38 +584,28 @@ export const onDeleteLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -511,18 +613,15 @@ export const onDeleteLivestock = /* GraphQL */ `
 export const onCreateLivestockFamily = /* GraphQL */ `
   subscription OnCreateLivestockFamily(
     $filter: ModelSubscriptionLivestockFamilyFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateLivestockFamily(filter: $filter, userId: $userId) {
+    onCreateLivestockFamily(filter: $filter, sub: $sub) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -530,18 +629,15 @@ export const onCreateLivestockFamily = /* GraphQL */ `
 export const onUpdateLivestockFamily = /* GraphQL */ `
   subscription OnUpdateLivestockFamily(
     $filter: ModelSubscriptionLivestockFamilyFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateLivestockFamily(filter: $filter, userId: $userId) {
+    onUpdateLivestockFamily(filter: $filter, sub: $sub) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -549,18 +645,15 @@ export const onUpdateLivestockFamily = /* GraphQL */ `
 export const onDeleteLivestockFamily = /* GraphQL */ `
   subscription OnDeleteLivestockFamily(
     $filter: ModelSubscriptionLivestockFamilyFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteLivestockFamily(filter: $filter, userId: $userId) {
+    onDeleteLivestockFamily(filter: $filter, sub: $sub) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -568,10 +661,11 @@ export const onDeleteLivestockFamily = /* GraphQL */ `
 export const onCreateMedicalRecord = /* GraphQL */ `
   subscription OnCreateMedicalRecord(
     $filter: ModelSubscriptionMedicalRecordFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateMedicalRecord(filter: $filter, userId: $userId) {
+    onCreateMedicalRecord(filter: $filter, sub: $sub) {
       id
+      sub
       livestockID
       type
       notes
@@ -579,6 +673,7 @@ export const onCreateMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -588,19 +683,11 @@ export const onCreateMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -608,10 +695,11 @@ export const onCreateMedicalRecord = /* GraphQL */ `
 export const onUpdateMedicalRecord = /* GraphQL */ `
   subscription OnUpdateMedicalRecord(
     $filter: ModelSubscriptionMedicalRecordFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateMedicalRecord(filter: $filter, userId: $userId) {
+    onUpdateMedicalRecord(filter: $filter, sub: $sub) {
       id
+      sub
       livestockID
       type
       notes
@@ -619,6 +707,7 @@ export const onUpdateMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -628,19 +717,11 @@ export const onUpdateMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -648,10 +729,11 @@ export const onUpdateMedicalRecord = /* GraphQL */ `
 export const onDeleteMedicalRecord = /* GraphQL */ `
   subscription OnDeleteMedicalRecord(
     $filter: ModelSubscriptionMedicalRecordFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteMedicalRecord(filter: $filter, userId: $userId) {
+    onDeleteMedicalRecord(filter: $filter, sub: $sub) {
       id
+      sub
       livestockID
       type
       notes
@@ -659,6 +741,7 @@ export const onDeleteMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -668,19 +751,11 @@ export const onDeleteMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -688,25 +763,21 @@ export const onDeleteMedicalRecord = /* GraphQL */ `
 export const onCreateChickenFlock = /* GraphQL */ `
   subscription OnCreateChickenFlock(
     $filter: ModelSubscriptionChickenFlockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateChickenFlock(filter: $filter, userId: $userId) {
+    onCreateChickenFlock(filter: $filter, sub: $sub) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -714,25 +785,21 @@ export const onCreateChickenFlock = /* GraphQL */ `
 export const onUpdateChickenFlock = /* GraphQL */ `
   subscription OnUpdateChickenFlock(
     $filter: ModelSubscriptionChickenFlockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateChickenFlock(filter: $filter, userId: $userId) {
+    onUpdateChickenFlock(filter: $filter, sub: $sub) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -740,25 +807,21 @@ export const onUpdateChickenFlock = /* GraphQL */ `
 export const onDeleteChickenFlock = /* GraphQL */ `
   subscription OnDeleteChickenFlock(
     $filter: ModelSubscriptionChickenFlockFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteChickenFlock(filter: $filter, userId: $userId) {
+    onDeleteChickenFlock(filter: $filter, sub: $sub) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -766,20 +829,17 @@ export const onDeleteChickenFlock = /* GraphQL */ `
 export const onCreateEggLog = /* GraphQL */ `
   subscription OnCreateEggLog(
     $filter: ModelSubscriptionEggLogFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateEggLog(filter: $filter, userId: $userId) {
+    onCreateEggLog(filter: $filter, sub: $sub) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -787,20 +847,17 @@ export const onCreateEggLog = /* GraphQL */ `
 export const onUpdateEggLog = /* GraphQL */ `
   subscription OnUpdateEggLog(
     $filter: ModelSubscriptionEggLogFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateEggLog(filter: $filter, userId: $userId) {
+    onUpdateEggLog(filter: $filter, sub: $sub) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -808,20 +865,17 @@ export const onUpdateEggLog = /* GraphQL */ `
 export const onDeleteEggLog = /* GraphQL */ `
   subscription OnDeleteEggLog(
     $filter: ModelSubscriptionEggLogFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteEggLog(filter: $filter, userId: $userId) {
+    onDeleteEggLog(filter: $filter, sub: $sub) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -829,10 +883,11 @@ export const onDeleteEggLog = /* GraphQL */ `
 export const onCreateInventoryItem = /* GraphQL */ `
   subscription OnCreateInventoryItem(
     $filter: ModelSubscriptionInventoryItemFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onCreateInventoryItem(filter: $filter, userId: $userId) {
+    onCreateInventoryItem(filter: $filter, sub: $sub) {
       id
+      sub
       name
       type
       quantity
@@ -841,10 +896,6 @@ export const onCreateInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -852,10 +903,11 @@ export const onCreateInventoryItem = /* GraphQL */ `
 export const onUpdateInventoryItem = /* GraphQL */ `
   subscription OnUpdateInventoryItem(
     $filter: ModelSubscriptionInventoryItemFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onUpdateInventoryItem(filter: $filter, userId: $userId) {
+    onUpdateInventoryItem(filter: $filter, sub: $sub) {
       id
+      sub
       name
       type
       quantity
@@ -864,10 +916,6 @@ export const onUpdateInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -875,10 +923,11 @@ export const onUpdateInventoryItem = /* GraphQL */ `
 export const onDeleteInventoryItem = /* GraphQL */ `
   subscription OnDeleteInventoryItem(
     $filter: ModelSubscriptionInventoryItemFilterInput
-    $userId: String
+    $sub: String
   ) {
-    onDeleteInventoryItem(filter: $filter, userId: $userId) {
+    onDeleteInventoryItem(filter: $filter, sub: $sub) {
       id
+      sub
       name
       type
       quantity
@@ -887,10 +936,6 @@ export const onDeleteInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }

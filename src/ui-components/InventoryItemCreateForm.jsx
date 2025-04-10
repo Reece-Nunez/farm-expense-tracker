@@ -7,9 +7,10 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { InventoryItem } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { createInventoryItem } from "../graphql/mutations";
+const client = generateClient();
 export default function InventoryItemCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -22,6 +23,7 @@ export default function InventoryItemCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     name: "",
     type: "",
     quantity: "",
@@ -29,6 +31,7 @@ export default function InventoryItemCreateForm(props) {
     acquiredDate: "",
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
   const [type, setType] = React.useState(initialValues.type);
   const [quantity, setQuantity] = React.useState(initialValues.quantity);
@@ -39,6 +42,7 @@ export default function InventoryItemCreateForm(props) {
   const [notes, setNotes] = React.useState(initialValues.notes);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
+    setSub(initialValues.sub);
     setName(initialValues.name);
     setType(initialValues.type);
     setQuantity(initialValues.quantity);
@@ -48,6 +52,7 @@ export default function InventoryItemCreateForm(props) {
     setErrors({});
   };
   const validations = {
+    sub: [{ type: "Required" }],
     name: [{ type: "Required" }],
     type: [{ type: "Required" }],
     quantity: [],
@@ -81,6 +86,7 @@ export default function InventoryItemCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           name,
           type,
           quantity,
@@ -116,7 +122,14 @@ export default function InventoryItemCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(new InventoryItem(modelFields));
+          await client.graphql({
+            query: createInventoryItem.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -125,13 +138,44 @@ export default function InventoryItemCreateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "InventoryItemCreateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              name,
+              type,
+              quantity,
+              location,
+              acquiredDate,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Name"
         isRequired={true}
@@ -141,6 +185,7 @@ export default function InventoryItemCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name: value,
               type,
               quantity,
@@ -170,6 +215,7 @@ export default function InventoryItemCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type: value,
               quantity,
@@ -203,6 +249,7 @@ export default function InventoryItemCreateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity: value,
@@ -232,6 +279,7 @@ export default function InventoryItemCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,
@@ -262,6 +310,7 @@ export default function InventoryItemCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,
@@ -291,6 +340,7 @@ export default function InventoryItemCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               type,
               quantity,

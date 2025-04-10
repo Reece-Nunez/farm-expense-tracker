@@ -6,7 +6,6 @@
 
 import * as React from "react";
 import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { Field } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,11 +22,13 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type FieldUpdateFormInputValues = {
+    sub?: string;
     name?: string;
     acres?: number;
     notes?: string;
 };
 export declare type FieldUpdateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     acres?: ValidationFunction<number>;
     notes?: ValidationFunction<string>;
@@ -35,6 +36,7 @@ export declare type FieldUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type FieldUpdateFormOverridesProps = {
     FieldUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     acres?: PrimitiveOverrideProps<TextFieldProps>;
     notes?: PrimitiveOverrideProps<TextFieldProps>;
@@ -43,7 +45,7 @@ export declare type FieldUpdateFormProps = React.PropsWithChildren<{
     overrides?: FieldUpdateFormOverridesProps | undefined | null;
 } & {
     id?: string;
-    field?: Field;
+    field?: any;
     onSubmit?: (fields: FieldUpdateFormInputValues) => FieldUpdateFormInputValues;
     onSuccess?: (fields: FieldUpdateFormInputValues) => void;
     onError?: (fields: FieldUpdateFormInputValues, errorMessage: string) => void;

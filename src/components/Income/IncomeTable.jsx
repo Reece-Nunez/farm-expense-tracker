@@ -8,8 +8,8 @@ export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
   const navigate = useNavigate();
 
   const sortedIncomes = React.useMemo(() => {
-      return [...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
-    }, [incomes]);
+    return [...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [incomes]);
 
   const MobileIncomeCards = () => (
     <div className="block md:hidden space-y-6">

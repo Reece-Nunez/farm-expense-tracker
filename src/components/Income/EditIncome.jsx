@@ -1,8 +1,8 @@
-// EditIncome.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { DataStore } from "@aws-amplify/datastore";
-import { Income } from "../../models";
+import { generateClient } from "aws-amplify/api";
+import { getIncome } from "../../graphql/queries";
+import { updateIncome as updateIncomeMutation } from "../../graphql/mutations";
 import IncomeForm from "./IncomeForm";
 import { toast } from "react-hot-toast";
 import GenericModal from "../Util/GenericModal";
@@ -14,12 +14,18 @@ export default function EditIncome() {
   const [currentIncome, setCurrentIncome] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
+  const client = generateClient();
 
   useEffect(() => {
     const fetchIncomeById = async () => {
       try {
-        const found = await DataStore.query(Income, id);
+        const response = await client.graphql({
+          query: getIncome,
+          variables: { id }
+        });
+        const found = response.data.getIncome;
+
         if (!found) {
           toast.error("Income record not found!");
           navigate("/dashboard/income");
@@ -34,16 +40,19 @@ export default function EditIncome() {
     fetchIncomeById();
   }, [id, navigate]);
 
-  // Instead of updating immediately, we prompt the user for confirmation.
   const handleUpdateIncome = async (formData) => {
     setConfirmMessage("Are you sure you want to update this income?");
     setConfirmAction(() => async () => {
       try {
-        const updated = await DataStore.save(
-          Income.copyOf(currentIncome, (updated) => {
-            Object.assign(updated, formData);
-          })
-        );
+        const input = {
+          ...formData,
+          id: currentIncome.id,
+          userId: currentIncome.userId,
+        };
+        await client.graphql({
+          query: updateIncomeMutation,
+          variables: { input }
+        });
         toast.success("Income updated successfully!");
         navigate("/dashboard/income");
       } catch (error) {

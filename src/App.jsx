@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserRouter as Router,
@@ -9,33 +8,25 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
-
+import { generateClient } from "aws-amplify/api";
 import "@aws-amplify/ui-react/styles.css";
 import "../AuthOverides.css";
-
+import DataMigrationUI from "./components/Util/DataMigrationUI";
+import { getCurrentUser } from "./utils/getCurrentUser";
 import { Amplify } from "aws-amplify";
 import awsExports from "./aws-exports";
-import { DataStore } from "@aws-amplify/datastore";
-import { fetchAuthSession } from "@aws-amplify/auth";
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
 import { signOut } from "@aws-amplify/auth";
-
 import { useLoading, LoadingProvider } from "./context/LoadingContext";
 import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
-
-// Models
-import { Expense, Income } from "./models";
-
-// Custom
+import { deleteExpense, deleteIncome, createIncome, updateIncome, deleteLineItem } from "./graphql/mutations";
+import { listExpenses as listExpensesQuery, listIncomes as listIncomesQuery, listLineItems } from "./graphql/queries";
 import AuthPageLayout from "./components/Auth/AuthPageLayout";
 import PrivateRoute from "./components/Auth/PrivateRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import AuthGate from "./components/Auth/AuthGate";
-import { fixOwnerField } from "./utils/fixOwnerField";
 import GenericModal from "./components/Util/GenericModal";
-
-// Pages
 import LandingPage from "./components/Main/LandingPage";
 import About from "./components/Main/About";
 import Contact from "./components/Main/Contact";
@@ -57,26 +48,18 @@ import ChickenManager from "./components/Inventory/ChickenManager";
 import FieldManager from "./components/Inventory/FieldManager";
 import InventoryItemManager from "./components/Inventory/InventoryItemManager";
 import DebugComponent from "./components/Util/DebugComponent";
-import ClearDataStoreOnce from "./components/Util/ClearDataStoreOnce";
 import LivestockMedicalRecords from "./components/Livestock/LivestockMedicalRecords";
 import LivestockMedicalForm from "./components/Livestock/LivestockMedicalForm";
 
-// Amplify init
 Amplify.configure({ ...awsExports });
-DataStore.start();
 Modal.setAppElement("#root");
 
-/**
- * 1) The top-level App just sets up Providers + Router.
- *    It does NOT call useNavigate/useLocation.
- */
 export default function App() {
   return (
     <LoadingProvider>
       <Authenticator.Provider>
         <GlobalLoadingSpinner />
         <Router>
-          {/* We render our "inner" app logic inside <Router> so hooks work */}
           <AppInner />
         </Router>
       </Authenticator.Provider>
@@ -84,196 +67,307 @@ export default function App() {
   );
 }
 
-/**
- * 2) AppInner has all your logic: states, side effects, useNavigate, etc.
- *    Because AppInner is rendered inside <Router>, the React Router hooks
- *    are safe to use (no "invalid hook call" error).
- */
 function AppInner() {
-  // -------------- State --------------
   const [authChecked, setAuthChecked] = useState(false);
-
-  // Expenses
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-
-  // Incomes
   const [fetchedIncomes, setFetchedIncomes] = useState([]);
   const [editingIncome, setEditingIncome] = useState(null);
-
-  // Generic confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(() => { });
   const [confirmMessage, setConfirmMessage] = useState("");
-
-  // Generic delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAction, setDeleteAction] = useState(() => { });
   const [deleteMessage, setDeleteMessage] = useState("");
-
-  // Form refs
   const expenseFormRef = useRef(null);
   const incomeFormRef = useRef(null);
-
-  // We can safely call these router hooks here:
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Our loading context
   const { setIsLoading } = useLoading();
+  const client = generateClient();
+  const [pendingExpenseData, setPendingExpenseData] = useState(null);
 
-  // -------------- Effects --------------
-
-  // 1) Mark auth as checked
   useEffect(() => {
     setAuthChecked(true);
   }, []);
 
-  // 2) Fix the owner field once on app load
-  useEffect(() => {
-    fixOwnerField();
-  }, []);
-
-  // 3) Fetch & subscribe to expenses
   useEffect(() => {
     async function fetchExpenses() {
       setIsLoading(true);
       try {
-        const session = await fetchAuthSession();
-        const userSub = session.tokens.idToken.payload.sub;
-        console.log("[fetchExpenses] Current user sub:", userSub);
-
-        const userExpenses = await DataStore.query(Expense, (e) =>
-          e.userId.eq(userSub)
-        );
-        setFetchedExpenses(userExpenses);
+        const user = await getCurrentUser();
+        const res = await client.graphql({
+          query: listExpensesQuery,
+          variables: {
+            filter: {
+              and: [
+                { userId: { eq: user.id } },
+                { sub: { eq: user.sub } }
+              ]
+            },
+            limit: 1000
+          }
+        });
+        setFetchedExpenses(res.data.listExpenses.items);
       } catch (error) {
         console.error("[fetchExpenses] Error:", error);
       } finally {
         setIsLoading(false);
       }
     }
-
     fetchExpenses();
-    const expenseSub = DataStore.observe(Expense).subscribe((msg) => {
-      if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
-        fetchExpenses();
-      }
-    });
-
-    return () => expenseSub.unsubscribe();
   }, [setIsLoading]);
 
-  // 4) Fetch & subscribe to all incomes
   useEffect(() => {
     async function fetchIncome() {
       setIsLoading(true);
       try {
-        const allIncome = await DataStore.query(Income);
-        setFetchedIncomes(allIncome);
+        const user = await getCurrentUser();
+        const res = await client.graphql({
+          query: listIncomesQuery,
+          variables: {
+            filter: {
+              and: [
+                { userId: { eq: user.id } },
+                { sub: { eq: user.sub } }
+              ]
+            },
+            limit: 1000
+          }
+        });
+        setFetchedIncomes(res.data.listIncomes.items);
       } catch (error) {
         console.error("[fetchIncome] Error:", error);
       } finally {
         setIsLoading(false);
       }
     }
-
     fetchIncome();
-    const incomeSub = DataStore.observe(Income).subscribe((msg) => {
-      if (["INSERT", "UPDATE", "DELETE"].includes(msg.opType)) {
-        fetchIncome();
-      }
-    });
-
-    return () => incomeSub.unsubscribe();
   }, [setIsLoading]);
 
-  // 5) Auto logout after inactivity
   useEffect(() => {
-    const AUTO_LOGOUT_TIME = 60 * 60 * 1000; // 1 hour
+    const AUTO_LOGOUT_TIME = 60 * 60 * 1000;
     let inactivityTimer;
-
     const resetTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
         toast("Logging out due to inactivity...");
-        signOut(); // Logs the user out
+        signOut();
       }, AUTO_LOGOUT_TIME);
     };
-
     const events = ["mousemove", "keydown", "scroll", "click"];
     events.forEach((event) => window.addEventListener(event, resetTimer));
     resetTimer();
-
     return () => {
       events.forEach((event) => window.removeEventListener(event, resetTimer));
       clearTimeout(inactivityTimer);
     };
   }, []);
 
-  // -------------- Expense Handlers --------------
-  const handleExpenseSubmit = (formattedExpense) => {
-    setConfirmMessage("Are you sure you want to accept this expense?");
-    setConfirmAction(() => async () => {
-      setIsLoading(true);
-      try {
-        const session = await fetchAuthSession();
-        const userId = session.tokens.idToken.payload.sub;
+  useEffect(() => {
+    const handle = (e) => {
+      const validatedFormData = e.detail;
+      setPendingExpenseData(validatedFormData);
+      setConfirmMessage("Are you sure you want to accept this expense?");
+      setConfirmAction(() => () => handleExpenseSubmit(validatedFormData));
+      setShowConfirmModal(true);
+    };
 
-        if (editingExpense) {
-          // Edit existing expense
-          const updatedExpense = await DataStore.save(
-            Expense.copyOf(editingExpense, (updated) => {
-              Object.assign(updated, formattedExpense);
-              updated.userId = userId;
-            })
-          );
-          setFetchedExpenses((prev) =>
-            prev.map((exp) =>
-              exp.id === updatedExpense.id ? updatedExpense : exp
-            )
-          );
-          toast.success("Expense updated successfully!");
-          setEditingExpense(null);
-        } else {
-          // Create new expense
-          const newExpense = await DataStore.save(
-            new Expense({ ...formattedExpense, userId })
-          );
-          setFetchedExpenses((prev) => [...prev, newExpense]);
-          toast.success("Expense successfully added!");
-        }
-      } catch (error) {
-        console.error("[handleExpenseSubmit] Error saving expense:", error);
-        toast.error("Failed to save expense.");
-      } finally {
-        setIsLoading(false);
-        setConfirmMessage("");
-        setConfirmAction(() => { });
-        setShowConfirmModal(false);
-        expenseFormRef.current?.resetForm();
+    window.addEventListener("expenseFormReady", handle);
+    return () => window.removeEventListener("expenseFormReady", handle);
+  }, []);
+
+
+  const handleExpenseSubmit = async (validatedFormData) => {
+    setIsLoading(true);
+    const client = generateClient();
+
+    try {
+      const user = await getCurrentUser();
+
+      const isoDate = validatedFormData.date
+        ? new Date(validatedFormData.date).toISOString().split("T")[0]
+        : "";
+
+      // Upload receipt if present
+      let receiptImageKey = null;
+      if (validatedFormData.receiptFile && validatedFormData.receiptFile[0]) {
+        const file = validatedFormData.receiptFile[0];
+        const fileKey = `receipts/${Date.now()}_${file.name}`;
+        const upload = uploadData({
+          path: fileKey,
+          data: file,
+          options: { contentType: file.type },
+        });
+
+        await upload.result;
+        receiptImageKey = fileKey;
+        toast.success("Receipt uploaded successfully!");
       }
-    });
-    setShowConfirmModal(true);
+
+      // Calculate line totals and grand total
+      const lineItems = validatedFormData.lineItems.map((li) => {
+        const unitCost = parseFloat(li.unitCost || 0);
+        const quantity = parseFloat(li.quantity || 0);
+        return {
+          ...li,
+          unitCost,
+          quantity,
+          lineTotal: unitCost * quantity,
+        };
+      });
+
+      const grandTotal = lineItems.reduce((sum, li) => sum + li.lineTotal, 0);
+
+      const input = {
+        vendor: validatedFormData.vendor,
+        description: validatedFormData.description,
+        date: isoDate,
+        receiptImageKey,
+        grandTotal,
+        userId: user.id,
+        sub: user.sub,
+      };
+
+      let createdExpense;
+
+      if (editingExpense) {
+        const result = await client.graphql({
+          query: /* GraphQL */ `
+            mutation CreateExpense($input: CreateExpenseInput!) {
+              createExpense(input: $input) {
+                id
+              }
+            }
+          `,
+          variables: { input },
+        });
+        createdExpense = result.data.createExpense;
+        
+
+        setFetchedExpenses((prev) =>
+          prev.map((e) =>
+            e.id === createdExpense.id ? createdExpense : e
+          )
+        );
+        setEditingExpense(null);
+        toast.success("Expense updated successfully!");
+      } else {
+        const result = await client.graphql({
+          query: /* GraphQL */ `
+            mutation CreateExpense($input: CreateExpenseInput!) {
+              createExpense(input: $input) {
+                id
+              }
+            }
+          `,
+          variables: { input },
+        });
+        createdExpense = result.data.createExpense;
+        
+
+        setFetchedExpenses((prev) => [...prev, createdExpense]);
+        toast.success("Expense successfully added!");
+      }
+
+      await Promise.all(
+        lineItems.map((li) =>
+          client.graphql({
+            query: /* GraphQL */ `
+              mutation CreateLineItem($input: CreateLineItemInput!) {
+                createLineItem(input: $input) {
+                  id
+                  item
+                  category
+                  quantity
+                  unitCost
+                  lineTotal
+                  expenseID
+                  sub
+                  createdAt
+                  updatedAt
+                }
+              }
+            `,
+            variables: {
+              input: {
+                expenseID: createdExpense.id,
+                item: li.item,
+                category: li.category,
+                unitCost: li.unitCost,
+                quantity: li.quantity,
+                lineTotal: li.lineTotal,
+                sub: user.sub,
+              },
+            },
+          })
+        )
+      );
+      
+
+    } catch (error) {
+      console.error("[handleExpenseSubmit] Error:", error);
+      toast.error("Failed to save expense.");
+    } finally {
+      setIsLoading(false);
+      setConfirmMessage("");
+      setConfirmAction(() => { });
+      setShowConfirmModal(false);
+      expenseFormRef.current?.resetForm();
+    }
   };
 
-  const handleExpenseEdit = (expense) => {
-    navigate(`/dashboard/edit-expense/${expense.id}`);
-  };
+
+
+  const handleExpenseEdit = (expense) => navigate(`/dashboard/edit-expense/${expense.id}`);
 
   const handleExpenseDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this expense?");
     setDeleteAction(() => async () => {
       setIsLoading(true);
+      const client = generateClient();
+  
       try {
-        const record = await DataStore.query(Expense, id);
-        if (!record) {
-          toast.error("Expense not found.");
-          return;
-        }
-        await DataStore.delete(record);
-        setFetchedExpenses((prev) => prev.filter((exp) => exp.id !== id));
-        toast.success("Expense deleted successfully!");
+        // Step 1: Delete all line items
+        const lineItemRes = await client.graphql({
+          query: listLineItems,
+          variables: {
+            filter: { expenseID: { eq: id } },
+            limit: 1000,
+          },
+        });
+  
+        const lineItems = lineItemRes?.data?.listLineItems?.items || [];
+  
+        await Promise.all(
+          lineItems.map((li) =>
+            client.graphql({
+              query: /* GraphQL */ `
+                mutation DeleteLineItem($input: DeleteLineItemInput!) {
+                  deleteLineItem(input: $input) {
+                    id
+                  }
+                }
+              `,
+              variables: { input: { id: li.id } },
+            })
+          )
+        );
+  
+        // Step 2: Delete the expense using a custom mutation (excluding the `user`)
+        await client.graphql({
+          query: /* GraphQL */ `
+            mutation DeleteExpense($input: DeleteExpenseInput!) {
+              deleteExpense(input: $input) {
+                id
+              }
+            }
+          `,
+          variables: { input: { id } },
+        });
+  
+        setFetchedExpenses((prev) => prev.filter((e) => e.id !== id));
+        toast.success("Expense and its line items deleted successfully.");
       } catch (error) {
         console.error("[handleExpenseDelete] Error:", error);
         toast.error("Failed to delete expense.");
@@ -284,39 +378,49 @@ function AppInner() {
     });
     setShowDeleteModal(true);
   };
+  
+  
 
-  // -------------- Income Handlers --------------
+
   const handleIncomeSubmit = (incomeData) => {
     setConfirmMessage("Are you sure you want to accept this income?");
     setConfirmAction(() => async () => {
       setIsLoading(true);
-      try {
-        const session = await fetchAuthSession();
-        const userId = session.tokens.idToken.payload.sub;
+      const client = generateClient();
 
-        let newIncome;
+      try {
+        const user = await getCurrentUser();
+
         if (editingIncome) {
-          newIncome = await DataStore.save(
-            Income.copyOf(editingIncome, (updated) => {
-              Object.assign(updated, incomeData);
-              updated.userId = userId;
-            })
+          const updated = await client.graphql({
+            query: updateIncome,
+            variables: {
+              input: {
+                ...incomeData,
+                userId: user.id,
+                sub: user.sub
+              }
+            },
+          });
+          setFetchedIncomes((prev) =>
+            prev.map((i) => i.id === updated.data.updateIncome.id ? updated.data.updateIncome : i)
           );
-          toast.success("Income updated successfully!");
           setEditingIncome(null);
+          toast.success("Income updated successfully!");
         } else {
-          newIncome = await DataStore.save(
-            new Income({ ...incomeData, userId })
-          );
+          const created = await client.graphql({
+            query: createIncome,
+            variables: {
+              input: {
+                ...incomeData,
+                userId: user.id,
+                sub: user.sub
+              }
+            },
+          });
+          setFetchedIncomes((prev) => [...prev, created.data.createIncome]);
           toast.success("Income added successfully!");
         }
-
-        // update local state
-        setFetchedIncomes((prev) =>
-          editingIncome
-            ? prev.map((inc) => (inc.id === newIncome.id ? newIncome : inc))
-            : [...prev, newIncome]
-        );
       } catch (error) {
         console.error("[handleIncomeSubmit] Error:", error);
         toast.error("Failed to save income.");
@@ -331,22 +435,20 @@ function AppInner() {
     setShowConfirmModal(true);
   };
 
-  const handleIncomeEdit = (income) => {
-    navigate(`/dashboard/edit-income/${income.id}`);
-  };
+  const handleIncomeEdit = (income) => navigate(`/dashboard/edit-income/${income.id}`);
 
   const handleIncomeDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this income?");
     setDeleteAction(() => async () => {
       setIsLoading(true);
+      const client = generateClient();
+
       try {
-        const record = await DataStore.query(Income, id);
-        if (!record) {
-          toast.error("Income record not found.");
-          return;
-        }
-        await DataStore.delete(record);
-        setFetchedIncomes((prev) => prev.filter((inc) => inc.id !== id));
+        await client.graphql({
+          query: deleteIncome,
+          variables: { input: { id } },
+        });
+        setFetchedIncomes((prev) => prev.filter((i) => i.id !== id));
         toast.success("Income deleted successfully!");
       } catch (error) {
         console.error("[handleIncomeDelete] Error:", error);
@@ -359,107 +461,47 @@ function AppInner() {
     setShowDeleteModal(true);
   };
 
-  // -------------- Render --------------
-  // If auth check not done, show a quick loader
-  if (!authChecked) {
-    return <div style={{ padding: 20 }}>Checking authentication...</div>;
-  }
+
+  if (!authChecked) return <div style={{ padding: 20 }}>Checking authentication...</div>;
 
   return (
     <>
-      {/* Your nested routes: these define the site’s entire routing */}
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/util/debug" element={<DebugComponent />} />
-
-        {/* Auth route */}
         <Route element={<AuthPageLayout />}>
           <Route path="/auth" element={<AuthGate />} />
         </Route>
-
-        {/* Private /dashboard routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardLayout />
-            </PrivateRoute>
-          }
-        >
+        <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+          <Route path="admin/migrate" element={<DataMigrationUI />} />
           <Route path="inventory" element={<InventoryDashboard />} />
           <Route path="inventory/livestock" element={<LivestockManager />} />
           <Route path="inventory/livestock/:animalId" element={<LivestockProfile />} />
           <Route path="inventory/chickens" element={<ChickenManager />} />
           <Route path="inventory/fields" element={<FieldManager />} />
           <Route path="inventory/inventory-items" element={<InventoryItemManager />} />
-          <Route
-            path="inventory/livestock/:animalId/medical-records"
-            element={<LivestockMedicalRecords />}
-          />
+          <Route path="inventory/livestock/:animalId/medical-records" element={<LivestockMedicalRecords />} />
           <Route path="inventory/livestock/:animalId/medical-records/new" element={<LivestockMedicalForm />} />
-
-          {/* index => /dashboard */}
           <Route index element={<Dashboard />} />
-
-          {/* Expenses */}
-          <Route
-            path="expenses"
-            element={
-              <ExpenseTable
-                expenses={fetchedExpenses}
-                onEdit={handleExpenseEdit}
-                onDelete={handleExpenseDelete}
-              />
-            }
-          />
+          <Route path="expenses" element={<ExpenseTable expenses={fetchedExpenses} onEdit={handleExpenseEdit} onDelete={handleExpenseDelete} />} />
           <Route
             path="add-expense"
-            element={
-              <ExpenseForm
-                ref={expenseFormRef}
-                onValidSubmit={handleExpenseSubmit}
-              />
-            }
+            element={<ExpenseForm ref={expenseFormRef} onValidSubmit={handleExpenseSubmit} />}
           />
           <Route path="edit-expense/:id" element={<EditExpense />} />
-
-          {/* Income */}
-          <Route
-            path="income"
-            element={
-              <IncomeTable
-                incomes={fetchedIncomes}
-                onEdit={handleIncomeEdit}
-                onDelete={handleIncomeDelete}
-              />
-            }
-          />
-          <Route
-            path="add-income"
-            element={
-              <IncomeForm
-                ref={incomeFormRef}
-                onValidSubmit={handleIncomeSubmit}
-              />
-            }
-          />
+          <Route path="income" element={<IncomeTable incomes={fetchedIncomes} onEdit={handleIncomeEdit} onDelete={handleIncomeDelete} />} />
+          <Route path="add-income" element={<IncomeForm ref={incomeFormRef} onValidSubmit={handleIncomeSubmit} />} />
           <Route path="edit-income/:id" element={<EditIncome />} />
-
-          {/* Additional pages */}
           <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<Profile />} />
           <Route path="import-csv" element={<ImportExpensesCSV />} />
           <Route path="import-income" element={<ImportIncomeCSV />} />
         </Route>
-
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
-      {/* Confirmation Modal */}
       {showConfirmModal && (
         <GenericModal
           isOpen={showConfirmModal}
@@ -471,7 +513,6 @@ function AppInner() {
         />
       )}
 
-      {/* Deletion Modal */}
       {showDeleteModal && (
         <GenericModal
           isOpen={showDeleteModal}

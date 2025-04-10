@@ -13,9 +13,11 @@ import {
   SwitchField,
   TextField,
 } from "@aws-amplify/ui-react";
-import { ChickenFlock } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { getChickenFlock } from "../graphql/queries";
+import { updateChickenFlock } from "../graphql/mutations";
+const client = generateClient();
 export default function ChickenFlockUpdateForm(props) {
   const {
     id: idProp,
@@ -29,11 +31,13 @@ export default function ChickenFlockUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     breed: "",
     count: "",
     hasRooster: false,
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [breed, setBreed] = React.useState(initialValues.breed);
   const [count, setCount] = React.useState(initialValues.count);
   const [hasRooster, setHasRooster] = React.useState(initialValues.hasRooster);
@@ -43,6 +47,7 @@ export default function ChickenFlockUpdateForm(props) {
     const cleanValues = chickenFlockRecord
       ? { ...initialValues, ...chickenFlockRecord }
       : initialValues;
+    setSub(cleanValues.sub);
     setBreed(cleanValues.breed);
     setCount(cleanValues.count);
     setHasRooster(cleanValues.hasRooster);
@@ -55,7 +60,12 @@ export default function ChickenFlockUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(ChickenFlock, idProp)
+        ? (
+            await client.graphql({
+              query: getChickenFlock.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getChickenFlock
         : chickenFlockModelProp;
       setChickenFlockRecord(record);
     };
@@ -63,6 +73,7 @@ export default function ChickenFlockUpdateForm(props) {
   }, [idProp, chickenFlockModelProp]);
   React.useEffect(resetStateValues, [chickenFlockRecord]);
   const validations = {
+    sub: [{ type: "Required" }],
     breed: [{ type: "Required" }],
     count: [{ type: "Required" }],
     hasRooster: [],
@@ -94,10 +105,11 @@ export default function ChickenFlockUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           breed,
           count,
-          hasRooster,
-          notes,
+          hasRooster: hasRooster ?? null,
+          notes: notes ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -127,23 +139,56 @@ export default function ChickenFlockUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            ChickenFlock.copyOf(chickenFlockRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateChickenFlock.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: chickenFlockRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "ChickenFlockUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              breed,
+              count,
+              hasRooster,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Breed"
         isRequired={true}
@@ -153,6 +198,7 @@ export default function ChickenFlockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               breed: value,
               count,
               hasRooster,
@@ -184,6 +230,7 @@ export default function ChickenFlockUpdateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count: value,
               hasRooster,
@@ -211,6 +258,7 @@ export default function ChickenFlockUpdateForm(props) {
           let value = e.target.checked;
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count,
               hasRooster: value,
@@ -238,6 +286,7 @@ export default function ChickenFlockUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               breed,
               count,
               hasRooster,

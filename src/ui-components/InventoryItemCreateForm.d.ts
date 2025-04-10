@@ -22,6 +22,7 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type InventoryItemCreateFormInputValues = {
+    sub?: string;
     name?: string;
     type?: string;
     quantity?: number;
@@ -30,6 +31,7 @@ export declare type InventoryItemCreateFormInputValues = {
     notes?: string;
 };
 export declare type InventoryItemCreateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     type?: ValidationFunction<string>;
     quantity?: ValidationFunction<number>;
@@ -40,6 +42,7 @@ export declare type InventoryItemCreateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type InventoryItemCreateFormOverridesProps = {
     InventoryItemCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     type?: PrimitiveOverrideProps<TextFieldProps>;
     quantity?: PrimitiveOverrideProps<TextFieldProps>;

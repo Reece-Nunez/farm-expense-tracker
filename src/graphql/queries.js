@@ -16,20 +16,14 @@ export const getUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -54,32 +48,29 @@ export const listUsers = /* GraphQL */ `
         preferences
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
 `;
-export const syncUsers = /* GraphQL */ `
-  query SyncUsers(
-    $filter: ModelUserFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncUsers(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
+export const getExpense = /* GraphQL */ `
+  query GetExpense($id: ID!) {
+    getExpense(id: $id) {
+      id
+      sub
+      userId
+      date
+      vendor
+      grandTotal
+      description
+      receiptImageKey
+      lineItems {
+        nextToken
+        __typename
+      }
+      user {
         id
         sub
         username
@@ -92,42 +83,10 @@ export const syncUsers = /* GraphQL */ `
         preferences
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const getExpense = /* GraphQL */ `
-  query GetExpense($id: ID!) {
-    getExpense(id: $id) {
-      id
-      userId
-      date
-      vendor
-      grandTotal
-      description
-      receiptImageKey
-      lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
       __typename
     }
   }
@@ -141,6 +100,7 @@ export const listExpenses = /* GraphQL */ `
     listExpenses(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         userId
         date
         vendor
@@ -149,33 +109,22 @@ export const listExpenses = /* GraphQL */ `
         receiptImageKey
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userExpensesId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
 `;
-export const syncExpenses = /* GraphQL */ `
-  query SyncExpenses(
-    $filter: ModelExpenseFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncExpenses(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
+export const getLineItem = /* GraphQL */ `
+  query GetLineItem($id: ID!) {
+    getLineItem(id: $id) {
+      id
+      sub
+      expenseID
+      expense {
         id
+        sub
         userId
         date
         vendor
@@ -184,14 +133,40 @@ export const syncExpenses = /* GraphQL */ `
         receiptImageKey
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userExpensesId
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listLineItems = /* GraphQL */ `
+  query ListLineItems(
+    $filter: ModelLineItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listLineItems(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        sub
+        expenseID
+        item
+        category
+        quantity
+        unitCost
+        lineTotal
+        createdAt
+        updatedAt
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -200,6 +175,7 @@ export const getIncome = /* GraphQL */ `
   query GetIncome($id: ID!) {
     getIncome(id: $id) {
       id
+      sub
       userId
       date
       quantity
@@ -208,12 +184,23 @@ export const getIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -227,6 +214,7 @@ export const listIncomes = /* GraphQL */ `
     listIncomes(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         userId
         date
         quantity
@@ -237,51 +225,9 @@ export const listIncomes = /* GraphQL */ `
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userIncomeId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncIncomes = /* GraphQL */ `
-  query SyncIncomes(
-    $filter: ModelIncomeFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncIncomes(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        userId
-        date
-        quantity
-        price
-        paymentMethod
-        amount
-        item
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userIncomeId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -290,20 +236,16 @@ export const getField = /* GraphQL */ `
   query GetField($id: ID!) {
     getField(id: $id) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -317,51 +259,15 @@ export const listFields = /* GraphQL */ `
     listFields(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncFields = /* GraphQL */ `
-  query SyncFields(
-    $filter: ModelFieldFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncFields(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        name
-        acres
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -370,6 +276,7 @@ export const getLivestock = /* GraphQL */ `
   query GetLivestock($id: ID!) {
     getLivestock(id: $id) {
       id
+      sub
       name
       species
       breed
@@ -379,38 +286,28 @@ export const getLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -424,6 +321,7 @@ export const listLivestocks = /* GraphQL */ `
     listLivestocks(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         name
         species
         breed
@@ -433,50 +331,9 @@ export const listLivestocks = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncLivestocks = /* GraphQL */ `
-  query SyncLivestocks(
-    $filter: ModelLivestockFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncLivestocks(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        name
-        species
-        breed
-        birthdate
-        weight
-        gender
-        fieldID
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -485,14 +342,11 @@ export const getLivestockFamily = /* GraphQL */ `
   query GetLivestockFamily($id: ID!) {
     getLivestockFamily(id: $id) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -510,49 +364,14 @@ export const listLivestockFamilies = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         parentID
         childID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncLivestockFamilies = /* GraphQL */ `
-  query SyncLivestockFamilies(
-    $filter: ModelLivestockFamilyFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncLivestockFamilies(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        parentID
-        childID
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -561,6 +380,7 @@ export const getMedicalRecord = /* GraphQL */ `
   query GetMedicalRecord($id: ID!) {
     getMedicalRecord(id: $id) {
       id
+      sub
       livestockID
       type
       notes
@@ -568,6 +388,7 @@ export const getMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -577,19 +398,11 @@ export const getMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -603,6 +416,7 @@ export const listMedicalRecords = /* GraphQL */ `
     listMedicalRecords(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         livestockID
         type
         notes
@@ -610,50 +424,10 @@ export const listMedicalRecords = /* GraphQL */ `
         medicine
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         livestockMedicalRecordsId
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncMedicalRecords = /* GraphQL */ `
-  query SyncMedicalRecords(
-    $filter: ModelMedicalRecordFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncMedicalRecords(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        livestockID
-        type
-        notes
-        date
-        medicine
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        livestockMedicalRecordsId
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -662,21 +436,17 @@ export const getChickenFlock = /* GraphQL */ `
   query GetChickenFlock($id: ID!) {
     getChickenFlock(id: $id) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -690,53 +460,16 @@ export const listChickenFlocks = /* GraphQL */ `
     listChickenFlocks(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         breed
         count
         hasRooster
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncChickenFlocks = /* GraphQL */ `
-  query SyncChickenFlocks(
-    $filter: ModelChickenFlockFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncChickenFlocks(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        breed
-        count
-        hasRooster
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -745,16 +478,13 @@ export const getEggLog = /* GraphQL */ `
   query GetEggLog($id: ID!) {
     getEggLog(id: $id) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -768,53 +498,16 @@ export const listEggLogs = /* GraphQL */ `
     listEggLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         date
         eggsCollected
         chickenFlockID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         chickenFlockEggLogsId
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncEggLogs = /* GraphQL */ `
-  query SyncEggLogs(
-    $filter: ModelEggLogFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncEggLogs(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        date
-        eggsCollected
-        chickenFlockID
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        chickenFlockEggLogsId
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -823,6 +516,7 @@ export const getInventoryItem = /* GraphQL */ `
   query GetInventoryItem($id: ID!) {
     getInventoryItem(id: $id) {
       id
+      sub
       name
       type
       quantity
@@ -831,10 +525,6 @@ export const getInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -848,6 +538,7 @@ export const listInventoryItems = /* GraphQL */ `
     listInventoryItems(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        sub
         name
         type
         quantity
@@ -856,49 +547,9 @@ export const listInventoryItems = /* GraphQL */ `
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
-      __typename
-    }
-  }
-`;
-export const syncInventoryItems = /* GraphQL */ `
-  query SyncInventoryItems(
-    $filter: ModelInventoryItemFilterInput
-    $limit: Int
-    $nextToken: String
-    $lastSync: AWSTimestamp
-  ) {
-    syncInventoryItems(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      lastSync: $lastSync
-    ) {
-      items {
-        id
-        name
-        type
-        quantity
-        location
-        acquiredDate
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
-        __typename
-      }
-      nextToken
-      startedAt
       __typename
     }
   }
@@ -920,6 +571,7 @@ export const expensesByUserId = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         userId
         date
         vendor
@@ -928,14 +580,42 @@ export const expensesByUserId = /* GraphQL */ `
         receiptImageKey
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userExpensesId
         __typename
       }
       nextToken
-      startedAt
+      __typename
+    }
+  }
+`;
+export const lineItemsByExpenseID = /* GraphQL */ `
+  query LineItemsByExpenseID(
+    $expenseID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelLineItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    lineItemsByExpenseID(
+      expenseID: $expenseID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        sub
+        expenseID
+        item
+        category
+        quantity
+        unitCost
+        lineTotal
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
       __typename
     }
   }
@@ -957,6 +637,7 @@ export const incomesByUserId = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         userId
         date
         quantity
@@ -967,14 +648,9 @@ export const incomesByUserId = /* GraphQL */ `
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userIncomeId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -996,6 +672,7 @@ export const livestocksByFieldID = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         name
         species
         breed
@@ -1005,14 +682,9 @@ export const livestocksByFieldID = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -1034,18 +706,14 @@ export const livestockFamiliesByParentID = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         parentID
         childID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -1067,18 +735,14 @@ export const livestockFamiliesByChildID = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         parentID
         childID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -1100,6 +764,7 @@ export const medicalRecordsByLivestockID = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         livestockID
         type
         notes
@@ -1107,15 +772,10 @@ export const medicalRecordsByLivestockID = /* GraphQL */ `
         medicine
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         livestockMedicalRecordsId
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }
@@ -1137,20 +797,16 @@ export const eggLogsByChickenFlockID = /* GraphQL */ `
     ) {
       items {
         id
+        sub
         date
         eggsCollected
         chickenFlockID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         chickenFlockEggLogsId
-        userId
         __typename
       }
       nextToken
-      startedAt
       __typename
     }
   }

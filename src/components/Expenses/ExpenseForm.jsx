@@ -16,11 +16,11 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
-// If using AWS Amplify for file uploads:
+import { getCurrentUser } from "../../utils/getCurrentUser";
 import { uploadData } from "aws-amplify/storage";
+import { generateClient } from "aws-amplify/api";
+import { createExpense, createLineItem } from "../../graphql/mutations";
 import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
-
-// Import your nested schema that expects { date, vendor, lineItems[], ... }
 import { expenseFormSchema } from "@/schemas/expenseFormSchema";
 
 const categories = [
@@ -48,7 +48,6 @@ const categories = [
   "Medicine",
 ];
 
-// Default shape for one line item
 const defaultLineItem = {
   item: "",
   category: "",
@@ -56,10 +55,8 @@ const defaultLineItem = {
   quantity: "",
 };
 
-// Default values for the entire expense form
-// (one expense that has a lineItems array)
 const defaultExpense = {
-  date: null,       // store a Date object in the form
+  date: null,
   vendor: "",
   description: "",
   receiptFile: null,
@@ -82,22 +79,23 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
   useImperativeHandle(ref, () => ({
     resetForm: () => reset(defaultExpense),
+    validateAndGetData: () =>
+      new Promise((resolve, reject) => {
+        handleSubmit(resolve, reject)();
+      }),
   }));
 
-  // useFieldArray for lineItems
+
   const { fields: lineItemFields, append, remove } = useFieldArray({
     control,
     name: "lineItems",
   });
 
-  // If editing an existing Expense, pre-fill fields
   useEffect(() => {
     if (editingExpense) {
       reset({
         ...editingExpense,
-        // convert date string to Date object
         date: editingExpense.date ? new Date(editingExpense.date) : null,
-        // if no lineItems, have at least one blank
         lineItems: editingExpense.lineItems?.length
           ? editingExpense.lineItems.map((li) => ({
             item: li.item ?? "",
@@ -118,12 +116,10 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
   const navigate = useNavigate();
 
-  // -----------------------------
-  // Submit Handler (Returns ONE expense object)
-  // -----------------------------
   const onValid = useCallback(
     async (data) => {
       try {
+        const client = generateClient();
         const isoDate = data.date
           ? new Date(data.date).toISOString().split("T")[0]
           : "";
@@ -160,36 +156,79 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
 
         const grandTotal = lineItems.reduce((sum, li) => sum + li.lineTotal, 0);
 
-        const formattedExpense = {
+        const user = await getCurrentUser();
+        if (!user) return;
+        const input = {
+          sub: user.sub,
           date: isoDate,
           vendor: data.vendor,
           description: data.description,
           receiptImageKey,
-          lineItems,
           grandTotal,
+          userId: user.id,
         };
 
-        onValidSubmit(formattedExpense);
+
+        const createdExpense = expenseRes.data.createExpense;
+
+        await Promise.all(
+          lineItems.map(async (li) => {
+            await client.graphql({
+              query: `
+                mutation CreateLineItem($input: CreateLineItemInput!) {
+                  createLineItem(input: $input) {
+                    id
+                    item
+                    category
+                    quantity
+                    unitCost
+                    lineTotal
+                    expenseID
+                    sub
+                    createdAt
+                    updatedAt
+                  }
+                }
+              `,
+              variables: {
+                input: {
+                  expenseID: createdExpense.id,
+                  item: li.item,
+                  category: li.category,
+                  unitCost: li.unitCost,
+                  quantity: li.quantity,
+                  lineTotal: li.lineTotal,
+                  sub: user.sub,
+                },
+              },
+            });
+          })
+        );
+
+
+        toast.success("Expense saved successfully!");
+        onValidSubmit?.(createdExpense);
+        reset(defaultExpense);
+
       } catch (err) {
-        console.error("[ExpenseForm] File upload error:", err);
-        toast.error("Error uploading file.");
+        console.error("[ExpenseForm] Submission error:", err);
+        toast.error("Failed to save expense.");
       }
     },
     [onValidSubmit, editingExpense]
   );
 
-
   const onInvalid = () => {
     toast.error("Please fix errors before submitting.");
   };
 
-  // Optional: watch lineItems to compute a dynamic "grand total" in the UI
   const watchedLineItems = watch("lineItems") || [];
   const dynamicGrandTotal = watchedLineItems.reduce((sum, item) => {
     const cost = parseFloat(item.unitCost || 0);
     const qty = parseFloat(item.quantity || 0);
     return sum + cost * qty;
   }, 0);
+
 
   return (
     <Card className="w-full max-w-md md:max-w-4xl mx-auto p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
@@ -440,11 +479,29 @@ function ExpenseForm({ onValidSubmit, editingExpense }, ref) {
               Back to Dashboard
             </Button>
             <Button
-              type="submit"
+              type="button"
+              onClick={async () => {
+                try {
+                  const formData = await ref?.current?.validateAndGetData();
+                  if (formData) {
+                    window.dispatchEvent(new CustomEvent("expenseFormReady", { detail: formData }));
+                  }
+                } catch (error) {
+                  console.log("Validation failed:", error);
+                  toast.error("Please fix the form errors before submitting.");
+                  const errorElement = document.querySelector(".animate-shake");
+                  if (errorElement) {
+                    errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
+                }
+              }}
+              
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
             >
               Submit
             </Button>
+
+
           </div>
         </form>
       </CardContent>

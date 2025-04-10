@@ -7,9 +7,11 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { Field } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { getField } from "../graphql/queries";
+import { updateField } from "../graphql/mutations";
+const client = generateClient();
 export default function FieldUpdateForm(props) {
   const {
     id: idProp,
@@ -23,10 +25,12 @@ export default function FieldUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     name: "",
     acres: "",
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
   const [acres, setAcres] = React.useState(initialValues.acres);
   const [notes, setNotes] = React.useState(initialValues.notes);
@@ -35,6 +39,7 @@ export default function FieldUpdateForm(props) {
     const cleanValues = fieldRecord
       ? { ...initialValues, ...fieldRecord }
       : initialValues;
+    setSub(cleanValues.sub);
     setName(cleanValues.name);
     setAcres(cleanValues.acres);
     setNotes(cleanValues.notes);
@@ -44,7 +49,12 @@ export default function FieldUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Field, idProp)
+        ? (
+            await client.graphql({
+              query: getField.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getField
         : fieldModelProp;
       setFieldRecord(record);
     };
@@ -52,6 +62,7 @@ export default function FieldUpdateForm(props) {
   }, [idProp, fieldModelProp]);
   React.useEffect(resetStateValues, [fieldRecord]);
   const validations = {
+    sub: [{ type: "Required" }],
     name: [{ type: "Required" }],
     acres: [],
     notes: [],
@@ -82,9 +93,10 @@ export default function FieldUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           name,
-          acres,
-          notes,
+          acres: acres ?? null,
+          notes: notes ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -114,23 +126,55 @@ export default function FieldUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            Field.copyOf(fieldRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateField.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: fieldRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "FieldUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              name,
+              acres,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Name"
         isRequired={true}
@@ -140,6 +184,7 @@ export default function FieldUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name: value,
               acres,
               notes,
@@ -170,6 +215,7 @@ export default function FieldUpdateForm(props) {
             : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               acres: value,
               notes,
@@ -196,6 +242,7 @@ export default function FieldUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               acres,
               notes: value,

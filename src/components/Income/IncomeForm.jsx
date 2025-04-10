@@ -12,9 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { incomeSchema } from "@/schemas/incomeSchema";
-import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
+import { CalendarIcon } from "@heroicons/react/outline";
 
-// Define options
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
 
@@ -40,7 +39,6 @@ const IncomeForm = forwardRef((props, ref) => {
     },
   });
 
-  // Expose a reset method
   useImperativeHandle(ref, () => ({
     resetForm: () => reset(),
   }));
@@ -60,20 +58,17 @@ const IncomeForm = forwardRef((props, ref) => {
   const watchDate = watch("date");
   const watchPricePerUnit = watch("pricePerUnit");
   const watchWeightOrQuantity = parseFloat(watch("weightOrQuantity")) || 0;
-  const amount =
-    parseFloat(watchPricePerUnit || 0) * watchWeightOrQuantity || 0;
+  const amount = parseFloat(watchPricePerUnit || 0) * watchWeightOrQuantity || 0;
 
   const navigate = useNavigate();
 
   const onValid = (data) => {
-    // Convert date to YYYY-MM-DD
     const dateValue = data.date ? new Date(data.date) : null;
     const isoDate = dateValue ? dateValue.toISOString().split("T")[0] : "";
     const parsedQuantity = parseFloat(data.weightOrQuantity || "0");
     const parsedPrice = parseFloat(data.pricePerUnit || "0");
     const computedAmount = parsedPrice * parsedQuantity;
     const finalObj = {
-      userId: "", // will be set in parent code
       date: isoDate,
       paymentMethod: data.paymentMethod,
       item: data.item || "Other",
@@ -82,6 +77,7 @@ const IncomeForm = forwardRef((props, ref) => {
       amount: parseFloat(computedAmount.toFixed(2)),
       notes: data.notes || "",
     };
+
     onValidSubmit(finalObj);
     reset();
   };
@@ -106,7 +102,6 @@ const IncomeForm = forwardRef((props, ref) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-4">
-          {/* Date */}
           <div>
             <label className="block font-medium mb-1">
               <CalendarIcon className="inline-block w-5 h-5 text-blue-500 mr-1" />
@@ -117,9 +112,7 @@ const IncomeForm = forwardRef((props, ref) => {
               onChange={handleDateChange}
               placeholderText="Select Date"
               dateFormat="yyyy-MM-dd"
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                errors.date ? "border-red-500 animate-shake" : ""
-              }`}
+              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${errors.date ? "border-red-500 animate-shake" : ""}`}
               isClearable
             />
             {errors.date && (
@@ -127,38 +120,24 @@ const IncomeForm = forwardRef((props, ref) => {
             )}
           </div>
 
-          {/* Payment Method */}
           <div>
             <label className="block font-medium mb-1">Payment Method</label>
-            <Select
-              {...register("paymentMethod")}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
-            >
+            <Select {...register("paymentMethod")} className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
               <option value="">Select Payment Method</option>
               {paymentMethods.map((method) => (
-                <option key={method} value={method}>
-                  {method}
-                </option>
+                <option key={method} value={method}>{method}</option>
               ))}
             </Select>
           </div>
 
-          {/* Item Sold */}
           <div>
             <label className="block font-medium mb-1">
               Item Sold <span className="text-red-500">*</span>
             </label>
-            <Select
-              {...register("item")}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                errors.item ? "border-red-500 animate-shake" : ""
-              }`}
-            >
+            <Select {...register("item")} className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${errors.item ? "border-red-500 animate-shake" : ""}`}>
               <option value="">Select Item Sold</option>
               {itemsSold.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
+                <option key={option} value={option}>{option}</option>
               ))}
             </Select>
             {errors.item && (
@@ -166,7 +145,6 @@ const IncomeForm = forwardRef((props, ref) => {
             )}
           </div>
 
-          {/* Weight/Quantity and Price Per Unit */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block font-medium mb-1">Weight/Quantity</label>
@@ -193,7 +171,6 @@ const IncomeForm = forwardRef((props, ref) => {
             </div>
           </div>
 
-          {/* Computed Amount */}
           <div>
             <label className="block font-medium">Total Amount</label>
             <Input
@@ -203,7 +180,6 @@ const IncomeForm = forwardRef((props, ref) => {
             />
           </div>
 
-          {/* Notes */}
           <div>
             <label className="block font-medium mb-1">Notes (Optional)</label>
             <Textarea
@@ -213,26 +189,14 @@ const IncomeForm = forwardRef((props, ref) => {
             />
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row justify-around gap-4 mt-6">
-            <Button
-              type="button"
-              onClick={() => reset()}
-              className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors"
-            >
+            <Button type="button" onClick={() => reset()} className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors">
               Clear
             </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
-            >
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
               Submit
             </Button>
-            <Button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
-            >
+            <Button type="button" onClick={() => navigate("/dashboard")} className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors">
               Back to Dashboard
             </Button>
           </div>

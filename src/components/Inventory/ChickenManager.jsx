@@ -1,8 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { DataStore } from "@aws-amplify/datastore";
-import { ChickenFlock, EggLog, Expense } from "../../models";
+import { generateClient } from "aws-amplify/api";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../../utils/getCurrentUser";
+import {
+  listChickenFlocks,
+  listEggLogs,
+  listLineItems,
+  getExpense
+} from "../../graphql/queries";
+import {
+  createChickenFlock as createChickenFlockMutation,
+  updateChickenFlock as updateChickenFlockMutation,
+  deleteChickenFlock as deleteChickenFlockMutation,
+  createEggLog as createEggLogMutation
+} from "../../graphql/mutations";
 import { Button } from "@/components/ui/button";
-import { PencilAltIcon, TrashIcon, CheckIcon, XIcon } from "@heroicons/react/outline";
+import {
+  PencilAltIcon,
+  TrashIcon,
+  CheckIcon,
+  XIcon
+} from "@heroicons/react/outline";
 
 const CHICKEN_FEED_KEYWORDS = ["chicken feed", "poultry grain", "laying pellets", "scratch", "hens feed"];
 
@@ -14,46 +32,57 @@ const ChickenManager = () => {
   const [newEggLog, setNewEggLog] = useState({ flockId: "", date: "", eggsCollected: "" });
   const [editingFlockId, setEditingFlockId] = useState(null);
   const [editedFlock, setEditedFlock] = useState({});
+  const [user, setUser] = useState(null);
+  const client = generateClient();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
-    fetchData();
+    const init = async () => {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) return;
+      setUser(currentUser);
+      fetchData(currentUser);
+    };
+    init();
   }, []);
 
-  const fetchData = async () => {
-    const [fetchedFlocks, fetchedEggLogs, allExpenses] = await Promise.all([
-      DataStore.query(ChickenFlock),
-      DataStore.query(EggLog),
-      DataStore.query(Expense)
+  const fetchData = async (user) => {
+    const [fetchedFlocks, fetchedEggLogs, fetchedLineItems] = await Promise.all([
+      client.graphql({ query: listChickenFlocks, variables: { filter: { sub: { eq: user.id } } } }),
+      client.graphql({ query: listEggLogs, variables: { filter: { sub: { eq: user.id } } } }),
+      client.graphql({ query: listLineItems, variables: { filter: { sub: { eq: user.id } }, limit: 1000 } })
     ]);
 
-    const feedRelated = allExpenses.filter(exp =>
-      exp.lineItems?.some(item =>
-        CHICKEN_FEED_KEYWORDS.some(keyword => item.item?.toLowerCase().includes(keyword))
-      )
-    );
+    const flocks = fetchedFlocks.data.listChickenFlocks.items;
+    const eggLogs = fetchedEggLogs.data.listEggLogs.items;
+    const lineItems = fetchedLineItems.data.listLineItems.items;
 
-    setFlocks(fetchedFlocks);
-    setEggLogs(fetchedEggLogs);
-    setFeedExpenses(feedRelated);
-  };
-
-  const handleEditFlock = (flockId) => {
-    navigate(`/dashboard/inventory/chickens/edit/${flockId}`);
-  };
-
-  const handleDeleteFlock = async (flockId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this flock?");
-    if (!confirmDelete) return;
-
-    try {
-      const toDelete = await DataStore.query(ChickenFlock, flockId);
-      await DataStore.delete(toDelete);
-      setFlocks(prev => prev.filter(f => f.id !== flockId));
-    } catch (error) {
-      console.error("Error deleting flock:", error);
-      alert("Something went wrong while deleting.");
+    const feedRelated = [];
+    for (const item of lineItems) {
+      if (!CHICKEN_FEED_KEYWORDS.some(keyword => item.item?.toLowerCase().includes(keyword))) continue;
+      try {
+        const { data } = await client.graphql({ query: getExpense, variables: { id: item.expenseID } });
+        const expense = data.getExpense;
+        if (expense) {
+          feedRelated.push({
+            id: item.id,
+            lineTotal: item.lineTotal,
+            expenseDate: expense.date,
+            vendor: expense.vendor
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to fetch expense for line item", item.id);
+      }
     }
-  };
+
+    setFlocks(flocks);
+    setEggLogs(eggLogs);
+    setFeedExpenses(feedRelated);
+  }
+
+
 
   const handleEdit = (flock) => {
     setEditingFlockId(flock.id);
@@ -65,15 +94,17 @@ const ChickenManager = () => {
   };
 
   const handleSave = async () => {
-    const original = await DataStore.query(ChickenFlock, editingFlockId);
-    await DataStore.save(ChickenFlock.copyOf(original, updated => {
-      updated.breed = editedFlock.breed;
-      updated.count = parseInt(editedFlock.count);
-      updated.hasRooster = editedFlock.hasRooster;
-      updated.notes = editedFlock.notes;
-    }));
+    const input = {
+      id: editingFlockId,
+      breed: editedFlock.breed,
+      count: parseInt(editedFlock.count),
+      hasRooster: editedFlock.hasRooster,
+      notes: editedFlock.notes,
+      sub: user.id
+    };
+    await client.graphql({ query: updateChickenFlockMutation, variables: { input } });
     setEditingFlockId(null);
-    fetchData();
+    fetchData(user);
   };
 
   const handleCancel = () => {
@@ -83,38 +114,43 @@ const ChickenManager = () => {
 
   const handleDelete = async (flockId) => {
     if (confirm("Delete this flock?")) {
-      const toDelete = await DataStore.query(ChickenFlock, flockId);
-      await DataStore.delete(toDelete);
-      fetchData();
+      await client.graphql({ query: deleteChickenFlockMutation, variables: { input: { id: flockId } } });
+      fetchData(user);
     }
   };
 
   const handleAddFlock = async () => {
     if (!newFlock.breed || !newFlock.count) return;
-    await DataStore.save(new ChickenFlock({
+    const input = {
       breed: newFlock.breed,
       count: parseInt(newFlock.count),
       hasRooster: newFlock.hasRooster,
-      notes: newFlock.notes
-    }));
-    setNewFlock({ breed: "", count: "", notes: "" });
-    fetchData();
+      notes: newFlock.notes,
+      sub: user.id
+    };
+    await client.graphql({ query: createChickenFlockMutation, variables: { input } });
+    setNewFlock({ breed: "", count: "", hasRooster: false, notes: "" });
+    fetchData(user);
   };
 
   const handleAddEggLog = async () => {
     if (!newEggLog.flockId || !newEggLog.date || !newEggLog.eggsCollected) return;
-    await DataStore.save(new EggLog({
+    const input = {
       chickenFlockID: newEggLog.flockId,
       date: newEggLog.date,
-      eggsCollected: parseInt(newEggLog.eggsCollected)
-    }));
+      eggsCollected: parseInt(newEggLog.eggsCollected),
+      sub: user.id
+    };
+    await client.graphql({ query: createEggLogMutation, variables: { input } });
     setNewEggLog({ flockId: "", date: "", eggsCollected: "" });
-    fetchData();
+    fetchData(user);
   };
 
   const totalChickens = flocks.reduce((sum, f) => sum + f.count, 0);
   const totalEggs = eggLogs.reduce((sum, log) => sum + log.eggsCollected, 0);
-  const totalFeedSpent = feedExpenses.reduce((sum, exp) => sum + (exp.grandTotal || 0), 0);
+  const totalFeedSpent = feedExpenses.reduce((sum, item) => {
+    return sum + (item?.lineTotal ?? 0);
+  }, 0);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -161,6 +197,10 @@ const ChickenManager = () => {
 
         </div>
         <Button className="mt-3 bg-green-600 hover:bg-green-700 text-white" onClick={handleAddFlock}>Add Flock</Button>
+        <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}
+        >
+          Back To Inventory
+        </button>
       </div>
 
       {/* Add Egg Log */}
@@ -252,13 +292,13 @@ const ChickenManager = () => {
         </ul>
       </div>
 
-      {/* Related Feed Expenses */}
+
       <div className="bg-white p-4 rounded border shadow my-4">
         <h3 className="text-lg font-bold mb-4">Feed-Related Expenses</h3>
         <ul className="space-y-3">
-          {feedExpenses.map(exp => (
-            <li key={exp.id} className="border p-3 rounded bg-gray-50">
-              {new Date(exp.date).toLocaleDateString()} — {exp.vendor} — ${exp.grandTotal?.toFixed(2)}
+          {feedExpenses.map(item => (
+            <li key={item.id} className="border p-3 rounded bg-gray-50">
+              {item.expenseDate ? new Date(item.expenseDate).toLocaleDateString() : "Unknown Date"} — {item.vendor || "Unknown Vendor"} — ${item.lineTotal?.toFixed(2) || "0.00"}
             </li>
           ))}
         </ul>

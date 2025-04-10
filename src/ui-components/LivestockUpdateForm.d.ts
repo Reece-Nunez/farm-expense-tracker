@@ -6,7 +6,6 @@
 
 import * as React from "react";
 import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { Livestock } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,6 +22,7 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type LivestockUpdateFormInputValues = {
+    sub?: string;
     name?: string;
     species?: string;
     breed?: string;
@@ -31,6 +31,7 @@ export declare type LivestockUpdateFormInputValues = {
     gender?: string;
 };
 export declare type LivestockUpdateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     name?: ValidationFunction<string>;
     species?: ValidationFunction<string>;
     breed?: ValidationFunction<string>;
@@ -41,6 +42,7 @@ export declare type LivestockUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type LivestockUpdateFormOverridesProps = {
     LivestockUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     species?: PrimitiveOverrideProps<TextFieldProps>;
     breed?: PrimitiveOverrideProps<TextFieldProps>;
@@ -52,7 +54,7 @@ export declare type LivestockUpdateFormProps = React.PropsWithChildren<{
     overrides?: LivestockUpdateFormOverridesProps | undefined | null;
 } & {
     id?: string;
-    livestock?: Livestock;
+    livestock?: any;
     onSubmit?: (fields: LivestockUpdateFormInputValues) => LivestockUpdateFormInputValues;
     onSuccess?: (fields: LivestockUpdateFormInputValues) => void;
     onError?: (fields: LivestockUpdateFormInputValues, errorMessage: string) => void;

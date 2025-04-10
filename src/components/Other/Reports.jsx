@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { DataStore } from "@aws-amplify/datastore";
-import { Expense, Income } from "@/models";
+import { generateClient } from "aws-amplify/api";
+import { listExpenses, listIncomes, listLineItems } from "@/graphql/queries";
+import { getCurrentUser } from "@/utils/getCurrentUser";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +11,8 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function Reports() {
-  // All expenses/incomes from DataStore
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
-
-  // Current filter criteria
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
@@ -23,61 +21,88 @@ export default function Reports() {
     paymentMethod: "",
     item: "",
   });
-
-  // Filtered arrays that we display in the tables (also sorted)
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [filteredIncomes, setFilteredIncomes] = useState([]);
+  const client = generateClient();
+  const [expandedRows, setExpandedRows] = useState({});
 
-  // ----------------- Fetch & Sort Data on Mount -----------------
+  const toggleRow = (id) => {
+    setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-      // 1) Fetch from DataStore
-      const exp = await DataStore.query(Expense);
-      const inc = await DataStore.query(Income);
+      const user = await getCurrentUser();
+      if (!user) return;
 
-      // 2) Sort them by date descending (newest first)
-      const sortedExp = [...exp].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-      const sortedInc = [...inc].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+      try {
+        const [expenseRes, incomeRes] = await Promise.all([
+          client.graphql({
+            query: listExpenses,
+            variables: {
+              filter: { userId: { eq: user.id } },
+              limit: 1000,
+            },
+          }).then(res => res.data.listExpenses.items),
 
-      // 3) Store them in state, and also set them as initially "filtered"
-      setExpenses(sortedExp);
-      setIncomes(sortedInc);
-      setFilteredExpenses(sortedExp);
-      setFilteredIncomes(sortedInc);
+          client.graphql({
+            query: listIncomes,
+            variables: {
+              filter: { userId: { eq: user.id } },
+              limit: 1000,
+            },
+          }).then(res => res.data.listIncomes.items),
+        ]);
+
+        // 🧠 Fetch and attach line items to each expense
+        const enrichedExpenses = await Promise.all(
+          expenseRes.map(async (expense) => {
+            const lineItemRes = await client.graphql({
+              query: listLineItems,
+              variables: {
+                filter: { expenseID: { eq: expense.id } },
+                limit: 1000,
+              },
+            });
+
+            const lineItems = lineItemRes.data.listLineItems.items;
+            return { ...expense, lineItems };
+          })
+        );
+
+        const sortedExp = enrichedExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedInc = incomeRes.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        setExpenses(sortedExp);
+        setIncomes(sortedInc);
+        setFilteredExpenses(sortedExp);
+        setFilteredIncomes(sortedInc);
+      } catch (err) {
+        console.error("[Reports] fetchData error:", err);
+      }
     };
 
     fetchData();
   }, []);
 
-  // ----------------- Apply Filters (keeps them sorted) -----------------
   const applyFilters = () => {
-    // 1) Filter expenses
     const filteredExp = expenses.filter((exp) => {
       const inDateRange =
-        (!filters.dateFrom ||
-          new Date(exp.date) >= new Date(filters.dateFrom)) &&
+        (!filters.dateFrom || new Date(exp.date) >= new Date(filters.dateFrom)) &&
         (!filters.dateTo || new Date(exp.date) <= new Date(filters.dateTo));
 
       const matchesCategory =
-        !filters.category ||
-        exp.lineItems?.some((li) => li.category === filters.category);
+        !filters.category || exp.lineItems?.some((li) => li.category === filters.category);
 
       const matchesVendor =
-        !filters.vendor ||
-        exp.vendor?.toLowerCase().includes(filters.vendor.toLowerCase());
+        !filters.vendor || exp.vendor?.toLowerCase().includes(filters.vendor.toLowerCase());
 
       return inDateRange && matchesCategory && matchesVendor;
     });
 
-    // 2) Filter incomes
     const filteredInc = incomes.filter((inc) => {
       const inDateRange =
-        (!filters.dateFrom ||
-          new Date(inc.date) >= new Date(filters.dateFrom)) &&
+        (!filters.dateFrom || new Date(inc.date) >= new Date(filters.dateFrom)) &&
         (!filters.dateTo || new Date(inc.date) <= new Date(filters.dateTo));
 
       const matchesItem =
@@ -89,18 +114,14 @@ export default function Reports() {
       return inDateRange && matchesItem && matchesPaymentMethod;
     });
 
-    // 3) Sort them by date descending
     filteredExp.sort((a, b) => new Date(b.date) - new Date(a.date));
     filteredInc.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // 4) Update state
     setFilteredExpenses(filteredExp);
     setFilteredIncomes(filteredInc);
   };
 
-  // ----------------- Export CSV -----------------
   const exportCSV = () => {
-    // build expense objects for CSV
     const expenseData = filteredExpenses.map((exp) => ({
       Date: exp.date,
       Vendor: exp.vendor,
@@ -109,7 +130,6 @@ export default function Reports() {
       Description: exp.description,
     }));
 
-    // build income objects for CSV
     const incomeData = filteredIncomes.map((inc) => ({
       Date: inc.date,
       Item: inc.item,
@@ -120,7 +140,6 @@ export default function Reports() {
       Notes: inc.notes,
     }));
 
-    // build CSV lines
     const csvRows = [
       "Expenses",
       ["Date", "Vendor", "Category", "Grand Total", "Description"].join(","),
@@ -135,13 +154,11 @@ export default function Reports() {
     saveAs(csvBlob, "report.csv");
   };
 
-  // ----------------- Export PDF -----------------
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("Harvest Hub Report", 14, 20);
 
-    // Expenses table
     autoTable(doc, {
       startY: 30,
       head: [["Date", "Vendor", "Category", "Grand Total", "Description"]],
@@ -154,7 +171,6 @@ export default function Reports() {
       ]),
     });
 
-    // Incomes table
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
       head: [["Date", "Item", "Quantity", "Price", "Amount", "Payment", "Notes"]],
@@ -177,7 +193,6 @@ export default function Reports() {
       <CardHeader className="text-2xl font-bold text-center mb-4">
         Reports
       </CardHeader>
-
       <CardContent>
         {/* FILTER SECTION */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
@@ -295,11 +310,12 @@ export default function Reports() {
             <div key={idx} className="border rounded mb-4 p-3 bg-white shadow-sm">
               <p className="font-semibold">Date: <span className="font-normal">{exp.date}</span></p>
               <p className="font-semibold">Vendor: <span className="font-normal">{exp.vendor}</span></p>
-              <p className="font-semibold">Category:
+              <p className="font-semibold">Categories:
                 <span className="font-normal">
-                  {exp.lineItems?.map((li) => li.category).join(", ")}
+                  {[...new Set(exp.lineItems?.map((li) => li.category))].join(", ")}
                 </span>
               </p>
+
               <p className="font-semibold">Grand Total:
                 <span className="font-normal">
                   ${exp.grandTotal?.toFixed(2)}
@@ -319,32 +335,50 @@ export default function Reports() {
      "hidden" on small screens, "block" on md+ 
 */}
         <div className="hidden md:block overflow-x-auto w-full mb-6">
-          <table className="table-auto w-full border-collapse text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">Vendor</th>
-                <th className="border p-2">Category</th>
-                <th className="border p-2">Grand Total</th>
-                <th className="border p-2">Description</th>
+          {filteredExpenses.map((exp, idx) => (
+            <React.Fragment key={exp.id}>
+              <tr onClick={() => toggleRow(exp.id)} className="hover:bg-gray-100 cursor-pointer">
+                <td className="border p-2">{exp.date}</td>
+                <td className="border p-2">{exp.vendor}</td>
+                <td className="border p-2">
+                  {[...new Set(exp.lineItems?.map((li) => li.category))].join(", ")}
+                </td>
+                <td className="border p-2">${exp.grandTotal?.toFixed(2)}</td>
+                <td className="border p-2">{exp.description}</td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredExpenses.map((exp, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="border p-2">{exp.date}</td>
-                  <td className="border p-2">{exp.vendor}</td>
-                  <td className="border p-2">
-                    {exp.lineItems?.map((li) => li.category).join(", ")}
-                  </td>
-                  <td className="border p-2">${exp.grandTotal?.toFixed(2)}</td>
-                  <td className="border p-2 whitespace-normal break-words max-w-xs">
-                    {exp.description}
+              {expandedRows[exp.id] && (
+                <tr className="bg-gray-50">
+                  <td colSpan={5} className="p-3">
+                    <div className="text-sm">
+                      <p className="font-bold mb-2">Line Items:</p>
+                      <table className="table-auto w-full text-xs">
+                        <thead>
+                          <tr className="bg-gray-200">
+                            <th className="border px-2 py-1">Item</th>
+                            <th className="border px-2 py-1">Category</th>
+                            <th className="border px-2 py-1">Quantity</th>
+                            <th className="border px-2 py-1">Unit Cost</th>
+                            <th className="border px-2 py-1">Line Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {exp.lineItems?.map((li, i) => (
+                            <tr key={i}>
+                              <td className="border px-2 py-1">{li.item}</td>
+                              <td className="border px-2 py-1">{li.category}</td>
+                              <td className="border px-2 py-1">{li.quantity}</td>
+                              <td className="border px-2 py-1">${li.unitCost?.toFixed(2)}</td>
+                              <td className="border px-2 py-1">${li.lineTotal?.toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              )}
+            </React.Fragment>
+          ))}
         </div>
 
 
@@ -414,9 +448,7 @@ export default function Reports() {
               ))}
             </tbody>
           </table>
-        </div>
-
-      </CardContent>
+        </div>      </CardContent>
     </Card>
   );
 }

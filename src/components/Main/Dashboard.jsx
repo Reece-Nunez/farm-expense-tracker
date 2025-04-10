@@ -12,116 +12,111 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { DataStore } from "@aws-amplify/datastore";
-import { Expense, Income } from "@/models";
+import { generateClient } from "aws-amplify/api";
+import { listIncomes } from "@/graphql/queries";
 import { useLoading } from "../../context/LoadingContext";
-import { fetchAuthSession } from "@aws-amplify/auth";
+import { getCurrentUser } from "../../utils/getCurrentUser";
+import { LIST_EXPENSES_WITH_LINE_ITEMS } from "../../graphql/customQueries";
 
-// =========================
-// 🎨 Chart Colors
-// =========================
 const COLORS = [
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-  "#FF9F40",
-  "#8D99AE",
-  "#2B2D42",
-  "#B5CDA3",
-  "#FDCB82",
-  "#70C1B3",
-  "#247BA0",
-  "#FF1654",
-  "#00CFC1",
-  "#FFD166",
-  "#06D6A0",
-  "#118AB2",
-  "#073B4C",
-  "#E63946",
-  "#F1FAEE",
-  "#A8DADC",
-  "#457B9D",
-  "#1D3557",
+  "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+  "#8D99AE", "#2B2D42", "#B5CDA3", "#FDCB82", "#70C1B3", "#247BA0",
+  "#FF1654", "#00CFC1", "#FFD166", "#06D6A0", "#118AB2", "#073B4C",
+  "#E63946", "#F1FAEE", "#A8DADC", "#457B9D", "#1D3557",
 ];
 
-// =========================
-// 🚀 Dashboard Component
-// =========================
 export default function Dashboard() {
-  // -------------------------
-  // STATE & HOOKS
-  // -------------------------
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [recentIncomes, setRecentIncomes] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
   const { setIsLoading } = useLoading();
+  const client = generateClient();
 
   useEffect(() => {
-    fetchData();
+    (async () => {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      // Pass both id and sub
+      await fetchDashboardData(user.id, user.sub, setExpenses, setIncomes, setRecentExpenses, setRecentIncomes, setIsLoading);
+    })();
   }, []);
 
 
-
-  // -------------------------
-  // FETCH DATA
-  // -------------------------
-  const fetchData = async () => {
+  const fetchDashboardData = async (userId, userSub) => {
     setIsLoading(true);
     try {
-      const session = await fetchAuthSession();
-      const userSub = session?.tokens?.idToken?.payload?.sub;
-      const [allExpenses, allIncomes] = await Promise.all([
+      const expenseRes = await client.graphql({
+        query: LIST_EXPENSES_WITH_LINE_ITEMS,
+        variables: {
+          filter: {
+            and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
+          },
+          limit: 1000,
+        },
+      });
 
-        DataStore.query(Expense, (e) => e.userId.eq(userSub)),
-        DataStore.query(Income, (i) => i.userId.eq(userSub)),
-      ]);
-
-      const sortedExpenses = [...allExpenses].sort(
+      console.log(expenseRes);
+      
+  
+      const incomeRes = await client.graphql({
+        query: listIncomes,
+        variables: {
+          filter: {
+            and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
+          },
+          limit: 1000,
+        },
+      });
+  
+      const allExpenses = expenseRes.data.listExpenses.items || [];
+      const allIncomes = incomeRes.data.listIncomes.items || [];
+  
+      const parsedExpenses = allExpenses.map((exp) => ({
+        ...exp,
+        lineItems: {
+          items: exp.lineItems?.items?.map((li) => ({
+            item: li.item ?? "",
+            category: li.category ?? "Uncategorized",
+            quantity: parseFloat(li.quantity ?? 0),
+            unitCost: parseFloat(li.unitCost ?? 0),
+            lineTotal: parseFloat(li.lineTotal ?? 0),
+          })) ?? [],
+        },
+      }));
+      
+  
+      const sortedExpenses = [...parsedExpenses].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       );
       const sortedIncomes = [...allIncomes].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       );
-
+  
+      setExpenses(parsedExpenses);
+      setIncomes(allIncomes);
       setRecentExpenses(sortedExpenses.slice(0, 5));
       setRecentIncomes(sortedIncomes.slice(0, 5));
-      setExpenses(allExpenses);
-      setIncomes(allIncomes);
     } catch (err) {
-      console.error("Error fetching data for Dashboard:", err);
+      console.error("Error fetching dashboard data:", err);
     } finally {
       setIsLoading(false);
     }
   };
+  
 
-  // -------------------------
-  // CALCULATIONS
-  // -------------------------
-  const totalExpense = expenses.reduce(
-    (sum, e) => sum + (e.grandTotal || 0),
-    0
-  );
+
+  const totalExpense = expenses.reduce((sum, e) => sum + (e.grandTotal || 0), 0);
   const totalIncome = incomes.reduce((sum, inc) => sum + (inc.amount || 0), 0);
   const net = totalIncome - totalExpense;
 
-  const aggregatedData = useMemo(
-    () => aggregateData(timeRange, expenses, incomes),
-    [timeRange, expenses, incomes]
-  );
+  const aggregatedData = useMemo(() => aggregateData(timeRange, expenses, incomes), [timeRange, expenses, incomes]);
   const expenseCategoryData = getExpenseCategoryData(expenses);
-  const totalCategoryAmount = expenseCategoryData.reduce(
-    (sum, item) => sum + item.total,
-    0
-  );
+  const totalCategoryAmount = expenseCategoryData.reduce((sum, item) => sum + item.total, 0);
   const incomeItemData = getIncomeItemData(incomes);
 
-  // -------------------------
-  // RENDER JSX
-  // -------------------------
   return (
     <div className="h-full grid grid-cols-1 md:grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr]">
       <div className="hidden md:block"></div>
@@ -135,33 +130,18 @@ export default function Dashboard() {
         />
 
         <div className="grid grid-cols-1 xl:grid-cols-2">
-          <LineChartCard
-            timeRange={timeRange}
-            setTimeRange={setTimeRange}
-            data={aggregatedData}
-          />
-          <PieChartCard
-            data={expenseCategoryData}
-            total={totalCategoryAmount}
-          />
+          <LineChartCard timeRange={timeRange} setTimeRange={setTimeRange} data={aggregatedData} />
+          <PieChartCard data={expenseCategoryData} total={totalCategoryAmount} />
         </div>
 
         <IncomeItemPieChart data={incomeItemData} />
       </main>
 
-      <AsidePanel
-        recentExpenses={recentExpenses}
-        recentIncomes={recentIncomes}
-      />
+      <AsidePanel recentExpenses={recentExpenses} recentIncomes={recentIncomes} />
     </div>
   );
 }
 
-//
-// =========================
-// ⛏️ Helper Functions
-// =========================
-//
 const getWeekString = (dateStr) => {
   const date = new Date(dateStr);
   const firstJan = new Date(date.getFullYear(), 0, 1);
@@ -193,29 +173,26 @@ const aggregateData = (groupBy, expenses = [], incomes = []) => {
     dataMap[key].incomes += inc.amount || 0;
   });
 
-  return Object.keys(dataMap)
-    .sort()
-    .map((key) => ({
-      period: key,
-      expenses: parseFloat(dataMap[key].expenses.toFixed(2)),
-      incomes: parseFloat(dataMap[key].incomes.toFixed(2)),
-    }));
+  return Object.keys(dataMap).sort().map((key) => ({
+    period: key,
+    expenses: parseFloat(dataMap[key].expenses.toFixed(2)),
+    incomes: parseFloat(dataMap[key].incomes.toFixed(2)),
+  }));
 };
 
 const getExpenseCategoryData = (expenses = []) => {
   const map = {};
   expenses.forEach((exp) => {
-    exp.lineItems?.forEach((li) => {
+    const items = exp.lineItems?.items || [];
+    items.forEach((li) => {
       const cat = li.category || "Uncategorized";
       map[cat] = (map[cat] || 0) + (li.lineTotal || 0);
     });
   });
 
-  return Object.entries(map).map(([category, total]) => ({
-    category,
-    total,
-  }));
+  return Object.entries(map).map(([category, total]) => ({ category, total }));
 };
+
 
 const getIncomeItemData = (incomes = []) => {
   const map = {};
@@ -224,17 +201,8 @@ const getIncomeItemData = (incomes = []) => {
     map[item] = (map[item] || 0) + (inc.amount || 0);
   });
 
-  return Object.entries(map).map(([item, total]) => ({
-    item,
-    total,
-  }));
+  return Object.entries(map).map(([item, total]) => ({ item, total }));
 };
-
-//
-// =========================
-// 🧩 Extracted Components
-// =========================
-//
 
 const SummaryCards = ({ totalExpense, totalIncome, net }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">

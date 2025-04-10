@@ -4,23 +4,59 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PencilAltIcon, TrashIcon } from "@heroicons/react/outline";
 import { getUrl } from "aws-amplify/storage";
+import { generateClient } from "aws-amplify/api";
+import { deleteExpense as deleteExpenseMutation } from "@/graphql/mutations";
+import { listLineItems } from "@/graphql/queries";
 
 export default function ExpenseTable({ expenses = [], onDelete }) {
   const navigate = useNavigate();
   const [imageUrls, setImageUrls] = React.useState({});
   const [selectedImageUrl, setSelectedImageUrl] = React.useState(null);
+  const [mergedExpenses, setMergedExpenses] = React.useState([]);
+  const client = generateClient();
 
   const sortedExpenses = React.useMemo(() => {
-    return [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...mergedExpenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [mergedExpenses]);
+
+  // 🔄 Merge LineItems into Expenses on mount/update
+  React.useEffect(() => {
+    if (expenses.length === 0) return;
+
+    const fetchLineItemsAndMerge = async () => {
+      try {
+        const { data } = await client.graphql({ query: listLineItems });
+        const allLineItems = data.listLineItems.items;
+
+        // Group line items by expenseID
+        const grouped = allLineItems.reduce((acc, item) => {
+          if (!acc[item.expenseID]) acc[item.expenseID] = [];
+          acc[item.expenseID].push(item);
+          return acc;
+        }, {});
+
+        // Merge line items into each expense
+        const enriched = expenses.map((exp) => ({
+          ...exp,
+          lineItems: { items: grouped[exp.id] || [] },
+        }));
+
+        setMergedExpenses(enriched);
+      } catch (err) {
+        console.error("Error fetching line items:", err);
+      }
+    };
+
+    fetchLineItemsAndMerge();
   }, [expenses]);
 
-  // Fetch receipt image URLs
+  // 🖼️ Fetch Receipt Images
   React.useEffect(() => {
     let isMounted = true;
 
     async function fetchImages() {
       const newImageUrls = {};
-      for (const exp of sortedExpenses) {
+      for (const exp of mergedExpenses) {
         if (exp.receiptImageKey) {
           try {
             const { url } = await getUrl({ path: exp.receiptImageKey });
@@ -41,9 +77,59 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     return () => {
       isMounted = false;
     };
-  }, [sortedExpenses]);
+  }, [mergedExpenses]);
 
-  // Overlay for viewing full-size receipt images
+  const handleDelete = async (expenseId) => {
+    try {
+      // Step 1: Delete related line items first
+      const { data } = await client.graphql({
+        query: listLineItems,
+        variables: {
+          filter: { expenseID: { eq: expenseId } },
+          limit: 1000,
+        },
+      });
+  
+      const lineItems = data?.listLineItems?.items || [];
+  
+      await Promise.all(
+        lineItems.map((li) =>
+          client.graphql({
+            query: /* GraphQL */ `
+              mutation DeleteLineItem($input: DeleteLineItemInput!) {
+                deleteLineItem(input: $input) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              input: { id: li.id },
+            },
+          })
+        )
+      );
+  
+      // Step 2: Delete the expense itself (avoid selecting user)
+      await client.graphql({
+        query: /* GraphQL */ `
+          mutation DeleteExpense($input: DeleteExpenseInput!) {
+            deleteExpense(input: $input) {
+              id
+            }
+          }
+        `,
+        variables: { input: { id: expenseId } },
+      });
+  
+      if (onDelete) onDelete(expenseId);
+      toast.success("Expense and its line items deleted.");
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      toast.error("Failed to delete expense.");
+    }
+  };
+  
+
   const FullSizeImageOverlay = ({ imageUrl, onClose }) => {
     if (!imageUrl) return null;
     return (
@@ -97,27 +183,25 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         )}
 
         <div className="mt-4">
-          <h4 className="font-semibold text-gray-800 mb-2">Line Items:</h4>
-          <div className="space-y-2">
-            {expense.lineItems && expense.lineItems.length > 0 ? (
-              expense.lineItems.map((li, index) => (
-                <div key={index} className="border rounded-md p-3 bg-gray-50">
-                  <div className="flex justify-between">
-                    <p><span className="font-semibold">Item:</span> {li.item}</p>
-                    <p><span className="font-semibold">Category:</span> {li.category}</p>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <p><span className="font-semibold">Unit Cost:</span> ${parseFloat(li.unitCost ?? 0).toFixed(2)}</p>
-                    <p><span className="font-semibold">Quantity:</span> {li.quantity}</p>
-                    <p><span className="font-semibold">Line Total:</span> ${parseFloat(li.lineTotal ?? 0).toFixed(2)}</p>
-                  </div>
+          <h4 className="font-semibold text-gray-800 mb-3">Line Items:</h4>
+          <div className="space-y-3">
+            {[...new Map(expense.lineItems.items.map(li => [li.id, li])).values()].map((li, index) => (
+              <div
+                key={index}
+                className="border rounded-md p-3 bg-gray-50 shadow-sm"
+              >
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-700">
+                  <p><span className="font-medium">Item:</span> {li.item}</p>
+                  <p><span className="font-medium">Category:</span> {li.category}</p>
+                  <p><span className="font-medium">Quantity:</span> {li.quantity}</p>
+                  <p><span className="font-medium">Unit Cost:</span> ${parseFloat(li.unitCost ?? 0).toFixed(2)}</p>
+                  <p><span className="font-medium">Line Total:</span> ${parseFloat(li.lineTotal ?? 0).toFixed(2)}</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 italic">No line items available.</p>
-            )}
+              </div>
+            ))}
           </div>
         </div>
+
 
         <div className="flex justify-end gap-3 mt-6">
           <Button
@@ -128,7 +212,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
             Edit
           </Button>
           <Button
-            onClick={() => onDelete(expense.id)}
+            onClick={() => handleDelete(expense.id)}
             className="bg-red-500 hover:bg-red-600 text-white flex gap-2"
           >
             <TrashIcon className="h-4 w-4" />

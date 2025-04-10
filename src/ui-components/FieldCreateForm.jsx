@@ -7,9 +7,10 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { Field } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { createField } from "../graphql/mutations";
+const client = generateClient();
 export default function FieldCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -22,21 +23,25 @@ export default function FieldCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     name: "",
     acres: "",
     notes: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
   const [acres, setAcres] = React.useState(initialValues.acres);
   const [notes, setNotes] = React.useState(initialValues.notes);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
+    setSub(initialValues.sub);
     setName(initialValues.name);
     setAcres(initialValues.acres);
     setNotes(initialValues.notes);
     setErrors({});
   };
   const validations = {
+    sub: [{ type: "Required" }],
     name: [{ type: "Required" }],
     acres: [],
     notes: [],
@@ -67,6 +72,7 @@ export default function FieldCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           name,
           acres,
           notes,
@@ -99,7 +105,14 @@ export default function FieldCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(new Field(modelFields));
+          await client.graphql({
+            query: createField.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -108,13 +121,41 @@ export default function FieldCreateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "FieldCreateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              name,
+              acres,
+              notes,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Name"
         isRequired={true}
@@ -124,6 +165,7 @@ export default function FieldCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name: value,
               acres,
               notes,
@@ -154,6 +196,7 @@ export default function FieldCreateForm(props) {
             : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               acres: value,
               notes,
@@ -180,6 +223,7 @@ export default function FieldCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               name,
               acres,
               notes: value,

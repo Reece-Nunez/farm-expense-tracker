@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "@aws-amplify/auth";
-import { DataStore } from "@aws-amplify/datastore";
-import { fetchAuthSession } from "@aws-amplify/auth";
-import { getUrl } from "aws-amplify/storage";
-import { User } from "../../models";
+import { onUpdateUser } from "@/graphql/subscriptions";
+import { generateClient } from 'aws-amplify/api';
+ import { getUrl } from "aws-amplify/storage";
 import Logo from "../assets/Transparent1.png";
 import {
   HomeIcon,
@@ -21,6 +20,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
+import { getCurrentUser } from "../../utils/getCurrentUser";
 
 
 export default function Sidebar({ onCloseSidebar = () => { } }) {
@@ -35,23 +35,14 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
   useEffect(() => {
     let subscription;
 
-    const fetchUserProfile = async (sub) => {
+    const fetchUserProfile = async (user) => {
       try {
-        const [foundUser] = await DataStore.query(User, (u) => u.sub.eq(sub));
-        if (foundUser) {
-          setUsername(foundUser.username || "User");
+        setUsername(user.username || "User");
 
-          if (foundUser.profilePictureKey) {
-            const result = await getUrl({ path: foundUser.profilePictureKey });
-            setProfileImageUrl(result.url ? result.url.href : result);
-          } else {
-            setProfileImageUrl(
-              "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
-            );
-          }
+        if (user.profilePictureKey) {
+          const result = await getUrl({ path: user.profilePictureKey });
+          setProfileImageUrl(result.url ? result.url.href : result);
         } else {
-          // Reset to defaults if not found
-          setUsername("User");
           setProfileImageUrl(
             "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
           );
@@ -61,22 +52,32 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
       }
     };
 
+
+    const client = generateClient();
+
     const init = async () => {
       try {
-        const session = await fetchAuthSession();
-        const sub = session.tokens.idToken.payload.sub;
-        setUserSub(sub);
-        await fetchUserProfile(sub);
+        const user = await getCurrentUser();
+        if (!user) return;
 
-        // Subscribe to DataStore changes
-        subscription = DataStore.observe(User).subscribe((msg) => {
-          if (
-            (msg.opType === "UPDATE" || msg.opType === "INSERT") &&
-            msg.element.sub === sub
-          ) {
-            fetchUserProfile(sub);
-          }
-        });
+        setUserSub(user.sub);
+        await fetchUserProfile(user);
+
+        const subscription = client
+          .graphql({
+            query: onUpdateUser,
+          })
+          .subscribe({
+            next: ({ data }) => {
+              const updatedUser = data?.onUpdateUser;
+              if (updatedUser?.sub === user.sub) {
+                fetchUserProfile(updatedUser);
+              }
+            },
+            error: (err) => console.error("Subscription error:", err),
+          });
+
+        // Store `subscription` somewhere so you can unsubscribe on cleanup
       } catch (err) {
         console.error("Error in sidebar init:", err);
       }
@@ -93,15 +94,13 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
 
   const handleSignOut = async () => {
     try {
-      await DataStore.stop();
-      await DataStore.clear();
       await signOut();
       navigate('/');
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
-  
+
 
   const groupedNavItems = [
     {
@@ -133,6 +132,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           label: "Inventory (New)",
           icon: () => <FontAwesomeIcon icon={faBoxesStacked} className="w-5 h-5 text-brown-800" />,
           route: "/dashboard/inventory",
+        },
+        {
+          label: "Data Migration Tool",
+          icon: () => <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-purple-600" />,
+          route: "/dashboard/admin/migrate",
         },
         {
           label: "Homepage",

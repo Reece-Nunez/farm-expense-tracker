@@ -1,39 +1,41 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Authenticator, useAuthenticator } from "@aws-amplify/ui-react";
 import { Navigate } from "react-router-dom";
-import { DataStore } from "@aws-amplify/datastore";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function AuthGate() {
   const { user } = useAuthenticator((context) => [context.user]);
+  const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
-    const clearDataStoreAndReload = async () => {
+    const handleSessionReset = async () => {
       try {
-        console.log("[AuthGate] Clearing DataStore...");
-        await DataStore.stop();         // Ensure everything is stopped
-        await DataStore.clear();        // Now it's safe to clear
-        console.log("[AuthGate] DataStore cleared. Reloading...");
-        window.location.href = "/dashboard";  // Avoid soft-refresh issues
+        console.log("[AuthGate] Fetching new session and clearing local state...");
+        const session = await fetchAuthSession();
+        console.log("[AuthGate] Session refreshed:", session);
+        setRedirect(true);
       } catch (err) {
-        console.error("[AuthGate] Failed to clear DataStore:", err);
+        console.error("[AuthGate] Failed to refresh session:", err);
       }
     };
 
-    // Only run this logic the FIRST time after login
     const freshLoginFlag = localStorage.getItem("justSignedIn");
 
     if (user && freshLoginFlag !== "false") {
       localStorage.setItem("justSignedIn", "false");
-      clearDataStoreAndReload();
+      handleSessionReset();
     }
   }, [user]);
 
-  // For future logins
   useEffect(() => {
     if (!user) {
       localStorage.setItem("justSignedIn", "true");
     }
   }, [user]);
+
+  if (redirect) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (user) {
     return <div style={{ padding: 20 }}>Loading dashboard...</div>;

@@ -7,9 +7,11 @@
 /* eslint-disable */
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
-import { EggLog } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { DataStore } from "aws-amplify/datastore";
+import { generateClient } from "aws-amplify/api";
+import { getEggLog } from "../graphql/queries";
+import { updateEggLog } from "../graphql/mutations";
+const client = generateClient();
 export default function EggLogUpdateForm(props) {
   const {
     id: idProp,
@@ -23,10 +25,12 @@ export default function EggLogUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    sub: "",
     date: "",
     eggsCollected: "",
     chickenFlockID: "",
   };
+  const [sub, setSub] = React.useState(initialValues.sub);
   const [date, setDate] = React.useState(initialValues.date);
   const [eggsCollected, setEggsCollected] = React.useState(
     initialValues.eggsCollected
@@ -39,6 +43,7 @@ export default function EggLogUpdateForm(props) {
     const cleanValues = eggLogRecord
       ? { ...initialValues, ...eggLogRecord }
       : initialValues;
+    setSub(cleanValues.sub);
     setDate(cleanValues.date);
     setEggsCollected(cleanValues.eggsCollected);
     setChickenFlockID(cleanValues.chickenFlockID);
@@ -48,7 +53,12 @@ export default function EggLogUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(EggLog, idProp)
+        ? (
+            await client.graphql({
+              query: getEggLog.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getEggLog
         : eggLogModelProp;
       setEggLogRecord(record);
     };
@@ -56,6 +66,7 @@ export default function EggLogUpdateForm(props) {
   }, [idProp, eggLogModelProp]);
   React.useEffect(resetStateValues, [eggLogRecord]);
   const validations = {
+    sub: [{ type: "Required" }],
     date: [{ type: "Required" }],
     eggsCollected: [{ type: "Required" }],
     chickenFlockID: [{ type: "Required" }],
@@ -86,6 +97,7 @@ export default function EggLogUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          sub,
           date,
           eggsCollected,
           chickenFlockID,
@@ -118,23 +130,55 @@ export default function EggLogUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            EggLog.copyOf(eggLogRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await client.graphql({
+            query: updateEggLog.replaceAll("__typename", ""),
+            variables: {
+              input: {
+                id: eggLogRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
       {...getOverrideProps(overrides, "EggLogUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Sub"
+        isRequired={true}
+        isReadOnly={false}
+        value={sub}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub: value,
+              date,
+              eggsCollected,
+              chickenFlockID,
+            };
+            const result = onChange(modelFields);
+            value = result?.sub ?? value;
+          }
+          if (errors.sub?.hasError) {
+            runValidationTasks("sub", value);
+          }
+          setSub(value);
+        }}
+        onBlur={() => runValidationTasks("sub", sub)}
+        errorMessage={errors.sub?.errorMessage}
+        hasError={errors.sub?.hasError}
+        {...getOverrideProps(overrides, "sub")}
+      ></TextField>
       <TextField
         label="Date"
         isRequired={true}
@@ -145,6 +189,7 @@ export default function EggLogUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               date: value,
               eggsCollected,
               chickenFlockID,
@@ -175,6 +220,7 @@ export default function EggLogUpdateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
+              sub,
               date,
               eggsCollected: value,
               chickenFlockID,
@@ -201,6 +247,7 @@ export default function EggLogUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              sub,
               date,
               eggsCollected,
               chickenFlockID: value,

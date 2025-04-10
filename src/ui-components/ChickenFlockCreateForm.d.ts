@@ -22,12 +22,14 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type ChickenFlockCreateFormInputValues = {
+    sub?: string;
     breed?: string;
     count?: number;
     hasRooster?: boolean;
     notes?: string;
 };
 export declare type ChickenFlockCreateFormValidationValues = {
+    sub?: ValidationFunction<string>;
     breed?: ValidationFunction<string>;
     count?: ValidationFunction<number>;
     hasRooster?: ValidationFunction<boolean>;
@@ -36,6 +38,7 @@ export declare type ChickenFlockCreateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ChickenFlockCreateFormOverridesProps = {
     ChickenFlockCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    sub?: PrimitiveOverrideProps<TextFieldProps>;
     breed?: PrimitiveOverrideProps<TextFieldProps>;
     count?: PrimitiveOverrideProps<TextFieldProps>;
     hasRooster?: PrimitiveOverrideProps<SwitchFieldProps>;

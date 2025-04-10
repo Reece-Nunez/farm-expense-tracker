@@ -19,20 +19,14 @@ export const createUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -55,20 +49,14 @@ export const updateUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -91,20 +79,14 @@ export const deleteUser = /* GraphQL */ `
       preferences
       expenses {
         nextToken
-        startedAt
         __typename
       }
       income {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -116,6 +98,7 @@ export const createExpense = /* GraphQL */ `
   ) {
     createExpense(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       vendor
@@ -123,19 +106,26 @@ export const createExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
       __typename
     }
   }
@@ -147,6 +137,7 @@ export const updateExpense = /* GraphQL */ `
   ) {
     updateExpense(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       vendor
@@ -154,19 +145,26 @@ export const updateExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
       __typename
     }
   }
@@ -178,6 +176,7 @@ export const deleteExpense = /* GraphQL */ `
   ) {
     deleteExpense(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       vendor
@@ -185,19 +184,125 @@ export const deleteExpense = /* GraphQL */ `
       description
       receiptImageKey
       lineItems {
-        category
-        item
-        unitCost
-        quantity
-        lineTotal
+        nextToken
+        __typename
+      }
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userExpensesId
+      __typename
+    }
+  }
+`;
+export const createLineItem = /* GraphQL */ `
+  mutation CreateLineItem(
+    $input: CreateLineItemInput!
+    $condition: ModelLineItemConditionInput
+  ) {
+    createLineItem(input: $input, condition: $condition) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateLineItem = /* GraphQL */ `
+  mutation UpdateLineItem(
+    $input: UpdateLineItemInput!
+    $condition: ModelLineItemConditionInput
+  ) {
+    updateLineItem(input: $input, condition: $condition) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteLineItem = /* GraphQL */ `
+  mutation DeleteLineItem(
+    $input: DeleteLineItemInput!
+    $condition: ModelLineItemConditionInput
+  ) {
+    deleteLineItem(input: $input, condition: $condition) {
+      id
+      sub
+      expenseID
+      expense {
+        id
+        sub
+        userId
+        date
+        vendor
+        grandTotal
+        description
+        receiptImageKey
+        createdAt
+        updatedAt
+        __typename
+      }
+      item
+      category
+      quantity
+      unitCost
+      lineTotal
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -209,6 +314,7 @@ export const createIncome = /* GraphQL */ `
   ) {
     createIncome(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       quantity
@@ -217,12 +323,23 @@ export const createIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -234,6 +351,7 @@ export const updateIncome = /* GraphQL */ `
   ) {
     updateIncome(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       quantity
@@ -242,12 +360,23 @@ export const updateIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -259,6 +388,7 @@ export const deleteIncome = /* GraphQL */ `
   ) {
     deleteIncome(input: $input, condition: $condition) {
       id
+      sub
       userId
       date
       quantity
@@ -267,12 +397,23 @@ export const deleteIncome = /* GraphQL */ `
       amount
       item
       notes
+      user {
+        id
+        sub
+        username
+        email
+        farmName
+        phone
+        aboutMe
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userIncomeId
       __typename
     }
   }
@@ -284,20 +425,16 @@ export const createField = /* GraphQL */ `
   ) {
     createField(input: $input, condition: $condition) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -309,20 +446,16 @@ export const updateField = /* GraphQL */ `
   ) {
     updateField(input: $input, condition: $condition) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -334,20 +467,16 @@ export const deleteField = /* GraphQL */ `
   ) {
     deleteField(input: $input, condition: $condition) {
       id
+      sub
       name
       acres
       notes
       livestock {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -359,6 +488,7 @@ export const createLivestock = /* GraphQL */ `
   ) {
     createLivestock(input: $input, condition: $condition) {
       id
+      sub
       name
       species
       breed
@@ -368,38 +498,28 @@ export const createLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -411,6 +531,7 @@ export const updateLivestock = /* GraphQL */ `
   ) {
     updateLivestock(input: $input, condition: $condition) {
       id
+      sub
       name
       species
       breed
@@ -420,38 +541,28 @@ export const updateLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -463,6 +574,7 @@ export const deleteLivestock = /* GraphQL */ `
   ) {
     deleteLivestock(input: $input, condition: $condition) {
       id
+      sub
       name
       species
       breed
@@ -472,38 +584,28 @@ export const deleteLivestock = /* GraphQL */ `
       fieldID
       location {
         id
+        sub
         name
         acres
         notes
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       parents {
         nextToken
-        startedAt
         __typename
       }
       children {
         nextToken
-        startedAt
         __typename
       }
       medicalRecords {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -515,14 +617,11 @@ export const createLivestockFamily = /* GraphQL */ `
   ) {
     createLivestockFamily(input: $input, condition: $condition) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -534,14 +633,11 @@ export const updateLivestockFamily = /* GraphQL */ `
   ) {
     updateLivestockFamily(input: $input, condition: $condition) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -553,14 +649,11 @@ export const deleteLivestockFamily = /* GraphQL */ `
   ) {
     deleteLivestockFamily(input: $input, condition: $condition) {
       id
+      sub
       parentID
       childID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -572,6 +665,7 @@ export const createMedicalRecord = /* GraphQL */ `
   ) {
     createMedicalRecord(input: $input, condition: $condition) {
       id
+      sub
       livestockID
       type
       notes
@@ -579,6 +673,7 @@ export const createMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -588,19 +683,11 @@ export const createMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -612,6 +699,7 @@ export const updateMedicalRecord = /* GraphQL */ `
   ) {
     updateMedicalRecord(input: $input, condition: $condition) {
       id
+      sub
       livestockID
       type
       notes
@@ -619,6 +707,7 @@ export const updateMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -628,19 +717,11 @@ export const updateMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -652,6 +733,7 @@ export const deleteMedicalRecord = /* GraphQL */ `
   ) {
     deleteMedicalRecord(input: $input, condition: $condition) {
       id
+      sub
       livestockID
       type
       notes
@@ -659,6 +741,7 @@ export const deleteMedicalRecord = /* GraphQL */ `
       medicine
       livestock {
         id
+        sub
         name
         species
         breed
@@ -668,19 +751,11 @@ export const deleteMedicalRecord = /* GraphQL */ `
         fieldID
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        userId
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       livestockMedicalRecordsId
-      userId
       __typename
     }
   }
@@ -692,21 +767,17 @@ export const createChickenFlock = /* GraphQL */ `
   ) {
     createChickenFlock(input: $input, condition: $condition) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -718,21 +789,17 @@ export const updateChickenFlock = /* GraphQL */ `
   ) {
     updateChickenFlock(input: $input, condition: $condition) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -744,21 +811,17 @@ export const deleteChickenFlock = /* GraphQL */ `
   ) {
     deleteChickenFlock(input: $input, condition: $condition) {
       id
+      sub
       breed
       count
       hasRooster
       eggLogs {
         nextToken
-        startedAt
         __typename
       }
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -770,16 +833,13 @@ export const createEggLog = /* GraphQL */ `
   ) {
     createEggLog(input: $input, condition: $condition) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -791,16 +851,13 @@ export const updateEggLog = /* GraphQL */ `
   ) {
     updateEggLog(input: $input, condition: $condition) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -812,16 +869,13 @@ export const deleteEggLog = /* GraphQL */ `
   ) {
     deleteEggLog(input: $input, condition: $condition) {
       id
+      sub
       date
       eggsCollected
       chickenFlockID
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       chickenFlockEggLogsId
-      userId
       __typename
     }
   }
@@ -833,6 +887,7 @@ export const createInventoryItem = /* GraphQL */ `
   ) {
     createInventoryItem(input: $input, condition: $condition) {
       id
+      sub
       name
       type
       quantity
@@ -841,10 +896,6 @@ export const createInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -856,6 +907,7 @@ export const updateInventoryItem = /* GraphQL */ `
   ) {
     updateInventoryItem(input: $input, condition: $condition) {
       id
+      sub
       name
       type
       quantity
@@ -864,10 +916,6 @@ export const updateInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
@@ -879,6 +927,7 @@ export const deleteInventoryItem = /* GraphQL */ `
   ) {
     deleteInventoryItem(input: $input, condition: $condition) {
       id
+      sub
       name
       type
       quantity
@@ -887,10 +936,6 @@ export const deleteInventoryItem = /* GraphQL */ `
       notes
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      userId
       __typename
     }
   }
