@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 import { generateClient } from "aws-amplify/api";
@@ -20,6 +20,22 @@ import {
   faMap,
   faWheatAwn
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
+import {
+  format,
+  parseISO,
+  getWeek,
+  isValid,
+} from "date-fns";
 
 const InventoryDashboard = () => {
   const navigate = useNavigate();
@@ -34,7 +50,7 @@ const InventoryDashboard = () => {
     eggsPerDay: {},
     items: 0
   });
-
+  const [view, setView] = useState("day");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -115,6 +131,21 @@ const InventoryDashboard = () => {
     fetchAnalytics();
   }, []);
 
+  const eggChartData = useMemo(() => {
+    const grouped = {};
+    for (const [date, total] of Object.entries(analytics.eggsPerDay)) {
+      const d = parseISO(date);
+      if (!isValid(d)) continue;
+
+      let label;
+      if (view === "month") label = format(d, "MMM d"); // Apr 11 style
+      else if (view === "week") label = `${getWeek(d)}-'${format(d, "yy")}`; // 2-'25 style
+      else label = format(d, "M-d-yy"); // 4-11-25 style
+
+      grouped[label] = (grouped[label] || 0) + total;
+    }
+    return Object.entries(grouped).map(([x, y]) => ({ x, y }));
+  }, [analytics.eggsPerDay, view]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -152,27 +183,46 @@ const InventoryDashboard = () => {
         </div>
       </div>
 
+      {/* Egg Chart View Toggle + Chart */}
       <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <h2 className="text-xl font-bold mb-4">Livestock by Species</h2>
-        <ul className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(analytics.livestockBySpecies).map(([species, count]) => (
-            <li key={species} className="bg-gray-50 p-3 rounded border shadow-sm">
-              <span className="font-semibold">{species}</span>: {count}
-            </li>
-          ))}
-        </ul>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Egg Collection Trend</h2>
+          <div className="space-x-2">
+            {['day', 'week', 'month'].map(option => (
+              <button
+                key={option}
+                onClick={() => setView(option)}
+                className={`px-3 py-1 rounded-full border text-sm font-medium ${view === option ? 'bg-yellow-400 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={eggChartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="x" tick={{ fontSize: 12 }} />
+            <YAxis tickCount={6} />
+            <Tooltip
+              formatter={(value) => [`${value} eggs`, "Collected"]}
+              labelFormatter={(label) => `Date: ${label}`}
+            />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="y"
+              name="Eggs Collected"
+              stroke="#facc15"
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <h2 className="text-xl font-bold mb-4">Egg Collection Summary</h2>
-        <ul className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(analytics.eggsPerDay).map(([date, total]) => (
-            <li key={date} className="bg-yellow-50 p-3 rounded border shadow-sm">
-              <span className="font-semibold">{date}</span>: {total} eggs
-            </li>
-          ))}
-        </ul>
-      </div>
 
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-4">Field Utilization</h2>

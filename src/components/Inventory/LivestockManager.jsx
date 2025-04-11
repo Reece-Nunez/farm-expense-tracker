@@ -15,6 +15,7 @@ import {
   deleteLivestockFamily
 } from "@/graphql/mutations";
 import { generateClient } from "aws-amplify/api";
+import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
 const client = generateClient();
 
@@ -59,7 +60,12 @@ const LivestockManager = () => {
         limit: 1000
       }
     });
-    setLivestock(data.listLivestocks.items);
+    const enriched = data.listLivestocks.items.map(animal => ({
+      ...animal,
+      age: animal.birthdate ? formatDistanceToNowStrict(parseISO(animal.birthdate)) : "Unknown",
+      location: fields.find(f => f.id === animal.fieldID) || null
+    }));
+    setLivestock(enriched);
   };
 
   const fetchFields = async (sub) => {
@@ -85,10 +91,10 @@ const LivestockManager = () => {
   const handleAddOrUpdateAnimal = async () => {
     const { name, species, breed, birthdate, weight, gender, locationId } = newAnimal;
     const sub = user?.attributes?.sub || user?.sub;
-  
+
     try {
       let savedAnimal;
-  
+
       const input = {
         name,
         species,
@@ -99,10 +105,10 @@ const LivestockManager = () => {
         fieldID: locationId || null,
         sub,
       };
-  
+
       if (editingId) {
         input.id = editingId;
-  
+
         const { data } = await client.graphql({
           query: `
             mutation UpdateLivestock($input: UpdateLivestockInput!) {
@@ -123,9 +129,9 @@ const LivestockManager = () => {
           `,
           variables: { input },
         });
-  
+
         savedAnimal = data.updateLivestock;
-  
+
         const existingLinks = families.filter((f) => f.childID === editingId);
         await Promise.all(
           existingLinks.map((link) =>
@@ -156,10 +162,10 @@ const LivestockManager = () => {
           `,
           variables: { input },
         });
-  
+
         savedAnimal = data.createLivestock;
       }
-  
+
       for (const parentID of selectedParents) {
         await client.graphql({
           query: createLivestockFamily,
@@ -172,8 +178,7 @@ const LivestockManager = () => {
           },
         });
       }
-  
-      // ✅ Clear form after success
+
       setNewAnimal({
         name: "",
         species: "",
@@ -185,14 +190,13 @@ const LivestockManager = () => {
       });
       setSelectedParents([]);
       setEditingId(null);
-  
+
       await fetchLivestock(sub);
       await fetchFamilies(sub);
     } catch (err) {
       console.error("Error saving animal:", err);
     }
   };
-  
 
   const handleEdit = (animal) => {
     setEditingId(animal.id);
@@ -277,7 +281,26 @@ const LivestockManager = () => {
             <option value="Sheep">Sheep</option>
           </select>
           <input name="breed" value={newAnimal.breed} onChange={handleChange} placeholder="Breed" className="p-2 border rounded" />
-          <input type="date" name="birthdate" value={newAnimal.birthdate} onChange={handleChange} className="p-2 border rounded" />
+          <div className="relative">
+            <input
+              type="date"
+              name="birthdate"
+              value={newAnimal.birthdate}
+              onChange={handleChange}
+              className="peer p-2 pt-5 w-full border rounded text-black placeholder-transparent focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              placeholder="Birthdate"
+            />
+            <label
+              htmlFor="birthdate"
+              className="absolute left-2 top-2 text-gray-400 text-xs transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-yellow-600"
+            >
+              Birthdate
+            </label>
+          </div>
+          {newAnimal.birthdate && (
+            <p className="text-sm text-gray-600">Age: {formatDistanceToNowStrict(parseISO(newAnimal.birthdate))}</p>
+          )}
+
           <input name="weight" value={newAnimal.weight} onChange={handleChange} placeholder="Weight (lbs)" className="p-2 border rounded" />
           <select name="gender" value={newAnimal.gender} onChange={handleChange} className="p-2 border rounded">
             <option value="">Select Gender</option>
@@ -332,6 +355,7 @@ const LivestockManager = () => {
         onView={handleViewProfile}
         getParents={getParents}
         getChildren={getChildren}
+        showAge
       />
     </div>
   );

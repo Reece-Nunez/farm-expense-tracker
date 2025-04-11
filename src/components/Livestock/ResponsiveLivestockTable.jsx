@@ -12,6 +12,7 @@ const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getPare
               <th className="px-4 py-2 border">Species</th>
               <th className="px-4 py-2 border">Breed</th>
               <th className="px-4 py-2 border">Birthdate</th>
+              <th className="px-4 py-2 border">Age</th>
               <th className="px-4 py-2 border">Weight</th>
               <th className="px-4 py-2 border">Field</th>
               <th className="px-4 py-2 border">Parents</th>
@@ -26,6 +27,7 @@ const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getPare
                 <td className="border px-4 py-2">{animal.species}</td>
                 <td className="border px-4 py-2">{animal.breed}</td>
                 <td className="border px-4 py-2">{animal.birthdate}</td>
+                <td className="border px-4 py-2">{animal.age}</td>
                 <td className="border px-4 py-2">
                   {isNaN(animal.weight) ? "-" : animal.weight}
                 </td>
