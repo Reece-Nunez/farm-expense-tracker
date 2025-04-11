@@ -13,6 +13,8 @@
     "@aws-amplify/api": "^6.3.8",
     "@aws-amplify/api-graphql": "^4.7.12",
     "@aws-amplify/auth": "^6.11.0",
+    "@aws-amplify/data-schema-types": "^1.2.0",
+    "@aws-amplify/datastore": "^5.0.80",
     "@aws-amplify/ui-react": "^6.9.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

@@ -14,10 +14,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
-  optimizeDeps: {
-    include: ["aws-amplify", "@aws-amplify/auth"],
-    esbuildOptions: {
-      target: "esnext",
-    },
-  },
 });
