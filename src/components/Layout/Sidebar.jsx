@@ -133,11 +133,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           icon: () => <FontAwesomeIcon icon={faBoxesStacked} className="w-5 h-5 text-brown-800" />,
           route: "/dashboard/inventory",
         },
-        {
-          label: "Data Migration Tool",
-          icon: () => <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-purple-600" />,
-          route: "/dashboard/admin/migrate",
-        },
+      //{
+        //  label: "Data Migration Tool",
+        //  icon: () => <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-purple-600" />,
+        //route: "/dashboard/admin/migrate",
+        //},
         {
           label: "Homepage",
           icon: () => (
