@@ -24,12 +24,12 @@ const InventoryItemManager = () => {
     init();
   }, []);
 
-  const fetchItems = async (uid) => {
+  const fetchItems = async (sub) => {
     try {
       const { data } = await client.graphql({
         query: listInventoryItems,
         variables: {
-          filter: { userId: { eq: uid } }
+          filter: { sub: { eq: sub } }
         }
       });
 
@@ -54,13 +54,13 @@ const InventoryItemManager = () => {
             name: newItem.name,
             quantity: parseFloat(newItem.quantity),
             notes: newItem.notes,
-            userId
+            type: newItem.type
           }
         }
       });
 
       setNewItem({ name: "", quantity: "", notes: "" });
-      fetchItems(userId);
+      fetchItems(sub);
     } catch (error) {
       console.error("Error adding inventory item:", error);
     }
@@ -84,6 +84,9 @@ const InventoryItemManager = () => {
             placeholder="Item Name"
             className="p-2 border rounded"
           />
+          <select value={newItem.type} onChange={handleAddItem} className="p-2 border rounded" name="type" placeholder="Choose Type">
+            <option className="p-2 border rounded" value='select type'>Select Type</option>
+          </select>
           <input
             name="quantity"
             value={newItem.quantity}

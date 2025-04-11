@@ -31,11 +31,11 @@ const FieldManager = () => {
     init();
   }, []);
 
-  const fetchFields = async (userId) => {
+  const fetchFields = async (sub) => {
     try {
       const result = await client.graphql({
         query: listFields,
-        variables: { filter: { userId: { eq: userId } } }
+        variables: { filter: { sub: { eq: sub } } }
       });
       
       setFields(result.data.listFields.items);
@@ -44,11 +44,11 @@ const FieldManager = () => {
     }
   };
 
-  const fetchLivestock = async (userId) => {
+  const fetchLivestock = async (sub) => {
     try {
       const result = await client.graphql({
         query: listLivestocks,
-        variables: { filter: { userId: { eq: userId } } }
+        variables: { filter: { sub: { eq: sub } } }
       });
       
       setLivestock(result.data.listLivestocks.items);
@@ -71,7 +71,7 @@ const FieldManager = () => {
         name,
         acres: parseFloat(acres),
         notes,
-        userId: user.id,
+        sub: user.id,
       };
 
       if (editingId) {

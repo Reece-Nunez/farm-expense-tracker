@@ -331,57 +331,73 @@ export default function Reports() {
         </div>
 
         {/* 
-  2) DESKTOP VIEW: Standard table
-     "hidden" on small screens, "block" on md+ 
-*/}
+  2) DESKTOP VIEW: Standard table "hidden" on small screens, "block" on md+ */}
         <div className="hidden md:block overflow-x-auto w-full mb-6">
-          {filteredExpenses.map((exp, idx) => (
-            <React.Fragment key={exp.id}>
-              <tr onClick={() => toggleRow(exp.id)} className="hover:bg-gray-100 cursor-pointer">
-                <td className="border p-2">{exp.date}</td>
-                <td className="border p-2">{exp.vendor}</td>
-                <td className="border p-2">
-                  {[...new Set(exp.lineItems?.map((li) => li.category))].join(", ")}
-                </td>
-                <td className="border p-2">${exp.grandTotal?.toFixed(2)}</td>
-                <td className="border p-2">{exp.description}</td>
+          <table className="table-auto w-full border-collapse text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border p-2">Date</th>
+                <th className="border p-2">Vendor</th>
+                <th className="border p-2">Category</th>
+                <th className="border p-2">Grand Total</th>
+                <th className="border p-2">Description</th>
               </tr>
-              {expandedRows[exp.id] && (
-                <tr className="bg-gray-50">
-                  <td colSpan={5} className="p-3">
-                    <div className="text-sm">
-                      <p className="font-bold mb-2">Line Items:</p>
-                      <table className="table-auto w-full text-xs">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="border px-2 py-1">Item</th>
-                            <th className="border px-2 py-1">Category</th>
-                            <th className="border px-2 py-1">Quantity</th>
-                            <th className="border px-2 py-1">Unit Cost</th>
-                            <th className="border px-2 py-1">Line Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {exp.lineItems?.map((li, i) => (
-                            <tr key={i}>
-                              <td className="border px-2 py-1">{li.item}</td>
-                              <td className="border px-2 py-1">{li.category}</td>
-                              <td className="border px-2 py-1">{li.quantity}</td>
-                              <td className="border px-2 py-1">${li.unitCost?.toFixed(2)}</td>
-                              <td className="border px-2 py-1">${li.lineTotal?.toFixed(2)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
+            </thead>
+            <tbody>
+              {filteredExpenses.map((exp, idx) => (
+                <React.Fragment key={exp.id}>
+                  <tr
+                    onClick={() => toggleRow(exp.id)}
+                    className="hover:bg-gray-100 cursor-pointer"
+                  >
+                    <td className="border p-2">{exp.date}</td>
+                    <td className="border p-2">{exp.vendor}</td>
+                    <td className="border p-2">
+                      {[...new Set(exp.lineItems?.map((li) => li.category))].join(", ")}
+                    </td>
+                    <td className="border p-2">${exp.grandTotal?.toFixed(2)}</td>
+                    <td className="border p-2">{exp.description}</td>
+                  </tr>
+                  {expandedRows[exp.id] && (
+                    <tr className="bg-gray-50">
+                      <td colSpan={5} className="p-3">
+                        <div className="text-sm">
+                          <p className="font-bold mb-2">Line Items:</p>
+                          <table className="table-auto w-full text-xs">
+                            <thead>
+                              <tr className="bg-gray-200">
+                                <th className="border px-2 py-1">Item</th>
+                                <th className="border px-2 py-1">Category</th>
+                                <th className="border px-2 py-1">Quantity</th>
+                                <th className="border px-2 py-1">Unit Cost</th>
+                                <th className="border px-2 py-1">Line Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exp.lineItems?.map((li, i) => (
+                                <tr key={i}>
+                                  <td className="border px-2 py-1">{li.item}</td>
+                                  <td className="border px-2 py-1">{li.category}</td>
+                                  <td className="border px-2 py-1">{li.quantity}</td>
+                                  <td className="border px-2 py-1">
+                                    ${li.unitCost?.toFixed(2)}
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    ${li.lineTotal?.toFixed(2)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-
 
         {/* INCOME TABLE */}
         <h2 className="text-xl font-bold mb-2">
