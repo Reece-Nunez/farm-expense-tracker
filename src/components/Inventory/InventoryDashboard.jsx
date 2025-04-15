@@ -7,7 +7,7 @@ import {
   listChickenFlocks,
   listFields,
   listInventoryItems,
-  listEggLogs
+  listEggLogs,
 } from "../../graphql/queries";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,7 +18,7 @@ import {
   faWarehouse,
   faFaceLaughBeam,
   faMap,
-  faWheatAwn
+  faWheatAwn,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   LineChart,
@@ -28,14 +28,9 @@ import {
   YAxis,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
-import {
-  format,
-  parseISO,
-  getWeek,
-  isValid,
-} from "date-fns";
+import { format, parseISO, getWeek, isValid } from "date-fns";
 
 const InventoryDashboard = () => {
   const navigate = useNavigate();
@@ -48,7 +43,7 @@ const InventoryDashboard = () => {
     fieldAcreage: [],
     fieldUtilization: [],
     eggsPerDay: {},
-    items: 0
+    items: 0,
   });
   const [view, setView] = useState("day");
 
@@ -65,26 +60,32 @@ const InventoryDashboard = () => {
 
         const client = generateClient();
 
-        const [livestockData, chickensData, fieldsData, itemsData, eggLogsData] = await Promise.all([
+        const [
+          livestockData,
+          chickensData,
+          fieldsData,
+          itemsData,
+          eggLogsData,
+        ] = await Promise.all([
           client.graphql({
             query: listLivestocks,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
           client.graphql({
             query: listChickenFlocks,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
           client.graphql({
             query: listFields,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
           client.graphql({
             query: listInventoryItems,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
           client.graphql({
             query: listEggLogs,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
         ]);
 
@@ -99,10 +100,16 @@ const InventoryDashboard = () => {
           return acc;
         }, {});
 
-        const totalAcres = fields.reduce((sum, field) => sum + (field.acres || 0), 0);
-        const fieldAcreage = fields.map(f => ({ name: f.name, acres: f.acres || 0 }));
-        const fieldUtilization = fields.map(f => {
-          const count = livestock.filter(l => l.fieldID === f.id).length;
+        const totalAcres = fields.reduce(
+          (sum, field) => sum + (field.acres || 0),
+          0
+        );
+        const fieldAcreage = fields.map((f) => ({
+          name: f.name,
+          acres: f.acres || 0,
+        }));
+        const fieldUtilization = fields.map((f) => {
+          const count = livestock.filter((l) => l.fieldID === f.id).length;
           return { name: f.name, acres: f.acres || 0, livestockCount: count };
         });
 
@@ -120,9 +127,8 @@ const InventoryDashboard = () => {
           fieldAcreage,
           fieldUtilization,
           eggsPerDay,
-          items: items.length
+          items: items.length,
         });
-
       } catch (error) {
         console.error("Error fetching analytics:", error);
       }
@@ -132,53 +138,97 @@ const InventoryDashboard = () => {
   }, []);
 
   const eggChartData = useMemo(() => {
-    const grouped = {};
+    const grouped = [];
+
     for (const [date, total] of Object.entries(analytics.eggsPerDay)) {
       const d = parseISO(date);
       if (!isValid(d)) continue;
 
       let label;
-      if (view === "month") label = format(d, "MMM d"); // Apr 11 style
-      else if (view === "week") label = `${getWeek(d)}-'${format(d, "yy")}`; // 2-'25 style
-      else label = format(d, "M-d-yy"); // 4-11-25 style
+      if (view === "month") label = format(d, "MMM d"); // Apr 11
+      else if (view === "week")
+        label = `Week ${getWeek(d)} '${format(d, "yy")}`; // Week 15 '25
+      else label = format(d, "MMM d"); // Still use readable date, e.g. Apr 11
 
-      grouped[label] = (grouped[label] || 0) + total;
+      grouped.push({ date: d, label, total });
     }
-    return Object.entries(grouped).map(([x, y]) => ({ x, y }));
+
+    // Sort by date ascending
+    grouped.sort((a, b) => a.date - b.date);
+
+    // Final format for charting
+    return grouped.map(({ label, total }) => ({
+      x: label,
+      y: total,
+    }));
   }, [analytics.eggsPerDay, view]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Farm Inventory Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Farm Inventory Dashboard
+      </h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400" onClick={() => navigate("/dashboard/inventory/livestock")}>
-          <FontAwesomeIcon icon={faCow} className="text-brown-600 text-2xl mb-2" />
+        <div
+          className="bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
+          onClick={() => navigate("/dashboard/inventory/livestock")}
+        >
+          <FontAwesomeIcon
+            icon={faCow}
+            className="text-brown-600 text-2xl mb-2"
+          />
           <p className="font-bold text-lg">{analytics.livestock}</p>
           <p className="text-sm">Livestock</p>
         </div>
 
-        <div className="bg-yellow-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400" onClick={() => navigate("/dashboard/inventory/chickens")}>
-          <FontAwesomeIcon icon={faEgg} className="text-yellow-600 text-2xl mb-2" />
+        <div
+          className="bg-yellow-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400"
+          onClick={() => navigate("/dashboard/inventory/chickens")}
+        >
+          <FontAwesomeIcon
+            icon={faEgg}
+            className="text-yellow-600 text-2xl mb-2"
+          />
           <p className="font-bold text-lg">{analytics.chickens}</p>
           <p className="text-sm">Chicken Flocks</p>
         </div>
 
-        <div className="bg-green-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-green-400" onClick={() => navigate("/dashboard/inventory/fields")}>
-          <FontAwesomeIcon icon={faWheatAwn} className="text-green-600 text-2xl mb-2" />
+        <div
+          className="bg-green-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-green-400"
+          onClick={() => navigate("/dashboard/inventory/fields")}
+        >
+          <FontAwesomeIcon
+            icon={faWheatAwn}
+            className="text-green-600 text-2xl mb-2"
+          />
           <p className="font-bold text-lg">{analytics.fields}</p>
           <p className="text-sm">Fields</p>
         </div>
 
-        <div className="bg-gray-300 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-gray-400" onClick={() => navigate("/dashboard/inventory/inventory-items")}>
-          <FontAwesomeIcon icon={faTractor} className="text-gray-600 text-2xl mb-2" />
+        <div
+          className="bg-gray-300 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-gray-400"
+          onClick={() => navigate("/dashboard/inventory/inventory-items")}
+        >
+          <FontAwesomeIcon
+            icon={faTractor}
+            className="text-gray-600 text-2xl mb-2"
+          />
           <p className="font-bold text-lg">{analytics.items}</p>
           <p className="text-sm">Equipment</p>
         </div>
 
-        <div className="col-span-2 md:col-span-4 bg-indigo-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-indigo-400" onClick={() => navigate("/dashboard/inventory/fields")}>
-          <FontAwesomeIcon icon={faMap} className="text-indigo-600 text-2xl mb-2" />
-          <p className="font-bold text-xl">{analytics.totalAcres.toFixed(1)} acres</p>
+        <div
+          className="col-span-2 md:col-span-4 bg-indigo-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-indigo-400"
+          onClick={() => navigate("/dashboard/inventory/fields")}
+        >
+          <FontAwesomeIcon
+            icon={faMap}
+            className="text-indigo-600 text-2xl mb-2"
+          />
+          <p className="font-bold text-xl">
+            {analytics.totalAcres.toFixed(1)} acres
+          </p>
           <p className="text-sm">Total Acreage</p>
         </div>
       </div>
@@ -188,11 +238,15 @@ const InventoryDashboard = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Egg Collection Trend</h2>
           <div className="space-x-2">
-            {['day', 'week', 'month'].map(option => (
+            {["day", "week", "month"].map((option) => (
               <button
                 key={option}
                 onClick={() => setView(option)}
-                className={`px-3 py-1 rounded-full border text-sm font-medium ${view === option ? 'bg-yellow-400 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+                className={`px-3 py-1 rounded-full border text-sm font-medium ${
+                  view === option
+                    ? "bg-yellow-400 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
               </button>
@@ -223,13 +277,13 @@ const InventoryDashboard = () => {
         </ResponsiveContainer>
       </div>
 
-
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-4">Field Utilization</h2>
         <ul className="space-y-2">
           {analytics.fieldUtilization.map(({ name, acres, livestockCount }) => (
             <li key={name} className="bg-green-50 p-3 rounded border shadow-sm">
-              <strong>{name}</strong>: {acres} acres — {livestockCount} livestock
+              <strong>{name}</strong>: {acres} acres — {livestockCount}{" "}
+              livestock
             </li>
           ))}
         </ul>
@@ -237,7 +291,8 @@ const InventoryDashboard = () => {
 
       <div className="text-center mt-20 text-gray-600">
         <p>
-          This feature is in early access, please be patient — we’d love your feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
+          This feature is in early access, please be patient — we’d love your
+          feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
         </p>
       </div>
     </div>

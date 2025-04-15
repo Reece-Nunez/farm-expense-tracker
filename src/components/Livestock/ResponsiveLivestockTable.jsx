@@ -1,6 +1,13 @@
 import React from "react";
 
-const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getParents, getChildren }) => {
+const ResponsiveLivestockTable = ({
+  livestock,
+  onEdit,
+  onDelete,
+  onView,
+  getParents,
+  getChildren,
+}) => {
   return (
     <div className="w-full">
       {/* Desktop Table */}
@@ -17,6 +24,8 @@ const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getPare
               <th className="px-4 py-2 border">Field</th>
               <th className="px-4 py-2 border">Parents</th>
               <th className="px-4 py-2 border">Offspring</th>
+              <th className="px-4 py-2 border">Status</th>
+              <th className="px-4 py-2 border">Notes</th>
               <th className="px-4 py-2 border">Actions</th>
             </tr>
           </thead>
@@ -31,13 +40,36 @@ const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getPare
                 <td className="border px-4 py-2">
                   {isNaN(animal.weight) ? "-" : animal.weight}
                 </td>
-                <td className="border px-4 py-2">{animal.location?.name || "-"}</td>
+                <td className="border px-4 py-2">
+                  {animal.location?.name || "N/A"}
+                </td>
                 <td className="border px-4 py-2">{getParents(animal.id)}</td>
                 <td className="border px-4 py-2">{getChildren(animal.id)}</td>
+                <td className="border px-4 py-2">
+                  {animal.status || "Active"}
+                </td>
+                <td className="border px-4 py-2 whitespace-pre-wrap text-left">
+                  {animal.notes || "None"}
+                </td>
                 <td className="border px-4 py-2 space-x-2">
-                  <button onClick={() => onEdit(animal)} className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
-                  <button onClick={() => onDelete(animal.id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
-                  <button onClick={() => onView(animal.id)} className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">View</button>
+                  <button
+                    onClick={() => onEdit(animal)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDelete(animal.id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => onView(animal.id)}
+                    className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
@@ -48,19 +80,60 @@ const ResponsiveLivestockTable = ({ livestock, onEdit, onDelete, onView, getPare
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {livestock.map((animal) => (
-          <div key={animal.id} className="border rounded-lg p-4 shadow-md bg-white">
-            <p><strong>Name:</strong> {animal.name}</p>
-            <p><strong>Species:</strong> {animal.species}</p>
-            <p><strong>Breed:</strong> {animal.breed}</p>
-            <p><strong>Birthdate:</strong> {animal.birthdate}</p>
-            <p><strong>Weight:</strong> {animal.weight ?? "-"}</p>
-            <p><strong>Field:</strong> {animal.location?.name || "-"}</p>
-            <p><strong>Parents:</strong> {getParents(animal.id)}</p>
-            <p><strong>Offspring:</strong> {getChildren(animal.id)}</p>
+          <div
+            key={animal.id}
+            className="border rounded-lg p-4 shadow-md bg-white"
+          >
+            <p>
+              <strong>Name:</strong> {animal.name}
+            </p>
+            <p>
+              <strong>Species:</strong> {animal.species}
+            </p>
+            <p>
+              <strong>Breed:</strong> {animal.breed}
+            </p>
+            <p>
+              <strong>Birthdate:</strong> {animal.birthdate}
+            </p>
+            <p>
+              <strong>Weight:</strong> {animal.weight ?? "-"}
+            </p>
+            <p>
+              <strong>Field:</strong> {animal.location?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Parents:</strong> {getParents(animal.id)}
+            </p>
+            <p>
+              <strong>Offspring:</strong> {getChildren(animal.id)}
+            </p>
+            <p>
+              <strong>Status:</strong> {animal.status || "Active"}
+            </p>
+            <p>
+              <strong>Notes:</strong> {animal.notes || "None"}
+            </p>
+
             <div className="mt-2 flex flex-wrap gap-2">
-              <button onClick={() => onEdit(animal)} className="flex-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
-              <button onClick={() => onDelete(animal.id)} className="flex-1 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
-              <button onClick={() => onView(animal.id)} className="flex-1 px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">View</button>
+              <button
+                onClick={() => onEdit(animal)}
+                className="flex-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(animal.id)}
+                className="flex-1 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => onView(animal.id)}
+                className="flex-1 px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              >
+                View
+              </button>
             </div>
           </div>
         ))}

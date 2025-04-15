@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { generateClient } from "aws-amplify/api";
-import { getLivestock, listLivestockFamilies, listMedicalRecords, listLivestocks } from "@/graphql/queries";
+import {
+  getLivestock,
+  listLivestockFamilies,
+  listMedicalRecords,
+  listLivestocks,
+} from "@/graphql/queries";
 import { toast } from "react-hot-toast";
 
 const LivestockProfile = () => {
@@ -16,11 +21,17 @@ const LivestockProfile = () => {
   const [filterType, setFilterType] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const client = generateClient();
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [noteInput, setNoteInput] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: livestockData } = await client.graphql({ query: getLivestock, variables: { id: animalId } });
+        const { data: livestockData } = await client.graphql({
+          query: getLivestock,
+          variables: { id: animalId },
+        });
 
         if (!livestockData?.getLivestock) {
           toast.error("Animal not found.");
@@ -45,11 +56,15 @@ const LivestockProfile = () => {
         const records = medicalData.data.listMedicalRecords.items;
 
         const parentLinks = families.filter((f) => f.childID === animalId);
-        const parentAnimals = parentLinks.map((link) => allLivestock.find((a) => a.id === link.parentID)).filter(Boolean);
+        const parentAnimals = parentLinks
+          .map((link) => allLivestock.find((a) => a.id === link.parentID))
+          .filter(Boolean);
         setParents(parentAnimals);
 
         const childLinks = families.filter((f) => f.parentID === animalId);
-        const childAnimals = childLinks.map((link) => allLivestock.find((a) => a.id === link.childID)).filter(Boolean);
+        const childAnimals = childLinks
+          .map((link) => allLivestock.find((a) => a.id === link.childID))
+          .filter(Boolean);
         setOffspring(childAnimals);
 
         setMedicalRecords(records);
@@ -62,7 +77,46 @@ const LivestockProfile = () => {
     fetchData();
   }, [animalId, navigate]);
 
-  const handleAddRecord = () => navigate(`/dashboard/inventory/livestock/${animalId}/medical-records/new`);
+  const handleNoteSubmit = async () => {
+    if (!noteInput.trim()) return;
+
+    setSavingNote(true);
+    try {
+      const updatedNotes = `${animal.notes || ""}${
+        animal.notes ? "\n\n" : ""
+      }${noteInput.trim()}`;
+
+      const { data } = await client.graphql({
+        query: `
+          mutation UpdateLivestock($input: UpdateLivestockInput!) {
+            updateLivestock(input: $input) {
+              id
+              notes
+            }
+          }
+        `,
+        variables: {
+          input: {
+            id: animal.id,
+            notes: updatedNotes,
+          },
+        },
+      });
+
+      setAnimal({ ...animal, notes: data.updateLivestock.notes });
+      setNoteInput("");
+      setShowNoteInput(false);
+      toast.success("Note added!");
+    } catch (err) {
+      console.error("Error saving note:", err);
+      toast.error("Failed to save note.");
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const handleAddRecord = () =>
+    navigate(`/dashboard/inventory/livestock/${animalId}/medical-records/new`);
 
   const filteredRecords = medicalRecords.filter((record) => {
     const typeMatch = filterType ? record.type === filterType : true;
@@ -82,19 +136,99 @@ const LivestockProfile = () => {
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <h2 className="text-3xl font-bold mb-4">{animal.name}'s Profile</h2>
       <div className="flex flex-wrap gap-2 mb-6">
-        <button onClick={() => handleTabSwitch("profile")} className={`px-4 py-2 rounded ${selectedTab === "profile" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}>Profile</button>
-        <button onClick={() => handleTabSwitch("medical")} className={`px-4 py-2 rounded ${selectedTab === "medical" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}>Medical Records <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs">{medicalRecords.length}</span></button>
+        <button
+          onClick={() => handleTabSwitch("profile")}
+          className={`px-4 py-2 rounded ${
+            selectedTab === "profile"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+          }`}
+        >
+          Profile
+        </button>
+        <button
+          onClick={() => handleTabSwitch("medical")}
+          className={`px-4 py-2 rounded ${
+            selectedTab === "medical"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+          }`}
+        >
+          Medical Records{" "}
+          <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs">
+            {medicalRecords.length}
+          </span>
+        </button>
       </div>
 
       {selectedTab === "profile" && (
         <>
           <div className="bg-white rounded shadow p-4 md:p-6 border mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <p><strong>Species:</strong> {animal.species || "N/A"}</p>
-              <p><strong>Breed:</strong> {animal.breed || "N/A"}</p>
-              <p><strong>Birthdate:</strong> {animal.birthdate || "N/A"}</p>
-              <p><strong>Weight:</strong> {animal.weight ? `${animal.weight} lbs` : "N/A"}</p>
-              <p><strong>Field:</strong> {animal.location?.name || "N/A"}</p>
+              <p>
+                <strong>Species:</strong> {animal.species || "N/A"}
+              </p>
+              <p>
+                <strong>Breed:</strong> {animal.breed || "N/A"}
+              </p>
+              <p>
+                <strong>Birthdate:</strong> {animal.birthdate || "N/A"}
+              </p>
+              <p>
+                <strong>Weight:</strong>{" "}
+                {animal.weight ? `${animal.weight} lbs` : "N/A"}
+              </p>
+              <p>
+                <strong>Field:</strong> {animal.location?.name || "N/A"}
+              </p>
+              <p>
+                <strong>Status:</strong> {animal.status || "Active"}
+              </p>
+              <div className="col-span-1 md:col-span-2">
+                <p>
+                  <strong>Notes:</strong>
+                </p>
+                <div className="bg-gray-50 border rounded p-2 whitespace-pre-wrap mb-2">
+                  {animal.notes || "None"}
+                </div>
+                {!showNoteInput && (
+                  <button
+                    onClick={() => setShowNoteInput(true)}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    + Add Note
+                  </button>
+                )}
+                {showNoteInput && (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      className="w-full border rounded p-2"
+                      rows={3}
+                      placeholder="Enter your note..."
+                      value={noteInput}
+                      onChange={(e) => setNoteInput(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleNoteSubmit}
+                        disabled={savingNote}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded"
+                      >
+                        {savingNote ? "Saving..." : "Submit Note"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setNoteInput("");
+                          setShowNoteInput(false);
+                        }}
+                        className="text-sm text-gray-600 hover:underline"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -103,7 +237,10 @@ const LivestockProfile = () => {
             {parents.length > 0 ? (
               <div className="flex flex-wrap gap-4">
                 {parents.map((p) => (
-                  <div key={p.id} className="bg-gray-100 border rounded-lg p-4 w-full sm:w-[200px] shadow-sm">
+                  <div
+                    key={p.id}
+                    className="bg-gray-100 border rounded-lg p-4 w-full sm:w-[200px] shadow-sm"
+                  >
                     <p className="font-semibold text-lg">{p.name}</p>
                     <p className="text-sm text-gray-600">{p.species}</p>
                   </div>
@@ -119,7 +256,10 @@ const LivestockProfile = () => {
             {offspring.length > 0 ? (
               <div className="flex flex-wrap gap-4">
                 {offspring.map((o) => (
-                  <div key={o.id} className="bg-gray-100 border rounded-lg p-4 w-full sm:w-[200px] shadow-sm">
+                  <div
+                    key={o.id}
+                    className="bg-gray-100 border rounded-lg p-4 w-full sm:w-[200px] shadow-sm"
+                  >
                     <p className="font-semibold text-lg">{o.name}</p>
                     <p className="text-sm text-gray-600">{o.species}</p>
                   </div>
@@ -136,8 +276,14 @@ const LivestockProfile = () => {
         <div className="bg-white rounded shadow p-4 md:p-6 border">
           <div className="flex flex-col md:flex-row md:items-end gap-4 mb-4">
             <div>
-              <label className="block font-medium text-sm">Filter by Type</label>
-              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="border p-2 rounded w-full">
+              <label className="block font-medium text-sm">
+                Filter by Type
+              </label>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="border p-2 rounded w-full"
+              >
                 <option value="">All</option>
                 <option value="Vaccination">Vaccination</option>
                 <option value="Checkup">Checkup</option>
@@ -147,12 +293,33 @@ const LivestockProfile = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium text-sm">Filter by Date</label>
-              <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded w-full" />
+              <label className="block font-medium text-sm">
+                Filter by Date
+              </label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="border p-2 rounded w-full"
+              />
             </div>
             <div className="flex gap-2 ml-auto">
-              <button onClick={handleAddRecord} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">+ Add Record</button>
-              <button onClick={() => navigate(`/dashboard/inventory/livestock/${animalId}/medical-records`)} className="text-sm px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View All</button>
+              <button
+                onClick={handleAddRecord}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+              >
+                + Add Record
+              </button>
+              <button
+                onClick={() =>
+                  navigate(
+                    `/dashboard/inventory/livestock/${animalId}/medical-records`
+                  )
+                }
+                className="text-sm px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                View All
+              </button>
             </div>
           </div>
 
@@ -161,10 +328,20 @@ const LivestockProfile = () => {
               <li className="text-gray-500">No medical records found.</li>
             ) : (
               filteredRecords.map((r) => (
-                <li key={r.id} className="border p-3 rounded shadow-sm bg-gray-50">
-                  <div className="font-semibold text-blue-700">{r.type} <span className="text-sm text-gray-600">({r.date})</span></div>
-                  <div><strong>Medicine:</strong> {r.medicine || "N/A"}</div>
-                  <div><strong>Notes:</strong> {r.notes || "None"}</div>
+                <li
+                  key={r.id}
+                  className="border p-3 rounded shadow-sm bg-gray-50"
+                >
+                  <div className="font-semibold text-blue-700">
+                    {r.type}{" "}
+                    <span className="text-sm text-gray-600">({r.date})</span>
+                  </div>
+                  <div>
+                    <strong>Medicine:</strong> {r.medicine || "N/A"}
+                  </div>
+                  <div>
+                    <strong>Notes:</strong> {r.notes || "None"}
+                  </div>
                 </li>
               ))
             )}
@@ -173,7 +350,10 @@ const LivestockProfile = () => {
       )}
 
       <div className="mt-6">
-        <button className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700" onClick={() => navigate(-1)}>
+        <button
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          onClick={() => navigate(-1)}
+        >
           Back
         </button>
       </div>

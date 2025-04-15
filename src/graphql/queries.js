@@ -283,6 +283,7 @@ export const getLivestock = /* GraphQL */ `
       birthdate
       weight
       gender
+      status
       fieldID
       location {
         id
@@ -328,6 +329,7 @@ export const listLivestocks = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt
@@ -395,6 +397,7 @@ export const getMedicalRecord = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt
@@ -679,6 +682,7 @@ export const livestocksByFieldID = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt

@@ -495,6 +495,7 @@ export const onCreateLivestock = /* GraphQL */ `
       birthdate
       weight
       gender
+      status
       fieldID
       location {
         id
@@ -538,6 +539,7 @@ export const onUpdateLivestock = /* GraphQL */ `
       birthdate
       weight
       gender
+      status
       fieldID
       location {
         id
@@ -581,6 +583,7 @@ export const onDeleteLivestock = /* GraphQL */ `
       birthdate
       weight
       gender
+      status
       fieldID
       location {
         id
@@ -680,6 +683,7 @@ export const onCreateMedicalRecord = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt
@@ -714,6 +718,7 @@ export const onUpdateMedicalRecord = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt
@@ -748,6 +753,7 @@ export const onDeleteMedicalRecord = /* GraphQL */ `
         birthdate
         weight
         gender
+        status
         fieldID
         createdAt
         updatedAt

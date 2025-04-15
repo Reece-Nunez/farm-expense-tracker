@@ -29,6 +29,7 @@ export declare type LivestockCreateFormInputValues = {
     birthdate?: string;
     weight?: number;
     gender?: string;
+    status?: string;
 };
 export declare type LivestockCreateFormValidationValues = {
     sub?: ValidationFunction<string>;
@@ -38,6 +39,7 @@ export declare type LivestockCreateFormValidationValues = {
     birthdate?: ValidationFunction<string>;
     weight?: ValidationFunction<number>;
     gender?: ValidationFunction<string>;
+    status?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type LivestockCreateFormOverridesProps = {
@@ -49,6 +51,7 @@ export declare type LivestockCreateFormOverridesProps = {
     birthdate?: PrimitiveOverrideProps<TextFieldProps>;
     weight?: PrimitiveOverrideProps<TextFieldProps>;
     gender?: PrimitiveOverrideProps<TextFieldProps>;
+    status?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type LivestockCreateFormProps = React.PropsWithChildren<{
     overrides?: LivestockCreateFormOverridesProps | undefined | null;

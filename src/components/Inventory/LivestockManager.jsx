@@ -5,14 +5,14 @@ import { getCurrentUser } from "@/utils/getCurrentUser";
 import {
   listLivestocks,
   listFields,
-  listLivestockFamilies
+  listLivestockFamilies,
 } from "@/graphql/queries";
 import {
   createLivestock,
   updateLivestock,
   deleteLivestock,
   createLivestockFamily,
-  deleteLivestockFamily
+  deleteLivestockFamily,
 } from "@/graphql/mutations";
 import { generateClient } from "aws-amplify/api";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
@@ -32,7 +32,7 @@ const LivestockManager = () => {
     birthdate: "",
     weight: "",
     gender: "",
-    locationId: ""
+    locationId: "",
   });
   const [selectedParents, setSelectedParents] = useState([]);
 
@@ -57,21 +57,25 @@ const LivestockManager = () => {
       query: listLivestocks,
       variables: {
         filter: { sub: { eq: sub } },
-        limit: 1000
-      }
+        limit: 1000,
+      },
     });
-    const enriched = data.listLivestocks.items.map(animal => ({
-      ...animal,
-      age: animal.birthdate ? formatDistanceToNowStrict(parseISO(animal.birthdate)) : "Unknown",
-      location: fields.find(f => f.id === animal.fieldID) || null
-    }));
+    const enriched = data.listLivestocks.items
+      .filter((a) => a.status !== "Sold" && a.status !== "Butchered")
+      .map((animal) => ({
+        ...animal,
+        age: animal.birthdate
+          ? formatDistanceToNowStrict(parseISO(animal.birthdate))
+          : "Unknown",
+        location: fields.find((f) => f.id === animal.fieldID) || null,
+      }));
     setLivestock(enriched);
   };
 
   const fetchFields = async (sub) => {
     const { data } = await client.graphql({
       query: listFields,
-      variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+      variables: { filter: { sub: { eq: sub } }, limit: 1000 },
     });
     setFields(data.listFields.items);
   };
@@ -79,7 +83,7 @@ const LivestockManager = () => {
   const fetchFamilies = async (sub) => {
     const { data } = await client.graphql({
       query: listLivestockFamilies,
-      variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+      variables: { filter: { sub: { eq: sub } }, limit: 1000 },
     });
     setFamilies(data.listLivestockFamilies.items);
   };
@@ -89,7 +93,8 @@ const LivestockManager = () => {
   };
 
   const handleAddOrUpdateAnimal = async () => {
-    const { name, species, breed, birthdate, weight, gender, locationId } = newAnimal;
+    const { name, species, breed, birthdate, weight, gender, locationId } =
+      newAnimal;
     const sub = user?.attributes?.sub || user?.sub;
 
     try {
@@ -102,8 +107,13 @@ const LivestockManager = () => {
         birthdate,
         weight: parseFloat(weight),
         gender,
-        fieldID: locationId || null,
         sub,
+        fieldID:
+          newAnimal.status === "Sold" || newAnimal.status === "Butchered"
+            ? null
+            : locationId,
+        status: newAnimal.status || "Active",
+        notes: newAnimal.notes || "",
       };
 
       if (editingId) {
@@ -141,6 +151,13 @@ const LivestockManager = () => {
             })
           )
         );
+        if (input.status === "Sold" || input.status === "Butchered") {
+          await client.graphql({
+            query: deleteLivestock,
+            variables: { input: { id: input.id } },
+          });
+          return;
+        }
       } else {
         const { data } = await client.graphql({
           query: `
@@ -207,7 +224,7 @@ const LivestockManager = () => {
       birthdate: animal.birthdate || "",
       weight: animal.weight || "",
       gender: animal.gender || "",
-      locationId: animal.fieldID || ""
+      locationId: animal.fieldID || "",
     });
     const parentLinks = families.filter((f) => f.childID === animal.id);
     setSelectedParents(parentLinks.map((f) => f.parentID));
@@ -223,13 +240,13 @@ const LivestockManager = () => {
         parentLinks.map((link) =>
           client.graphql({
             query: deleteLivestockFamily,
-            variables: { input: { id: link.id } }
+            variables: { input: { id: link.id } },
           })
         )
       );
       await client.graphql({
         query: deleteLivestock,
-        variables: { input: { id: animalId } }
+        variables: { input: { id: animalId } },
       });
       const sub = user?.attributes?.sub || user?.sub;
       await fetchLivestock(sub);
@@ -272,15 +289,33 @@ const LivestockManager = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input name="name" value={newAnimal.name} onChange={handleChange} placeholder="Animal's Name" className="p-2 border rounded" />
-          <select name="species" value={newAnimal.species} onChange={handleChange} placeholder="Species" className="p-2 border rounded">
+          <input
+            name="name"
+            value={newAnimal.name}
+            onChange={handleChange}
+            placeholder="Animal's Name"
+            className="p-2 border rounded"
+          />
+          <select
+            name="species"
+            value={newAnimal.species}
+            onChange={handleChange}
+            placeholder="Species"
+            className="p-2 border rounded"
+          >
             <option value="">Select Species</option>
             <option value="Cow">Cow</option>
             <option value="Pig">Pig</option>
             <option value="Goat">Goat</option>
             <option value="Sheep">Sheep</option>
           </select>
-          <input name="breed" value={newAnimal.breed} onChange={handleChange} placeholder="Breed" className="p-2 border rounded" />
+          <input
+            name="breed"
+            value={newAnimal.breed}
+            onChange={handleChange}
+            placeholder="Breed"
+            className="p-2 border rounded"
+          />
           <div className="relative">
             <input
               type="date"
@@ -298,17 +333,35 @@ const LivestockManager = () => {
             </label>
           </div>
           {newAnimal.birthdate && (
-            <p className="text-sm text-gray-600">Age: {formatDistanceToNowStrict(parseISO(newAnimal.birthdate))}</p>
+            <p className="text-sm text-gray-600">
+              Age: {formatDistanceToNowStrict(parseISO(newAnimal.birthdate))}
+            </p>
           )}
 
-          <input name="weight" value={newAnimal.weight} onChange={handleChange} placeholder="Weight (lbs)" className="p-2 border rounded" />
-          <select name="gender" value={newAnimal.gender} onChange={handleChange} className="p-2 border rounded">
+          <input
+            name="weight"
+            value={newAnimal.weight}
+            onChange={handleChange}
+            placeholder="Weight (lbs)"
+            className="p-2 border rounded"
+          />
+          <select
+            name="gender"
+            value={newAnimal.gender}
+            onChange={handleChange}
+            className="p-2 border rounded"
+          >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Unknown">Unknown</option>
           </select>
-          <select name="locationId" value={newAnimal.locationId} onChange={handleChange} className="p-2 border rounded">
+          <select
+            name="locationId"
+            value={newAnimal.locationId}
+            onChange={handleChange}
+            className="p-2 border rounded"
+          >
             <option value="">Select Field (Optional)</option>
             {fields.map((f) => (
               <option key={f.id} value={f.id}>
@@ -316,14 +369,51 @@ const LivestockManager = () => {
               </option>
             ))}
           </select>
+          <div className="flex items-center gap-4 mt-4">
+            <label className="font-semibold">Status:</label>
+            <label>
+              <input
+                type="radio"
+                name="status"
+                value="Sold"
+                checked={newAnimal.status === "Sold"}
+                onChange={handleChange}
+              />{" "}
+              Sold
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="status"
+                value="Butchered"
+                checked={newAnimal.status === "Butchered"}
+                onChange={handleChange}
+              />{" "}
+              Butchered
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="status"
+                value=""
+                checked={!newAnimal.status}
+                onChange={() => setNewAnimal({ ...newAnimal, status: "" })}
+              />{" "}
+              Active
+            </label>
+          </div>
         </div>
 
-        <label className="block mt-4 font-semibold">Select Parent(s) (Optional)</label>
+        <label className="block mt-4 font-semibold">
+          Select Parent(s) (Optional)
+        </label>
         <select
           multiple
           value={selectedParents}
           onChange={(e) =>
-            setSelectedParents([...e.target.selectedOptions].map((o) => o.value))
+            setSelectedParents(
+              [...e.target.selectedOptions].map((o) => o.value)
+            )
           }
           className="w-full p-2 border rounded mt-1"
         >
@@ -340,7 +430,9 @@ const LivestockManager = () => {
         >
           {editingId ? "Update Animal" : "Add Animal"}
         </button>
-        <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}
+        <button
+          className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          onClick={() => navigate(-1)}
         >
           Back To Inventory
         </button>
