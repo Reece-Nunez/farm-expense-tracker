@@ -9,7 +9,6 @@ export default function Profile() {
   const [userRecord, setUserRecord] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [username, setUsername] = useState("");
   const [farmName, setFarmName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -27,7 +26,6 @@ export default function Profile() {
         if (!foundUser) return;
 
         setUserRecord(foundUser);
-        setUsername(foundUser.username || "");
         setFarmName(foundUser.farmName || "");
         setEmail(foundUser.email || "");
         setPhone(foundUser.phone || "");
@@ -118,7 +116,6 @@ export default function Profile() {
 
       const input = {
         sub: user.sub,
-        username,
         farmName,
         email,
         phone,
@@ -153,7 +150,6 @@ export default function Profile() {
     try {
       const input = {
         id: userRecord.id,
-        username,
         farmName,
         email,
         phone,
@@ -210,17 +206,6 @@ export default function Profile() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-1">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-            required
-          />
-        </div>
-
         <div>
           <label className="block font-medium mb-1">Farm Name</label>
           <input

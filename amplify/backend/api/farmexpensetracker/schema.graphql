@@ -31,7 +31,6 @@ type Expense @model
   description: String
   receiptImageKey: String
   lineItems: [LineItem] @hasMany(indexName: "byExpenseID", fields: ["id"])
-  user: User @belongsTo(fields: ["userId"])
 }
 
 type LineItem @model
@@ -66,7 +65,6 @@ type Income @model
   amount: Float!
   item: String
   notes: String
-  user: User @belongsTo(fields: ["userId"])
 }
 
 type Field @model

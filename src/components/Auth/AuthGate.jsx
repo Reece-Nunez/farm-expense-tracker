@@ -5,45 +5,50 @@ import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function AuthGate() {
   const { user } = useAuthenticator((context) => [context.user]);
+  const [ready, setReady] = useState(false);
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
-    const handleSessionReset = async () => {
-      try {
-        console.log("[AuthGate] Fetching new session and clearing local state...");
-        const session = await fetchAuthSession();
-        console.log("[AuthGate] Session refreshed:", session);
-        setRedirect(true);
-      } catch (err) {
-        console.error("[AuthGate] Failed to refresh session:", err);
+    const run = async () => {
+      if (!user) {
+        localStorage.setItem("justSignedIn", "true");
+        return;
       }
+
+      const freshLoginFlag = localStorage.getItem("justSignedIn");
+
+      if (freshLoginFlag === "true") {
+        localStorage.setItem("justSignedIn", "false");
+
+        try {
+          console.log("[AuthGate] Refreshing session after sign-in...");
+          await fetchAuthSession();
+        } catch (err) {
+          console.error("[AuthGate] Session refresh failed:", err);
+        }
+      }
+
+      setRedirect(true);
     };
 
-    const freshLoginFlag = localStorage.getItem("justSignedIn");
-
-    if (user && freshLoginFlag !== "false") {
-      localStorage.setItem("justSignedIn", "false");
-      handleSessionReset();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) {
-      localStorage.setItem("justSignedIn", "true");
-    }
+    run();
   }, [user]);
 
   if (redirect) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (user) {
-    return <div style={{ padding: 20 }}>Loading dashboard...</div>;
+  if (!user) {
+    return (
+      <div style={{ marginTop: "2rem" }}>
+        <Authenticator />
+      </div>
+    );
   }
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <Authenticator />
+    <div style={{ padding: 20 }}>
+      Loading dashboard... Please refresh the page if stuck...
     </div>
   );
 }

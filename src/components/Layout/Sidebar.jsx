@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "@aws-amplify/auth";
 import { onUpdateUser } from "@/graphql/subscriptions";
-import { generateClient } from 'aws-amplify/api';
- import { getUrl } from "aws-amplify/storage";
+import { generateClient } from "aws-amplify/api";
+import { getUrl } from "aws-amplify/storage";
 import Logo from "../assets/Transparent1.png";
 import {
   HomeIcon,
@@ -15,15 +15,14 @@ import {
   UserIcon,
   PlusIcon,
   ChevronRightIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from "@heroicons/react/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 
-
-export default function Sidebar({ onCloseSidebar = () => { } }) {
+export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(
@@ -31,6 +30,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
   );
   const [username, setUsername] = useState("User");
   const [userSub, setUserSub] = useState(null);
+  const [farmName, setFarmName] = useState("");
 
   useEffect(() => {
     let subscription;
@@ -38,20 +38,23 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
     const fetchUserProfile = async (user) => {
       try {
         setUsername(user.username || "User");
+        setFarmName(user.farmName || "");
 
         if (user.profilePictureKey) {
-          const result = await getUrl({ path: user.profilePictureKey });
-          setProfileImageUrl(result.url ? result.url.href : result);
+          try {
+            const { url } = await getUrl({ path: user.profilePictureKey });
+            setProfileImageUrl(url.href);
+          } catch (err) {
+            console.error("Failed to fetch profile image URL:", err);
+            setProfileImageUrl(defaultProfileImage);
+          }
         } else {
-          setProfileImageUrl(
-            "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
-          );
+          setProfileImageUrl(defaultProfileImage);
         }
       } catch (err) {
         console.error("Error fetching user profile in sidebar:", err);
       }
     };
-
 
     const client = generateClient();
 
@@ -95,45 +98,84 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
-
   const groupedNavItems = [
     {
       label: "Expenses",
       items: [
-        { label: "Expenses", icon: CreditCardIcon, route: "/dashboard/expenses", color: "text-blue-600" },
-        { label: "Add Expense", icon: PlusIcon, route: "/dashboard/add-expense", color: "text-blue-600" },
+        {
+          label: "Expenses",
+          icon: CreditCardIcon,
+          route: "/dashboard/expenses",
+          color: "text-blue-600",
+        },
+        {
+          label: "Add Expense",
+          icon: PlusIcon,
+          route: "/dashboard/add-expense",
+          color: "text-blue-600",
+        },
       ],
     },
     {
       label: "Income",
       items: [
-        { label: "Income", icon: CurrencyDollarIcon, route: "/dashboard/income", color: "text-green-600" },
-        { label: "Add Income", icon: PlusIcon, route: "/dashboard/add-income", color: "text-green-600" },
+        {
+          label: "Income",
+          icon: CurrencyDollarIcon,
+          route: "/dashboard/income",
+          color: "text-green-600",
+        },
+        {
+          label: "Add Income",
+          icon: PlusIcon,
+          route: "/dashboard/add-income",
+          color: "text-green-600",
+        },
       ],
     },
     {
       label: "CSV Import",
       items: [
-        { label: "Import Expenses CSV", icon: UploadIcon, route: "/dashboard/import-csv", color: "text-blue-600" },
-        { label: "Import Income CSV", icon: UploadIcon, route: "/dashboard/import-income", color: "text-green-600" },
+        {
+          label: "Import Expenses CSV",
+          icon: UploadIcon,
+          route: "/dashboard/import-csv",
+          color: "text-blue-600",
+        },
+        {
+          label: "Import Income CSV",
+          icon: UploadIcon,
+          route: "/dashboard/import-income",
+          color: "text-green-600",
+        },
       ],
     },
     {
       label: "Other",
       items: [
-        { label: "Reports", icon: ChartBarIcon, route: "/dashboard/reports", color: "text-yellow-600" },
+        {
+          label: "Reports",
+          icon: ChartBarIcon,
+          route: "/dashboard/reports",
+          color: "text-yellow-600",
+        },
         {
           label: "Inventory (New)",
-          icon: () => <FontAwesomeIcon icon={faBoxesStacked} className="w-5 h-5 text-brown-800" />,
+          icon: () => (
+            <FontAwesomeIcon
+              icon={faBoxesStacked}
+              className="w-5 h-5 text-brown-800"
+            />
+          ),
           route: "/dashboard/inventory",
         },
-      //{
+        //{
         //  label: "Data Migration Tool",
         //  icon: () => <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-purple-600" />,
         //route: "/dashboard/admin/migrate",
@@ -141,19 +183,14 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
         {
           label: "Homepage",
           icon: () => (
-            <img
-              src={Icon}
-              alt="Logo"
-              className="w-5 h-5 object-contain"
-            />
+            <img src={Icon} alt="Logo" className="w-5 h-5 object-contain" />
           ),
           route: "/",
         },
         //{ label: "Debug", icon: PlusIcon, route: "/util/debug", color: "text-red-300"},
       ],
-    }
+    },
   ];
-
 
   // Helper for nav clicks
   const handleNavClick = (route) => {
@@ -163,6 +200,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
 
   return (
     <div className="flex flex-col h-full justify-between overflow-y-auto">
+      {/* Profile display */}
       {/* Profile display */}
       <div className="p-4 border-b border-gray-200">
         <button
@@ -174,10 +212,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
             alt="Profile"
             className="w-16 h-16 rounded-full object-cover mb-1"
           />
-          <p className="text-sm">Hi, {username}</p>
+          <p className="text-sm font-medium">Hi, {farmName}</p>
           <ChevronDownIcon
-            className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${profileMenuOpen ? "rotate-180" : ""
-              }`}
+            className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${
+              profileMenuOpen ? "rotate-180" : ""
+            }`}
           />
         </button>
 
@@ -199,13 +238,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
             </button>
           </div>
         )}
-
       </div>
-
 
       {/* App Name */}
       <div className="p-4 border-b border-gray-200 text-xl font-bold">
-        <a href='/' className="flex-shrink-0">
+        <a href="/" className="flex-shrink-0">
           <img src={Logo} alt="AgTrackr Logo" className="h-10 sm:h-12" />
         </a>
       </div>
@@ -216,7 +253,10 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
           onClick={() => handleNavClick("/dashboard")}
           className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
         >
-          <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-orange-600" />
+          <FontAwesomeIcon
+            icon={faChartLine}
+            className="w-5 h-5 text-orange-600"
+          />
           <span>Dashboard</span>
         </button>
         {groupedNavItems.map((group, groupIdx) => {
@@ -241,16 +281,18 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
               {/* Group Items */}
               {isExpanded && (
                 <div className="space-y-1 ml-2">
-                  {group.items.map(({ label, icon: Icon, route, color }, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleNavClick(route)}
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
-                      <Icon className={`w-5 h-5 ${color}`} />
-                      <span>{label}</span>
-                    </button>
-                  ))}
+                  {group.items.map(
+                    ({ label, icon: Icon, route, color }, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleNavClick(route)}
+                        className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <Icon className={`w-5 h-5 ${color}`} />
+                        <span>{label}</span>
+                      </button>
+                    )
+                  )}
                 </div>
               )}
             </div>

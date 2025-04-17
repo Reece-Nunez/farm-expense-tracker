@@ -109,21 +109,6 @@ export const createExpense = /* GraphQL */ `
         nextToken
         __typename
       }
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename
@@ -148,21 +133,6 @@ export const updateExpense = /* GraphQL */ `
         nextToken
         __typename
       }
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename
@@ -185,21 +155,6 @@ export const deleteExpense = /* GraphQL */ `
       receiptImageKey
       lineItems {
         nextToken
-        __typename
-      }
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
         __typename
       }
       createdAt
@@ -323,21 +278,6 @@ export const createIncome = /* GraphQL */ `
       amount
       item
       notes
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename
@@ -360,21 +300,6 @@ export const updateIncome = /* GraphQL */ `
       amount
       item
       notes
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename
@@ -397,21 +322,6 @@ export const deleteIncome = /* GraphQL */ `
       amount
       item
       notes
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename

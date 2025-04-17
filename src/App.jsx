@@ -20,13 +20,24 @@ import Modal from "react-modal";
 import { signOut } from "@aws-amplify/auth";
 import { useLoading, LoadingProvider } from "./context/LoadingContext";
 import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
-import { deleteExpense, deleteIncome, createIncome, updateIncome, deleteLineItem } from "./graphql/mutations";
-import { listExpenses as listExpensesQuery, listIncomes as listIncomesQuery, listLineItems } from "./graphql/queries";
+import {
+  deleteExpense,
+  deleteIncome,
+  createIncome,
+  updateIncome,
+  deleteLineItem,
+} from "./graphql/mutations";
+import {
+  listExpenses as listExpensesQuery,
+  listIncomes as listIncomesQuery,
+  listLineItems,
+} from "./graphql/queries";
 import AuthPageLayout from "./components/Auth/AuthPageLayout";
 import PrivateRoute from "./components/Auth/PrivateRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import AuthGate from "./components/Auth/AuthGate";
 import GenericModal from "./components/Util/GenericModal";
+import { uploadData } from "aws-amplify/storage";
 import LandingPage from "./components/Main/LandingPage";
 import About from "./components/Main/About";
 import Contact from "./components/Main/Contact";
@@ -74,10 +85,10 @@ function AppInner() {
   const [fetchedIncomes, setFetchedIncomes] = useState([]);
   const [editingIncome, setEditingIncome] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => { });
+  const [confirmAction, setConfirmAction] = useState(() => {});
   const [confirmMessage, setConfirmMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => { });
+  const [deleteAction, setDeleteAction] = useState(() => {});
   const [deleteMessage, setDeleteMessage] = useState("");
   const expenseFormRef = useRef(null);
   const incomeFormRef = useRef(null);
@@ -100,13 +111,10 @@ function AppInner() {
           query: listExpensesQuery,
           variables: {
             filter: {
-              and: [
-                { userId: { eq: user.id } },
-                { sub: { eq: user.sub } }
-              ]
+              and: [{ userId: { eq: user.id } }, { sub: { eq: user.sub } }],
             },
-            limit: 1000
-          }
+            limit: 1000,
+          },
         });
         setFetchedExpenses(res.data.listExpenses.items);
       } catch (error) {
@@ -127,13 +135,10 @@ function AppInner() {
           query: listIncomesQuery,
           variables: {
             filter: {
-              and: [
-                { userId: { eq: user.id } },
-                { sub: { eq: user.sub } }
-              ]
+              and: [{ userId: { eq: user.id } }, { sub: { eq: user.sub } }],
             },
-            limit: 1000
-          }
+            limit: 1000,
+          },
         });
         setFetchedIncomes(res.data.listIncomes.items);
       } catch (error) {
@@ -176,7 +181,6 @@ function AppInner() {
     window.addEventListener("expenseFormReady", handle);
     return () => window.removeEventListener("expenseFormReady", handle);
   }, []);
-
 
   const handleExpenseSubmit = async (validatedFormData) => {
     setIsLoading(true);
@@ -237,18 +241,20 @@ function AppInner() {
             mutation CreateExpense($input: CreateExpenseInput!) {
               createExpense(input: $input) {
                 id
+                vendor
+                date
+                grandTotal
+                description
+                receiptImageKey
               }
             }
           `,
           variables: { input },
         });
         createdExpense = result.data.createExpense;
-        
 
         setFetchedExpenses((prev) =>
-          prev.map((e) =>
-            e.id === createdExpense.id ? createdExpense : e
-          )
+          prev.map((e) => (e.id === createdExpense.id ? createdExpense : e))
         );
         setEditingExpense(null);
         toast.success("Expense updated successfully!");
@@ -258,13 +264,17 @@ function AppInner() {
             mutation CreateExpense($input: CreateExpenseInput!) {
               createExpense(input: $input) {
                 id
+                vendor
+                date
+                grandTotal
+                description
+                receiptImageKey
               }
             }
           `,
           variables: { input },
         });
         createdExpense = result.data.createExpense;
-        
 
         setFetchedExpenses((prev) => [...prev, createdExpense]);
         toast.success("Expense successfully added!");
@@ -303,30 +313,27 @@ function AppInner() {
           })
         )
       );
-      
-
     } catch (error) {
       console.error("[handleExpenseSubmit] Error:", error);
       toast.error("Failed to save expense.");
     } finally {
       setIsLoading(false);
       setConfirmMessage("");
-      setConfirmAction(() => { });
+      setConfirmAction(() => {});
       setShowConfirmModal(false);
       expenseFormRef.current?.resetForm();
     }
   };
 
-
-
-  const handleExpenseEdit = (expense) => navigate(`/dashboard/edit-expense/${expense.id}`);
+  const handleExpenseEdit = (expense) =>
+    navigate(`/dashboard/edit-expense/${expense.id}`);
 
   const handleExpenseDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this expense?");
     setDeleteAction(() => async () => {
       setIsLoading(true);
       const client = generateClient();
-  
+
       try {
         // Step 1: Delete all line items
         const lineItemRes = await client.graphql({
@@ -336,9 +343,9 @@ function AppInner() {
             limit: 1000,
           },
         });
-  
+
         const lineItems = lineItemRes?.data?.listLineItems?.items || [];
-  
+
         await Promise.all(
           lineItems.map((li) =>
             client.graphql({
@@ -353,7 +360,7 @@ function AppInner() {
             })
           )
         );
-  
+
         // Step 2: Delete the expense using a custom mutation (excluding the `user`)
         await client.graphql({
           query: /* GraphQL */ `
@@ -365,7 +372,7 @@ function AppInner() {
           `,
           variables: { input: { id } },
         });
-  
+
         setFetchedExpenses((prev) => prev.filter((e) => e.id !== id));
         toast.success("Expense and its line items deleted successfully.");
       } catch (error) {
@@ -378,9 +385,6 @@ function AppInner() {
     });
     setShowDeleteModal(true);
   };
-  
-  
-
 
   const handleIncomeSubmit = (incomeData) => {
     setConfirmMessage("Are you sure you want to accept this income?");
@@ -398,12 +402,16 @@ function AppInner() {
               input: {
                 ...incomeData,
                 userId: user.id,
-                sub: user.sub
-              }
+                sub: user.sub,
+              },
             },
           });
           setFetchedIncomes((prev) =>
-            prev.map((i) => i.id === updated.data.updateIncome.id ? updated.data.updateIncome : i)
+            prev.map((i) =>
+              i.id === updated.data.updateIncome.id
+                ? updated.data.updateIncome
+                : i
+            )
           );
           setEditingIncome(null);
           toast.success("Income updated successfully!");
@@ -414,8 +422,8 @@ function AppInner() {
               input: {
                 ...incomeData,
                 userId: user.id,
-                sub: user.sub
-              }
+                sub: user.sub,
+              },
             },
           });
           setFetchedIncomes((prev) => [...prev, created.data.createIncome]);
@@ -427,7 +435,7 @@ function AppInner() {
       } finally {
         setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => { });
+        setConfirmAction(() => {});
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
@@ -435,7 +443,8 @@ function AppInner() {
     setShowConfirmModal(true);
   };
 
-  const handleIncomeEdit = (income) => navigate(`/dashboard/edit-income/${income.id}`);
+  const handleIncomeEdit = (income) =>
+    navigate(`/dashboard/edit-income/${income.id}`);
 
   const handleIncomeDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this income?");
@@ -461,8 +470,8 @@ function AppInner() {
     setShowDeleteModal(true);
   };
 
-
-  if (!authChecked) return <div style={{ padding: 20 }}>Checking authentication...</div>;
+  if (!authChecked)
+    return <div style={{ padding: 20 }}>Checking authentication...</div>;
 
   return (
     <>
@@ -474,25 +483,75 @@ function AppInner() {
         <Route element={<AuthPageLayout />}>
           <Route path="/auth" element={<AuthGate />} />
         </Route>
-        <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
+        >
           <Route path="admin/migrate" element={<DataMigrationUI />} />
           <Route path="inventory" element={<InventoryDashboard />} />
           <Route path="inventory/livestock" element={<LivestockManager />} />
-          <Route path="inventory/livestock/:animalId" element={<LivestockProfile />} />
+          <Route
+            path="inventory/livestock/:animalId"
+            element={<LivestockProfile />}
+          />
           <Route path="inventory/chickens" element={<ChickenManager />} />
           <Route path="inventory/fields" element={<FieldManager />} />
-          <Route path="inventory/inventory-items" element={<InventoryItemManager />} />
-          <Route path="inventory/livestock/:animalId/medical-records" element={<LivestockMedicalRecords />} />
-          <Route path="inventory/livestock/:animalId/medical-records/new" element={<LivestockMedicalForm />} />
+          <Route
+            path="inventory/inventory-items"
+            element={<InventoryItemManager />}
+          />
+          <Route
+            path="inventory/livestock/:animalId/medical-records"
+            element={<LivestockMedicalRecords />}
+          />
+          <Route
+            path="inventory/livestock/:animalId/medical-records/new"
+            element={<LivestockMedicalForm />}
+          />
           <Route index element={<Dashboard />} />
-          <Route path="expenses" element={<ExpenseTable expenses={fetchedExpenses} onEdit={handleExpenseEdit} onDelete={handleExpenseDelete} />} />
+          <Route
+            path="expenses"
+            element={
+              <ExpenseTable
+                expenses={fetchedExpenses}
+                onEdit={handleExpenseEdit}
+                onDelete={handleExpenseDelete}
+              />
+            }
+          />
           <Route
             path="add-expense"
-            element={<ExpenseForm ref={expenseFormRef} onValidSubmit={handleExpenseSubmit} />}
+            element={
+              <ExpenseForm
+                ref={expenseFormRef}
+                onValidSubmit={handleExpenseSubmit}
+              />
+            }
           />
           <Route path="edit-expense/:id" element={<EditExpense />} />
-          <Route path="income" element={<IncomeTable incomes={fetchedIncomes} onEdit={handleIncomeEdit} onDelete={handleIncomeDelete} />} />
-          <Route path="add-income" element={<IncomeForm ref={incomeFormRef} onValidSubmit={handleIncomeSubmit} />} />
+          <Route
+            path="income"
+            element={
+              <IncomeTable
+                incomes={fetchedIncomes}
+                onEdit={handleIncomeEdit}
+                onDelete={handleIncomeDelete}
+              />
+            }
+          />
+          <Route
+            path="add-income"
+            element={
+              <IncomeForm
+                ref={incomeFormRef}
+                onValidSubmit={handleIncomeSubmit}
+              />
+            }
+          />
           <Route path="edit-income/:id" element={<EditIncome />} />
           <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<Profile />} />

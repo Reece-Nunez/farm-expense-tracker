@@ -70,21 +70,6 @@ export const getExpense = /* GraphQL */ `
         nextToken
         __typename
       }
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename
@@ -184,21 +169,6 @@ export const getIncome = /* GraphQL */ `
       amount
       item
       notes
-      user {
-        id
-        sub
-        username
-        email
-        farmName
-        phone
-        aboutMe
-        profilePictureKey
-        role
-        preferences
-        createdAt
-        updatedAt
-        __typename
-      }
       createdAt
       updatedAt
       __typename

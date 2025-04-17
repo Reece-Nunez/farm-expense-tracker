@@ -7,6 +7,7 @@ import { getUrl } from "aws-amplify/storage";
 import { generateClient } from "aws-amplify/api";
 import { deleteExpense as deleteExpenseMutation } from "@/graphql/mutations";
 import { listLineItems } from "@/graphql/queries";
+import { toast } from "react-hot-toast";
 
 export default function ExpenseTable({ expenses = [], onDelete }) {
   const navigate = useNavigate();
