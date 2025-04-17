@@ -17,7 +17,9 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
   const client = generateClient();
 
   const sortedExpenses = React.useMemo(() => {
-    return [...mergedExpenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...mergedExpenses].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
   }, [mergedExpenses]);
 
   // 🔄 Merge LineItems into Expenses on mount/update
@@ -90,9 +92,9 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
           limit: 1000,
         },
       });
-  
+
       const lineItems = data?.listLineItems?.items || [];
-  
+
       await Promise.all(
         lineItems.map((li) =>
           client.graphql({
@@ -109,7 +111,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
           })
         )
       );
-  
+
       // Step 2: Delete the expense itself (avoid selecting user)
       await client.graphql({
         query: /* GraphQL */ `
@@ -121,7 +123,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         `,
         variables: { input: { id: expenseId } },
       });
-  
+
       if (onDelete) onDelete(expenseId);
       toast.success("Expense and its line items deleted.");
     } catch (error) {
@@ -129,7 +131,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
       toast.error("Failed to delete expense.");
     }
   };
-  
 
   const FullSizeImageOverlay = ({ imageUrl, onClose }) => {
     if (!imageUrl) return null;
@@ -154,17 +155,25 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
       <div className="bg-white shadow-lg rounded-lg p-6 mb-6 border border-gray-200 hover:shadow-2xl transition-shadow duration-300">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-lg font-bold mb-1">{expense.vendor || "Unknown Vendor"}</h3>
-            <p className="text-gray-500 text-sm">{new Date(expense.date).toLocaleDateString()}</p>
+            <h3 className="text-lg font-bold mb-1">
+              {expense.vendor || "Unknown Vendor"}
+            </h3>
+            <p className="text-gray-500 text-sm">
+              {new Date(expense.date).toLocaleDateString()}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-gray-700 font-semibold">Grand Total:</p>
-            <p className="text-2xl text-green-600 font-bold">${(expense.grandTotal ?? 0).toFixed(2)}</p>
+            <p className="text-2xl text-green-600 font-bold">
+              ${(expense.grandTotal ?? 0).toFixed(2)}
+            </p>
           </div>
         </div>
 
         {expense.description && (
-          <p className="text-gray-600 mb-4 italic">Notes: {expense.description}</p>
+          <p className="text-gray-600 mb-4 italic">
+            Notes: {expense.description}
+          </p>
         )}
 
         {expense.receiptImageKey && (
@@ -186,23 +195,38 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         <div className="mt-4">
           <h4 className="font-semibold text-gray-800 mb-3">Line Items:</h4>
           <div className="space-y-3">
-            {[...new Map(expense.lineItems.items.map(li => [li.id, li])).values()].map((li, index) => (
+            {[
+              ...new Map(
+                expense.lineItems.items.map((li) => [li.id, li])
+              ).values(),
+            ].map((li, index) => (
               <div
                 key={index}
                 className="border rounded-md p-3 bg-gray-50 shadow-sm"
               >
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-700">
-                  <p><span className="font-medium">Item:</span> {li.item}</p>
-                  <p><span className="font-medium">Category:</span> {li.category}</p>
-                  <p><span className="font-medium">Quantity:</span> {li.quantity}</p>
-                  <p><span className="font-medium">Unit Cost:</span> ${parseFloat(li.unitCost ?? 0).toFixed(2)}</p>
-                  <p><span className="font-medium">Line Total:</span> ${parseFloat(li.lineTotal ?? 0).toFixed(2)}</p>
+                  <p>
+                    <span className="font-medium">Item:</span> {li.item}
+                  </p>
+                  <p>
+                    <span className="font-medium">Category:</span> {li.category}
+                  </p>
+                  <p>
+                    <span className="font-medium">Quantity:</span> {li.quantity}
+                  </p>
+                  <p>
+                    <span className="font-medium">Unit Cost:</span> $
+                    {parseFloat(li.unitCost ?? 0).toFixed(2)}
+                  </p>
+                  <p>
+                    <span className="font-medium">Line Total:</span> $
+                    {parseFloat(li.lineTotal ?? 0).toFixed(2)}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
 
         <div className="flex justify-end gap-3 mt-6">
           <Button
@@ -213,7 +237,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
             Edit
           </Button>
           <Button
-            onClick={() => handleDelete(expense.id)}
+            onClick={() => onDelete?.(expense.id)}
             className="bg-red-500 hover:bg-red-600 text-white flex gap-2"
           >
             <TrashIcon className="h-4 w-4" />

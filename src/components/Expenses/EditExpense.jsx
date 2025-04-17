@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { generateClient } from "aws-amplify/api";
-import { getExpense as getExpenseQuery, listLineItems } from "@/graphql/queries";
+import {
+  getExpense as getExpenseQuery,
+  listLineItems,
+} from "@/graphql/queries";
 import { updateExpense as updateExpenseMutation } from "@/graphql/mutations";
 import ExpenseForm from "@/components/Expenses/ExpenseForm";
 import { toast } from "react-hot-toast";
@@ -21,21 +24,21 @@ export default function EditExpense() {
     const fetchExpenseById = async () => {
       try {
         const client = generateClient();
-  
+
         // Fetch base expense info
         const res = await client.graphql({
           query: getExpenseQuery,
           variables: { id },
         });
-  
+
         const found = res?.data?.getExpense;
-  
+
         if (!found) {
           toast.error("Expense not found!");
           navigate("/dashboard/expenses");
           return;
         }
-  
+
         // Fetch associated line items
         const lineItemRes = await client.graphql({
           query: listLineItems,
@@ -46,30 +49,35 @@ export default function EditExpense() {
             limit: 1000,
           },
         });
-  
+
         const lineItems = lineItemRes?.data?.listLineItems?.items || [];
-  
+
         const transformedLineItems = lineItems.map((li) => ({
           item: li.item || "",
           category: li.category || "",
-          unitCost: typeof li.unitCost === "number" ? li.unitCost.toString() : li.unitCost || "",
-          quantity: typeof li.quantity === "number" ? li.quantity.toString() : li.quantity || "",
+          unitCost:
+            typeof li.unitCost === "number"
+              ? li.unitCost.toString()
+              : li.unitCost || "",
+          quantity:
+            typeof li.quantity === "number"
+              ? li.quantity.toString()
+              : li.quantity || "",
         }));
-  
+
         setCurrentExpense({
           ...found,
           lineItems: transformedLineItems,
+          receiptImageKey: found.receiptImageKey || null,
         });
       } catch (error) {
         toast.error("Error fetching expense.");
         console.error("[EditExpense] fetch error:", error);
       }
     };
-  
+
     fetchExpenseById();
   }, [id, navigate]);
-  
-  
 
   const handleUpdateExpense = async (formattedExpense) => {
     setConfirmMessage("Are you sure you want to update this expense?");
@@ -77,23 +85,83 @@ export default function EditExpense() {
       try {
         const client = generateClient();
         const currentUser = await getCurrentUser();
-        if(!currentUser) return;
+        if (!currentUser) return;
 
+        const isoDate = formattedExpense.date
+          ? new Date(formattedExpense.date).toISOString().split("T")[0]
+          : "";
+
+        // Step 1: Delete old line items
+        const existingLineItemsRes = await client.graphql({
+          query: listLineItems,
+          variables: {
+            filter: { expenseID: { eq: currentExpense.id } },
+            limit: 1000,
+          },
+        });
+
+        const oldLineItems =
+          existingLineItemsRes?.data?.listLineItems?.items || [];
+
+        await Promise.all(
+          oldLineItems.map((li) =>
+            client.graphql({
+              query: /* GraphQL */ `
+                mutation DeleteLineItem($input: DeleteLineItemInput!) {
+                  deleteLineItem(input: $input) {
+                    id
+                  }
+                }
+              `,
+              variables: { input: { id: li.id } },
+            })
+          )
+        );
+
+        // Step 2: Update expense (preserve receiptImageKey if no file selected)
         const input = {
           id: currentExpense.id,
-          date: formattedExpense.date,
           vendor: formattedExpense.vendor,
           description: formattedExpense.description,
-          receiptImageKey: formattedExpense.receiptImageKey,
-          lineItems: formattedExpense.lineItems,
+          date: isoDate,
+          receiptImageKey:
+            formattedExpense.receiptImageKey || currentExpense.receiptImageKey,
           grandTotal: formattedExpense.grandTotal,
           userId: currentUser.id,
+          sub: currentUser.sub,
         };
 
-        await client.graphql({
+        const result = await client.graphql({
           query: updateExpenseMutation,
           variables: { input },
         });
+
+        // Step 3: Re-create line items
+        await Promise.all(
+          formattedExpense.lineItems.map((li) =>
+            client.graphql({
+              query: /* GraphQL */ `
+                mutation CreateLineItem($input: CreateLineItemInput!) {
+                  createLineItem(input: $input) {
+                    id
+                  }
+                }
+              `,
+              variables: {
+                input: {
+                  expenseID: currentExpense.id,
+                  item: li.item,
+                  category: li.category,
+                  unitCost: parseFloat(li.unitCost || 0),
+                  quantity: parseFloat(li.quantity || 0),
+                  lineTotal:
+                    parseFloat(li.unitCost || 0) * parseFloat(li.quantity || 0),
+                  sub: currentUser.sub,
+                },
+              },
+            })
+          )
+        );
 
         toast.success("Expense updated successfully!");
         navigate("/dashboard/expenses");

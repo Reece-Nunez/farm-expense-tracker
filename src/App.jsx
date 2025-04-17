@@ -182,20 +182,40 @@ function AppInner() {
     return () => window.removeEventListener("expenseFormReady", handle);
   }, []);
 
+  useEffect(() => {
+    const handle = (e) => {
+      const validatedFormData = e.detail;
+      setPendingExpenseData(validatedFormData);
+      setConfirmMessage("Are you sure you want to accept this expense?");
+      setConfirmAction(() => () => handleExpenseSubmit(validatedFormData));
+      setShowConfirmModal(true);
+    };
+
+    window.addEventListener("expenseFormReady", handle);
+    return () => window.removeEventListener("expenseFormReady", handle);
+  }, []);
+
   const handleExpenseSubmit = async (validatedFormData) => {
     setIsLoading(true);
     const client = generateClient();
 
     try {
       const user = await getCurrentUser();
-
       const isoDate = validatedFormData.date
         ? new Date(validatedFormData.date).toISOString().split("T")[0]
         : "";
 
-      // Upload receipt if present
-      let receiptImageKey = null;
+      let receiptImageKey = validatedFormData.receiptImageKey || null;
       if (validatedFormData.receiptFile && validatedFormData.receiptFile[0]) {
+        if (receiptImageKey) {
+          try {
+            await fetch(`https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/${receiptImageKey}`, {
+              method: "DELETE",
+            });
+          } catch (deleteErr) {
+            console.warn("Failed to delete old image:", deleteErr);
+          }
+        }
         const file = validatedFormData.receiptFile[0];
         const fileKey = `receipts/${Date.now()}_${file.name}`;
         const upload = uploadData({
@@ -203,13 +223,11 @@ function AppInner() {
           data: file,
           options: { contentType: file.type },
         });
-
         await upload.result;
         receiptImageKey = fileKey;
         toast.success("Receipt uploaded successfully!");
       }
 
-      // Calculate line totals and grand total
       const lineItems = validatedFormData.lineItems.map((li) => {
         const unitCost = parseFloat(li.unitCost || 0);
         const quantity = parseFloat(li.quantity || 0);
@@ -234,24 +252,43 @@ function AppInner() {
       };
 
       let createdExpense;
-
-      if (editingExpense) {
+      if (validatedFormData.id) {
         const result = await client.graphql({
           query: /* GraphQL */ `
-            mutation CreateExpense($input: CreateExpenseInput!) {
-              createExpense(input: $input) {
+            mutation UpdateExpense($input: UpdateExpenseInput!) {
+              updateExpense(input: $input) {
                 id
-                vendor
-                date
-                grandTotal
-                description
-                receiptImageKey
               }
             }
           `,
-          variables: { input },
+          variables: { input: { ...input, id: validatedFormData.id } },
         });
-        createdExpense = result.data.createExpense;
+
+        createdExpense = result.data.updateExpense;
+
+        const lineItemRes = await client.graphql({
+          query: listLineItems,
+          variables: {
+            filter: { expenseID: { eq: validatedFormData.id } },
+            limit: 1000,
+          },
+        });
+
+        const oldLineItems = lineItemRes?.data?.listLineItems?.items || [];
+        await Promise.all(
+          oldLineItems.map((li) =>
+            client.graphql({
+              query: /* GraphQL */ `
+                mutation DeleteLineItem($input: DeleteLineItemInput!) {
+                  deleteLineItem(input: $input) {
+                    id
+                  }
+                }
+              `,
+              variables: { input: { id: li.id } },
+            })
+          )
+        );
 
         setFetchedExpenses((prev) =>
           prev.map((e) => (e.id === createdExpense.id ? createdExpense : e))
@@ -274,8 +311,8 @@ function AppInner() {
           `,
           variables: { input },
         });
-        createdExpense = result.data.createExpense;
 
+        createdExpense = result.data.createExpense;
         setFetchedExpenses((prev) => [...prev, createdExpense]);
         toast.success("Expense successfully added!");
       }
@@ -287,15 +324,6 @@ function AppInner() {
               mutation CreateLineItem($input: CreateLineItemInput!) {
                 createLineItem(input: $input) {
                   id
-                  item
-                  category
-                  quantity
-                  unitCost
-                  lineTotal
-                  expenseID
-                  sub
-                  createdAt
-                  updatedAt
                 }
               }
             `,
@@ -322,11 +350,9 @@ function AppInner() {
       setConfirmAction(() => {});
       setShowConfirmModal(false);
       expenseFormRef.current?.resetForm();
+      navigate(-1)
     }
   };
-
-  const handleExpenseEdit = (expense) =>
-    navigate(`/dashboard/edit-expense/${expense.id}`);
 
   const handleExpenseDelete = (id) => {
     setDeleteMessage("Are you sure you want to delete this expense?");
@@ -335,8 +361,7 @@ function AppInner() {
       const client = generateClient();
 
       try {
-        // Step 1: Delete all line items
-        const lineItemRes = await client.graphql({
+        const res = await client.graphql({
           query: listLineItems,
           variables: {
             filter: { expenseID: { eq: id } },
@@ -344,10 +369,9 @@ function AppInner() {
           },
         });
 
-        const lineItems = lineItemRes?.data?.listLineItems?.items || [];
-
+        const itemsToDelete = res?.data?.listLineItems?.items || [];
         await Promise.all(
-          lineItems.map((li) =>
+          itemsToDelete.map((item) =>
             client.graphql({
               query: /* GraphQL */ `
                 mutation DeleteLineItem($input: DeleteLineItemInput!) {
@@ -356,12 +380,11 @@ function AppInner() {
                   }
                 }
               `,
-              variables: { input: { id: li.id } },
+              variables: { input: { id: item.id } },
             })
           )
         );
 
-        // Step 2: Delete the expense using a custom mutation (excluding the `user`)
         await client.graphql({
           query: /* GraphQL */ `
             mutation DeleteExpense($input: DeleteExpenseInput!) {
@@ -385,6 +408,9 @@ function AppInner() {
     });
     setShowDeleteModal(true);
   };
+
+  const handleExpenseEdit = (expense) =>
+    navigate(`/dashboard/edit-expense/${expense.id}`);
 
   const handleIncomeSubmit = (incomeData) => {
     setConfirmMessage("Are you sure you want to accept this income?");
