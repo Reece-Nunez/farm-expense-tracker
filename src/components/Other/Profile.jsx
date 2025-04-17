@@ -5,6 +5,9 @@ import { getUser, listUsers } from "@/graphql/queries";
 import { updateUser, createUser } from "@/graphql/mutations";
 import { generateClient } from "aws-amplify/api";
 
+const defaultProfileImage =
+    "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg";
+
 export default function Profile() {
   const [userRecord, setUserRecord] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,8 +16,6 @@ export default function Profile() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [aboutMe, setAboutMe] = useState("");
-
-  const defaultProfileImage = "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg";
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
   const [newProfilePicFile, setNewProfilePicFile] = useState(null);
   const client = generateClient();
@@ -96,10 +97,13 @@ export default function Profile() {
 
       const input = {
         id: userRecord.id,
-        profilePictureKey: ""
+        profilePictureKey: "",
       };
 
-      const { data } = await client.graphql({ query: updateUser, variables: { input } });
+      const { data } = await client.graphql({
+        query: updateUser,
+        variables: { input },
+      });
       setUserRecord(data.updateUser);
       setProfileImageUrl(defaultProfileImage);
       alert("Profile picture deleted successfully!");
@@ -114,8 +118,20 @@ export default function Profile() {
       const user = await getCurrentUser();
       if (!user) return;
 
+      const checkRes = await client.graphql({
+        query: listUsers,
+        variables: { filter: { sub: { eq: user.sub } }, limit: 1 },
+      });
+
+      const existing = checkRes?.data?.listUsers?.items?.[0];
+      if (existing) {
+        setUserRecord(existing);
+        return;
+      }
+
       const input = {
         sub: user.sub,
+        username: user.username, // keep it fixed from auth
         farmName,
         email,
         phone,
@@ -128,21 +144,11 @@ export default function Profile() {
         variables: { input },
       });
 
-      if (!data?.createUser) {
-        throw new Error("User creation returned no data.");
-      }
-
       setUserRecord(data.createUser);
-
-      if (profilePictureKey) {
-        const { url } = await getUrl({ path: profilePictureKey });
-        setProfileImageUrl(url.href);
-      }
-
-      alert("Profile created successfully!");
+      const { url } = await getUrl({ path: profilePictureKey });
+      setProfileImageUrl(url.href);
     } catch (error) {
       console.error("Error creating new user record:", error);
-      alert("Failed to create profile.");
     }
   };
 
@@ -157,7 +163,10 @@ export default function Profile() {
         profilePictureKey: profilePictureKey || userRecord.profilePictureKey,
       };
 
-      const { data } = await client.graphql({ query: updateUser, variables: { input } });
+      const { data } = await client.graphql({
+        query: updateUser,
+        variables: { input },
+      });
       setUserRecord(data.updateUser);
 
       if (profilePictureKey) {
@@ -199,7 +208,12 @@ export default function Profile() {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z"
+              />
             </svg>
           </button>
         )}

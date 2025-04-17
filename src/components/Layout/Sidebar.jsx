@@ -22,12 +22,12 @@ import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 
+const defaultProfileImage = "https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/profile-pictures/default.jpg";
+
 export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState(
-    "https://farmexpensetrackerreceipts3b0d2-dev.s3.us-east-1.amazonaws.com/profile-pictures/default.jpg"
-  );
+  const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
   const [username, setUsername] = useState("User");
   const [userSub, setUserSub] = useState(null);
   const [farmName, setFarmName] = useState("");

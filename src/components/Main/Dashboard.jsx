@@ -94,7 +94,6 @@ export default function Dashboard() {
         },
       });
 
-      console.log(expenseRes);
 
       const incomeRes = await client.graphql({
         query: listIncomes,
@@ -156,7 +155,6 @@ export default function Dashboard() {
     [timeRange, expenses, incomes]
   );
   const expenseCategoryData = getExpenseCategoryData(expenses);
-  console.log("expenseCategoryData", expenseCategoryData);
   const totalCategoryAmount = expenseCategoryData.reduce(
     (sum, item) => sum + item.total,
     0
