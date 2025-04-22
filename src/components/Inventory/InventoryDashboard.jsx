@@ -8,17 +8,20 @@ import {
   listFields,
   listInventoryItems,
   listEggLogs,
+  listLineItems,
+  getExpense
 } from "../../graphql/queries";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import {
   faCow,
   faEgg,
   faTractor,
-  faWarehouse,
   faFaceLaughBeam,
   faMap,
   faWheatAwn,
+  faCrow,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   LineChart,
@@ -32,6 +35,8 @@ import {
 } from "recharts";
 import { format, parseISO, getWeek, isValid } from "date-fns";
 
+const CHICKEN_FEED_KEYWORDS = ["chicken feed", "poultry grain", "laying pellets", "scratch", "hens feed", "layer pellet"];
+
 const InventoryDashboard = () => {
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState({
@@ -43,9 +48,26 @@ const InventoryDashboard = () => {
     fieldAcreage: [],
     fieldUtilization: [],
     eggsPerDay: {},
-    items: 0,
+    items: [],
   });
   const [view, setView] = useState("day");
+  const formatted = format(parseISO("2024-04-20"), "MM-dd-yyyy");
+  const [selectedType, setSelectedType] = useState("All");
+  const [feedExpenses, setFeedExpenses] = useState([]);
+  const [eggLogs, setEggLogs] = useState([]);
+
+  const inventoryTypes = useMemo(() => {
+    const uniqueTypes = [...new Set(analytics.items.map(item => item.type))];
+    return ["All", ...uniqueTypes];
+  }, [analytics.items]);
+
+  const filteredItems = useMemo(() => {
+    const items = [...analytics.items].sort((a, b) => a.quantity - b.quantity); // sort by quantity
+    return selectedType === "All"
+      ? items
+      : items.filter((item) => item.type === selectedType);
+  }, [analytics.items, selectedType]);
+
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -66,6 +88,7 @@ const InventoryDashboard = () => {
           fieldsData,
           itemsData,
           eggLogsData,
+          lineItemsData
         ] = await Promise.all([
           client.graphql({
             query: listLivestocks,
@@ -87,13 +110,32 @@ const InventoryDashboard = () => {
             query: listEggLogs,
             variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
+          client.graphql({
+            query: listLineItems,
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+          }),
         ]);
+
+        const eggLogs = eggLogsData?.data?.listEggLogs?.items || [];
+        setEggLogs(eggLogs);
+
+        const feedLines = lineItemsData.data.listLineItems.items.filter(item =>
+          CHICKEN_FEED_KEYWORDS.some(keyword => item.item?.toLowerCase().includes(keyword))
+        );
+
+        const detailedFeedExpenses = [];
+        for (const item of feedLines) {
+          const { data } = await client.graphql({ query: getExpense, variables: { id: item.expenseID } });
+          if (data.getExpense) {
+            detailedFeedExpenses.push({ date: data.getExpense.date, cost: item.lineTotal });
+          }
+        }
+        setFeedExpenses(detailedFeedExpenses);
 
         const livestock = livestockData?.data?.listLivestocks?.items || [];
         const chickens = chickensData?.data?.listChickenFlocks?.items || [];
         const fields = fieldsData?.data?.listFields?.items || [];
         const items = itemsData?.data?.listInventoryItems?.items || [];
-        const eggLogs = eggLogsData?.data?.listEggLogs?.items || [];
 
         const livestockBySpecies = livestock.reduce((acc, l) => {
           acc[l.species] = (acc[l.species] || 0) + 1;
@@ -118,16 +160,17 @@ const InventoryDashboard = () => {
           return acc;
         }, {});
 
+
         setAnalytics({
           livestock: livestock.length,
           livestockBySpecies,
-          chickens: chickens.length,
+          chickens: chickensData?.data?.listChickenFlocks?.items.length || 0,
           fields: fields.length,
           totalAcres,
           fieldAcreage,
           fieldUtilization,
           eggsPerDay,
-          items: items.length,
+          items: items,
         });
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -137,31 +180,116 @@ const InventoryDashboard = () => {
     fetchAnalytics();
   }, []);
 
-  const eggChartData = useMemo(() => {
-    const grouped = [];
+  const getWeekString = (dateStr) => {
+    const date = new Date(dateStr);
+    const firstJan = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - firstJan) / (24 * 60 * 60 * 1000));
+    const week = Math.ceil((days + firstJan.getDay() + 1) / 7);
+    return `${date.getFullYear()}-W${week.toString().padStart(2, "0")}`;
+  };
 
-    for (const [date, total] of Object.entries(analytics.eggsPerDay)) {
-      const d = parseISO(date);
-      if (!isValid(d)) continue;
+  const getKeyByTimeRange = (dateStr, groupBy) => {
+    if (!dateStr) return "";
 
-      let label;
-      if (view === "month") label = format(d, "MMM d"); // Apr 11
-      else if (view === "week")
-        label = `Week ${getWeek(d)} '${format(d, "yy")}`; // Week 15 '25
-      else label = format(d, "MMM d"); // Still use readable date, e.g. Apr 11
+    const parsed = parseISO(dateStr);
 
-      grouped.push({ date: d, label, total });
+    if (groupBy === "month") {
+      return format(parsed, "MM-yyyy");
     }
 
-    // Sort by date ascending
-    grouped.sort((a, b) => a.date - b.date);
+    if (groupBy === "week") {
+      const weekNum = getWeek(parsed);
+      return `W${String(weekNum).padStart(2, "0")}-${parsed.getFullYear()}`;
+    }
 
-    // Final format for charting
-    return grouped.map(({ label, total }) => ({
-      x: label,
-      y: total,
-    }));
+    return format(parsed, "MM-dd-yyyy");
+  };
+
+  const feedChartData = useMemo(() => {
+    const dates = new Set();
+
+    feedExpenses.forEach(exp => dates.add(getKeyByTimeRange(exp.date, view)));
+    eggLogs.forEach(log => dates.add(getKeyByTimeRange(log.date, view)));
+
+    const sortedDates = Array.from(dates).sort();
+
+    const feedMap = {};
+    feedExpenses.forEach(exp => {
+      const key = getKeyByTimeRange(exp.date, view);
+      feedMap[key] = (feedMap[key] || 0) + exp.cost;
+    });
+
+    const eggMap = {};
+    eggLogs.forEach(log => {
+      const key = getKeyByTimeRange(log.date, view);
+      eggMap[key] = (eggMap[key] || 0) + log.eggsCollected;
+    });
+
+    let cumulativeFeed = 0;
+    let cumulativeEggs = 0;
+
+    return sortedDates.map(date => {
+      cumulativeFeed += feedMap[date] || 0;
+      cumulativeEggs += eggMap[date] || 0;
+
+      return {
+        period: date,
+        feedCost: parseFloat(cumulativeFeed.toFixed(2)),
+        costPerEgg: cumulativeEggs > 0 ? parseFloat((cumulativeFeed / cumulativeEggs).toFixed(2)) : 0
+      };
+    });
+  }, [feedExpenses, eggLogs, view]);
+
+
+
+  const aggregateData = (groupBy, expenses = [], incomes = []) => {
+    const dataMap = {};
+
+    expenses.forEach((exp) => {
+      if (!exp.date) return;
+      let key = getKeyByTimeRange(exp.date, groupBy);
+      if (!dataMap[key]) dataMap[key] = { expenses: 0, incomes: 0 };
+      dataMap[key].expenses += exp.grandTotal || 0;
+    });
+
+    incomes.forEach((inc) => {
+      if (!inc.date) return;
+      let key = getKeyByTimeRange(inc.date, groupBy);
+      if (!dataMap[key]) dataMap[key] = { expenses: 0, incomes: 0 };
+      dataMap[key].incomes += inc.amount || 0;
+    });
+
+    return Object.keys(dataMap)
+      .sort()
+      .map((key) => ({
+        period: key,
+        expenses: parseFloat(dataMap[key].expenses.toFixed(2)),
+        incomes: parseFloat(dataMap[key].incomes.toFixed(2)),
+      }));
+  };
+
+  const eggChartData = useMemo(() => {
+    const map = {};
+    Object.entries(analytics.eggsPerDay).forEach(([dateStr, total]) => {
+      const key = getKeyByTimeRange(dateStr, view);
+      map[key] = (map[key] || 0) + total;
+    });
+
+    return Object.keys(map)
+      .sort()
+      .map((period) => ({
+        period:
+          view === "day" && isValid(parseISO(period))
+            ? format(parseISO(period), "MM-dd-yyyy")
+            : period,
+        eggs: map[period],
+      }));
   }, [analytics.eggsPerDay, view]);
+
+  const chartData = feedExpenses.map(exp => ({
+    date: new Date(exp.expenseDate).toLocaleDateString(),
+    feedCost: exp.lineTotal
+  }));
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -187,7 +315,7 @@ const InventoryDashboard = () => {
           onClick={() => navigate("/dashboard/inventory/chickens")}
         >
           <FontAwesomeIcon
-            icon={faEgg}
+            icon={faCrow}
             className="text-yellow-600 text-2xl mb-2"
           />
           <p className="font-bold text-lg">{analytics.chickens}</p>
@@ -214,8 +342,8 @@ const InventoryDashboard = () => {
             icon={faTractor}
             className="text-gray-600 text-2xl mb-2"
           />
-          <p className="font-bold text-lg">{analytics.items}</p>
-          <p className="text-sm">Equipment</p>
+          <p className="font-bold text-lg">{analytics.items.length}</p>
+          <p className="text-sm">Items</p>
         </div>
 
         <div
@@ -242,11 +370,10 @@ const InventoryDashboard = () => {
               <button
                 key={option}
                 onClick={() => setView(option)}
-                className={`px-3 py-1 rounded-full border text-sm font-medium ${
-                  view === option
-                    ? "bg-yellow-400 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
+                className={`px-3 py-1 rounded-full border text-sm font-medium ${view === option
+                  ? "bg-yellow-400 text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+                  }`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
               </button>
@@ -257,16 +384,23 @@ const InventoryDashboard = () => {
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={eggChartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="x" tick={{ fontSize: 12 }} />
+            <XAxis dataKey="period" tick={{ fontSize: 12 }} />
             <YAxis tickCount={6} />
             <Tooltip
               formatter={(value) => [`${value} eggs`, "Collected"]}
-              labelFormatter={(label) => `Date: ${label}`}
+              labelFormatter={label => {
+                if (!label) return "";
+                try {
+                  return "Date: " + format(parseISO(label), "MM-dd-yyyy");
+                } catch {
+                  return "Date: " + label;
+                }
+              }}
             />
             <Legend />
             <Line
               type="monotone"
-              dataKey="y"
+              dataKey="eggs"
               name="Eggs Collected"
               stroke="#facc15"
               strokeWidth={2}
@@ -277,17 +411,93 @@ const InventoryDashboard = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <h2 className="text-xl font-bold mb-4">Field Utilization</h2>
-        <ul className="space-y-2">
-          {analytics.fieldUtilization.map(({ name, acres, livestockCount }) => (
-            <li key={name} className="bg-green-50 p-3 rounded border shadow-sm">
-              <strong>{name}</strong>: {acres} acres — {livestockCount}{" "}
-              livestock
-            </li>
-          ))}
-        </ul>
+      <div className="bg-gray-50 p-4 rounded border shadow mb-10">
+        <h3 className="text-lg font-bold mb-4">Feed Expenses & Cost Per Egg</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={feedChartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="period" />
+            <YAxis yAxisId="left" />
+            <YAxis yAxisId="right" orientation="right" />
+            <Tooltip formatter={(value, name) => {
+              if (name.includes("Cost per Egg")) {
+                return [`$${value.toFixed(2)}`, name];
+              }
+              return [`$${value.toFixed(2)}`, name];
+            }} />
+            <Legend />
+            <Line yAxisId="left" type="monotone" dataKey="feedCost" stroke="#34d399" name="Feed Cost ($)" />
+            <Line yAxisId="right" type="monotone" dataKey="costPerEgg" stroke="#facc15" name="Cost per Egg ($)" />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
+
+
+      <div className="bg-white rounded-lg p-6 shadow mb-10">
+        <h2 className="text-xl font-bold mb-6">Field Utilization</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {analytics.fieldUtilization.map(({ name, acres, livestockCount }) => (
+            <div
+              key={name}
+              className="bg-green-50 border border-green-200 p-4 rounded-lg shadow-sm hover:shadow-md transition"
+            >
+              <h3 className="text-md font-semibold text-green-800 mb-1">{name}</h3>
+
+              <div className="flex justify-between items-center text-sm text-gray-700">
+                <div>
+                  <p>
+                    <span className="font-medium text-green-700">{acres}</span>{" "}
+                    acres
+                  </p>
+                  <p>
+                    <span className="font-medium text-green-700">
+                      {livestockCount}
+                    </span>{" "}
+                    livestock
+                  </p>
+                </div>
+
+                {/* Optional icon or label */}
+                <div className="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                  Utilized
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+
+      <div className="bg-white rounded-lg p-6 shadow mb-10">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Inventory Items</h2>
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-1 text-sm"
+          >
+            {inventoryTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {inventoryTypes
+          .filter((type) => type !== "All")
+          .filter((type) => selectedType === "All" || selectedType === type)
+          .map((type) => (
+            <InventoryItemGroup
+              key={type}
+              type={type}
+              items={filteredItems.filter((item) => item.type === type)}
+            />
+          ))}
+      </div>
+
+
 
       <div className="text-center mt-20 text-gray-600">
         <p>
@@ -298,5 +508,58 @@ const InventoryDashboard = () => {
     </div>
   );
 };
+
+const InventoryItemGroup = ({ type, items }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+  const isLowStock = () => {
+    if (type === "Feed" && totalQuantity < 50) return true;
+    if (type === "Hay" && totalQuantity < 5) return true;
+    return false;
+  };
+
+  return (
+    <div className="mb-4 border rounded-lg bg-white shadow-sm">
+      <div
+        onClick={() => setIsExpanded((prev) => !prev)}
+        className="flex justify-between items-center px-4 py-3 bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-t-lg transition"
+      >
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold text-gray-800">{type}</h3>
+          {isLowStock() && (
+            <span className="text-red-600 text-xs bg-red-100 px-2 py-0.5 rounded-full">
+              Low Stock
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">Qty: {totalQuantity}</span>
+          <FontAwesomeIcon
+            icon={isExpanded ? faChevronUp : faChevronDown}
+            className="text-gray-500"
+          />
+        </div>
+      </div>
+
+      {isExpanded && (
+        <ul className="px-4 py-2 space-y-2 border-t transition-all">
+          {items.map(({ id, name, quantity, notes }) => (
+            <li key={id} className="flex justify-between text-sm">
+              <div>
+                <p className="font-medium">{name}</p>
+                {notes && <p className="text-gray-500 italic text-xs">{notes}</p>}
+              </div>
+              <span className="text-gray-500">Qty: {quantity}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 
 export default InventoryDashboard;

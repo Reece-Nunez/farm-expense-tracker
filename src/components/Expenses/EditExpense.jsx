@@ -18,7 +18,7 @@ export default function EditExpense() {
   const [currentExpense, setCurrentExpense] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
 
   useEffect(() => {
     const fetchExpenseById = async () => {
@@ -164,7 +164,7 @@ export default function EditExpense() {
         );
 
         toast.success("Expense updated successfully!");
-        navigate("/dashboard/expenses");
+        navigate("/dashboard/expenses")
       } catch (error) {
         console.error("[EditExpense] update error:", error);
         toast.error("Failed to update expense.");
@@ -186,7 +186,7 @@ export default function EditExpense() {
         <h2 className="text-2xl font-bold text-center mb-6">Edit Expense</h2>
         <ExpenseForm
           ref={expenseFormRef}
-          editingExpense={currentExpense}
+          defaultValues={currentExpense}
           onValidSubmit={handleUpdateExpense}
         />
       </div>

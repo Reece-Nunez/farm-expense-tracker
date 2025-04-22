@@ -3,11 +3,29 @@ import { generateClient } from "aws-amplify/api";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";import {
   listChickenFlocks,
   listEggLogs,
   listLineItems,
   getExpense
 } from "../../graphql/queries";
+import {
+  faCrow,
+  faBowlFood,
+  faEgg,
+  faList,
+  faSeedling,
+  faDollarSign,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   createChickenFlock as createChickenFlockMutation,
   updateChickenFlock as updateChickenFlockMutation,
@@ -22,7 +40,7 @@ import {
   XIcon
 } from "@heroicons/react/outline";
 
-const CHICKEN_FEED_KEYWORDS = ["chicken feed", "poultry grain", "laying pellets", "scratch", "hens feed"];
+const CHICKEN_FEED_KEYWORDS = ["chicken feed", "poultry grain", "laying pellets", "scratch", "hens feed", "layer pellet"];
 
 const ChickenManager = () => {
   const [flocks, setFlocks] = useState([]);
@@ -146,11 +164,11 @@ const ChickenManager = () => {
     fetchData(user);
   };
 
+  // Calculations
   const totalChickens = flocks.reduce((sum, f) => sum + f.count, 0);
   const totalEggs = eggLogs.reduce((sum, log) => sum + log.eggsCollected, 0);
-  const totalFeedSpent = feedExpenses.reduce((sum, item) => {
-    return sum + (item?.lineTotal ?? 0);
-  }, 0);
+  const totalFeedSpent = feedExpenses.reduce((sum, item) => sum + (item?.lineTotal ?? 0), 0);
+  const feedCostPerEgg = totalEggs > 0 ? (totalFeedSpent / totalEggs).toFixed(2) : "0.00";
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -158,23 +176,12 @@ const ChickenManager = () => {
       <p className="text-gray-600 mb-6">Track flocks, daily egg collection, and feed expenses.</p>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white shadow p-4 rounded border">
-          <p className="text-sm text-gray-500">Flocks</p>
-          <p className="text-xl font-bold">{flocks.length}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded border">
-          <p className="text-sm text-gray-500">Total Chickens</p>
-          <p className="text-xl font-bold">{totalChickens}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded border">
-          <p className="text-sm text-gray-500">Eggs Collected</p>
-          <p className="text-xl font-bold">{totalEggs}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded border">
-          <p className="text-sm text-gray-500">Feed Expense</p>
-          <p className="text-xl font-bold">${totalFeedSpent.toFixed(2)}</p>
-        </div>
+      <div className="grid md:grid-cols-5 gap-4 mb-10">
+        <StatCard label="Flocks" value={flocks.length} icon={faList} />
+        <StatCard label="Total Chickens" value={totalChickens} icon={faCrow} />
+        <StatCard label="Eggs Collected" value={totalEggs} icon={faEgg} />
+        <StatCard label="Feed Expense" value={`$${totalFeedSpent.toFixed(2)}`} icon={faBowlFood} />
+        <StatCard label="Feed Cost / Egg" value={`$${feedCostPerEgg}`} icon={faDollarSign} />
       </div>
 
       {/* Add Flock */}
@@ -292,19 +299,49 @@ const ChickenManager = () => {
         </ul>
       </div>
 
-
-      <div className="bg-white p-4 rounded border shadow my-4">
-        <h3 className="text-lg font-bold mb-4">Feed-Related Expenses</h3>
-        <ul className="space-y-3">
-          {feedExpenses.map(item => (
-            <li key={item.id} className="border p-3 rounded bg-gray-50">
-              {item.expenseDate ? new Date(item.expenseDate).toLocaleDateString() : "Unknown Date"} — {item.vendor || "Unknown Vendor"} — ${item.lineTotal?.toFixed(2) || "0.00"}
-            </li>
-          ))}
-        </ul>
+      {/* Feed Expense Table */}
+      <div className="bg-white p-4 rounded border shadow mb-10">
+        <h3 className="text-lg font-bold mb-4">Feed Expense Details</h3>
+        {feedExpenses.length === 0 ? (
+          <p className="text-sm text-gray-500">No feed-related expenses found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-3 py-2 border">Date</th>
+                  <th className="px-3 py-2 border">Item</th>
+                  <th className="px-3 py-2 border">Vendor</th>
+                  <th className="px-3 py-2 border text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {feedExpenses.sort((a, b) => new Date(b.expenseDate) - new Date(a.expenseDate)).map(exp => (
+                  <tr key={exp.id} className="border-b">
+                    <td className="px-3 py-2">{new Date(exp.expenseDate).toLocaleDateString()}</td>
+                    <td className="px-3 py-2">{exp.item}</td>
+                    <td className="px-3 py-2">{exp.vendor || "Unknown Vendor"}</td>
+                    <td className="px-3 py-2 text-right text-green-700 font-medium">
+                      ${exp.lineTotal.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+// Reusable Stat Card
+const StatCard = ({ label, value, icon }) => (
+  <div className="bg-white p-4 rounded-lg border shadow text-center">
+    <FontAwesomeIcon icon={icon} className="text-green-500 mb-2 text-xl" />
+    <p className="text-gray-500 text-sm">{label}</p>
+    <p className="text-2xl font-semibold">{value}</p>
+  </div>
+);
 
 export default ChickenManager;

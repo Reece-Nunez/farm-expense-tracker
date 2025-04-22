@@ -6,6 +6,7 @@ import {
   Navigate,
   useLocation,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 import { Authenticator } from "@aws-amplify/ui-react";
 import { generateClient } from "aws-amplify/api";
@@ -32,6 +33,7 @@ import {
   listIncomes as listIncomesQuery,
   listLineItems,
 } from "./graphql/queries";
+import { getExpense as getExpenseQuery } from "./graphql/queries";
 import AuthPageLayout from "./components/Auth/AuthPageLayout";
 import PrivateRoute from "./components/Auth/PrivateRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
@@ -45,7 +47,6 @@ import Dashboard from "./components/Main/Dashboard";
 import ExpenseTable from "./components/Expenses/ExpenseTable";
 import ExpenseForm from "./components/Expenses/ExpenseForm";
 import IncomeForm from "./components/Income/IncomeForm";
-import EditExpense from "./components/Expenses/EditExpense";
 import IncomeTable from "./components/Income/IncomeTable";
 import EditIncome from "./components/Income/EditIncome";
 import Reports from "./components/Other/Reports";
@@ -78,6 +79,44 @@ export default function App() {
   );
 }
 
+function EditExpenseWrapper({ onSubmit }) {
+  const { id } = useParams();
+  const [expense, setExpense] = useState(null);
+
+  useEffect(() => {
+    async function fetch() {
+      const client = generateClient();
+      const res = await client.graphql({
+        query: getExpenseQuery,
+        variables: { id },
+      });
+      const data = res.data.getExpense;
+      const liRes = await client.graphql({
+        query: listLineItems,
+        variables: { filter: { expenseID: { eq: id } }, limit: 1000 },
+      });
+      const items = liRes.data.listLineItems.items;
+      setExpense({
+        id: data.id,
+        vendor: data.vendor,
+        date: data.date,
+        description: data.description,
+        receiptImageKey: data.receiptImageKey,
+        lineItems: items.map((li) => ({
+          item: li.item,
+          category: li.category,
+          unitCost: li.unitCost.toString(),
+          quantity: li.quantity.toString(),
+        })),
+      });
+    }
+    fetch();
+  }, [id]);
+
+  if (!expense) return <div>Loading...</div>;
+  return <ExpenseForm defaultValues={expense} onValidSubmit={onSubmit} />;
+}
+
 function AppInner() {
   const [authChecked, setAuthChecked] = useState(false);
   const [fetchedExpenses, setFetchedExpenses] = useState([]);
@@ -90,7 +129,6 @@ function AppInner() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAction, setDeleteAction] = useState(() => {});
   const [deleteMessage, setDeleteMessage] = useState("");
-  const expenseFormRef = useRef(null);
   const incomeFormRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -209,9 +247,12 @@ function AppInner() {
       if (validatedFormData.receiptFile && validatedFormData.receiptFile[0]) {
         if (receiptImageKey) {
           try {
-            await fetch(`https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/${receiptImageKey}`, {
-              method: "DELETE",
-            });
+            await fetch(
+              `https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/${receiptImageKey}`,
+              {
+                method: "DELETE",
+              }
+            );
           } catch (deleteErr) {
             console.warn("Failed to delete old image:", deleteErr);
           }
@@ -349,8 +390,7 @@ function AppInner() {
       setConfirmMessage("");
       setConfirmAction(() => {});
       setShowConfirmModal(false);
-      expenseFormRef.current?.resetForm();
-      navigate(-1)
+      navigate(-1);
     }
   };
 
@@ -551,14 +591,12 @@ function AppInner() {
           />
           <Route
             path="add-expense"
-            element={
-              <ExpenseForm
-                ref={expenseFormRef}
-                onValidSubmit={handleExpenseSubmit}
-              />
-            }
+            element={<ExpenseForm onValidSubmit={handleExpenseSubmit} />}
           />
-          <Route path="edit-expense/:id" element={<EditExpense />} />
+          <Route
+            path="edit-expense/:id"
+            element={<EditExpenseWrapper onSubmit={handleExpenseSubmit} />}
+          />{" "}
           <Route
             path="income"
             element={

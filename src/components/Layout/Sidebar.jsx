@@ -175,19 +175,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           ),
           route: "/dashboard/inventory",
         },
-        //{
-        //  label: "Data Migration Tool",
-        //  icon: () => <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-purple-600" />,
-        //route: "/dashboard/admin/migrate",
-        //},
-        {
-          label: "Homepage",
-          icon: () => (
-            <img src={Icon} alt="Logo" className="w-5 h-5 object-contain" />
-          ),
-          route: "/",
-        },
-        //{ label: "Debug", icon: PlusIcon, route: "/util/debug", color: "text-red-300"},
       ],
     },
   ];

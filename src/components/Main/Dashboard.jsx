@@ -15,7 +15,6 @@ import {
 import { generateClient } from "aws-amplify/api";
 import { useNavigate } from "react-router-dom";
 import { listIncomes } from "@/graphql/queries";
-import { useLoading } from "../../context/LoadingContext";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 import { LIST_EXPENSES_WITH_LINE_ITEMS } from "../../graphql/customQueries";
 
@@ -51,7 +50,6 @@ export default function Dashboard() {
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [recentIncomes, setRecentIncomes] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
-  const { setIsLoading } = useLoading();
   const client = generateClient();
   const navigate = useNavigate();
 
@@ -68,7 +66,6 @@ export default function Dashboard() {
         setIncomes,
         setRecentExpenses,
         setRecentIncomes,
-        setIsLoading
       );
     })();
   }, []);
@@ -80,9 +77,7 @@ export default function Dashboard() {
     setIncomes,
     setRecentExpenses,
     setRecentIncomes,
-    setIsLoading
   ) => {
-    setIsLoading(true);
     try {
       const expenseRes = await client.graphql({
         query: LIST_EXPENSES_WITH_LINE_ITEMS,
@@ -134,7 +129,6 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -239,7 +233,7 @@ const aggregateData = (groupBy, expenses = [], incomes = []) => {
 const getExpenseCategoryData = (expenses = []) => {
   const map = {};
   expenses.forEach((exp) => {
-    const items = exp.lineItems || []; // no .items
+    const items = exp.lineItems || [];
     items.forEach((li) => {
       const cat = li.category || "Uncategorized";
       map[cat] = (map[cat] || 0) + (li.lineTotal || 0);

@@ -22,9 +22,8 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     );
   }, [mergedExpenses]);
 
-  // 🔄 Merge LineItems into Expenses on mount/update
   React.useEffect(() => {
-    if (expenses.length === 0) return;
+    if (!expenses.length) return;
 
     const fetchLineItemsAndMerge = async () => {
       try {

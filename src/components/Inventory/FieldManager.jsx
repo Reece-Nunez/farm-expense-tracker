@@ -37,7 +37,7 @@ const FieldManager = () => {
         query: listFields,
         variables: { filter: { sub: { eq: sub } } }
       });
-      
+
       setFields(result.data.listFields.items);
     } catch (error) {
       console.error("Error fetching fields:", error);
@@ -50,7 +50,7 @@ const FieldManager = () => {
         query: listLivestocks,
         variables: { filter: { sub: { eq: sub } } }
       });
-      
+
       setLivestock(result.data.listLivestocks.items);
     } catch (error) {
       console.error("Error fetching livestock:", error);
@@ -80,7 +80,7 @@ const FieldManager = () => {
       } else {
         await client.graphql({ query: createFieldMutation, variables: { input } });
       }
-      
+
 
       setFieldForm({ name: "", acres: "", notes: "" });
       setEditingId(null);
@@ -102,7 +102,7 @@ const FieldManager = () => {
         query: deleteFieldMutation,
         variables: { input: { id } }
       });
-            const user = await getCurrentUser();
+      const user = await getCurrentUser();
       await fetchFields(user.id);
     } catch (err) {
       console.error("Error deleting field:", err);
@@ -129,29 +129,52 @@ const FieldManager = () => {
         </button>
       </div>
 
-      <h3 className="text-xl font-semibold mb-2">All Fields</h3>
-      <div className="space-y-4">
+      <h3 className="text-xl font-semibold mb-4">All Fields</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {fields.map((field) => {
           const fieldLivestock = getLivestockInField(field.id);
           return (
-            <div key={field.id} className="bg-white border rounded-lg p-4 shadow">
-              <div className="flex justify-between items-center">
+            <div key={field.id} className="bg-white border rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+              <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="text-lg font-bold">{field.name}</h4>
-                  <p className="text-sm text-gray-600">{field.acres} acres</p>
-                  {field.notes && <p className="text-sm text-gray-500 mt-1 italic">{field.notes}</p>}
+                  <h4 className="text-lg font-bold text-green-800 mb-1">{field.name}</h4>
+                  <p className="text-sm text-gray-700">{field.acres} acres</p>
+                  {field.notes && (
+                    <p className="text-xs text-gray-500 italic mt-1">{field.notes}</p>
+                  )}
                 </div>
-                <div className="space-x-2">
-                  <button onClick={() => handleEdit(field)} className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
-                  <button onClick={() => handleDelete(field.id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+
+                <div className="flex flex-col items-end space-y-1">
+                  <button
+                    onClick={() => handleEdit(field)}
+                    className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(field.id)}
+                    className="text-xs px-3 py-1 bg-red-100 text-red-700 rounded-full hover:bg-red-200"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
+
               {fieldLivestock.length > 0 && (
-                <div className="mt-4">
-                  <h5 className="text-sm font-semibold">Livestock in this Field:</h5>
-                  <ul className="list-disc list-inside text-sm text-gray-700">
+                <div className="mt-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <h5 className="text-sm font-semibold text-gray-800">
+                      Livestock Assigned
+                    </h5>
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
+                      {fieldLivestock.length} animal{fieldLivestock.length !== 1 && "s"}
+                    </span>
+                  </div>
+                  <ul className="text-sm text-gray-600 list-disc list-inside">
                     {fieldLivestock.map((animal) => (
-                      <li key={animal.id}>{animal.name} ({animal.species})</li>
+                      <li key={animal.id}>
+                        {animal.name} ({animal.species})
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -160,6 +183,7 @@ const FieldManager = () => {
           );
         })}
       </div>
+
 
       <button className="mt-4 px-4 mx-2 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => navigate(-1)}>
         Back To Inventory
