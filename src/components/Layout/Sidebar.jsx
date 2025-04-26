@@ -24,7 +24,7 @@ import { getCurrentUser } from "../../utils/getCurrentUser";
 
 const defaultProfileImage = "https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/profile-pictures/default.jpg";
 
-export default function Sidebar({ onCloseSidebar = () => {} }) {
+export default function Sidebar({ onCloseSidebar = () => { } }) {
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
@@ -179,6 +179,14 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
     },
   ];
 
+  const [expandedGroups, setExpandedGroups] = useState(() => {
+    const initialState = {};
+    groupedNavItems.forEach(group => {
+      initialState[group.label] = true;
+    });
+    return initialState;
+  });
+
   // Helper for nav clicks
   const handleNavClick = (route) => {
     navigate(route);
@@ -186,56 +194,57 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
   };
 
   return (
-    <div className="flex flex-col h-full justify-between overflow-y-auto">
-      {/* Profile display */}
-      {/* Profile display */}
-      <div className="p-4 border-b border-gray-200">
-        <button
-          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-          className="flex flex-col items-center w-full focus:outline-none"
-        >
-          <img
-            src={profileImageUrl}
-            alt="Profile"
-            className="w-16 h-16 rounded-full object-cover mb-1"
-          />
-          <p className="text-sm font-medium">Hi, {farmName}</p>
-          <ChevronDownIcon
-            className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${
-              profileMenuOpen ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+    <div className="flex flex-col min-h-screen max-h-screen overflow-hidden">
+      <div className="flex-shrink-0">
 
-        {profileMenuOpen && (
-          <div className="mt-3 space-y-2">
-            <button
-              onClick={() => handleNavClick("/dashboard/profile")}
-              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-            >
-              <UserIcon className="w-5 h-5" />
-              <span>Profile</span>
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-red-500 hover:bg-red-600"
-            >
-              <LogoutIcon className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        )}
-      </div>
+        {/* Profile display */}
+        <div className="p-4 sm:p-2 border-b border-gray-200">
+          <button
+            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+            className="flex flex-col items-center w-full focus:outline-none"
+          >
+            <img
+              src={profileImageUrl}
+              alt="Profile"
+              className="w-16 h-16 rounded-full object-cover mb-1"
+            />
+            <p className="text-sm font-medium">Hi, {farmName}</p>
+            <ChevronDownIcon
+              className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${profileMenuOpen ? "rotate-180" : ""
+                }`}
+            />
+          </button>
 
-      {/* App Name */}
-      <div className="p-4 border-b border-gray-200 text-xl font-bold">
-        <a href="/" className="flex-shrink-0">
-          <img src={Logo} alt="AgTrackr Logo" className="h-10 sm:h-12" />
-        </a>
+          {profileMenuOpen && (
+            <div className="mt-3 space-y-2">
+              <button
+                onClick={() => handleNavClick("/dashboard/profile")}
+                className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <UserIcon className="w-5 h-5" />
+                <span>Profile</span>
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-white bg-red-500 hover:bg-red-600"
+              >
+                <LogoutIcon className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* App Name */}
+        <div className="p-4 border-b border-gray-200 text-xl font-bold">
+          <a href="/" className="flex-shrink-0">
+            <img src={Logo} alt="AgTrackr Logo" className="h-10 sm:h-12" />
+          </a>
+        </div>
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         <button
           onClick={() => handleNavClick("/dashboard")}
           className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
@@ -247,15 +256,21 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           <span>Dashboard</span>
         </button>
         {groupedNavItems.map((group, groupIdx) => {
-          const [expanded, setExpanded] = useState(true); // expand by default, or toggle for collapsed
-          const isExpanded = expanded; // You could persist state per-group with a more complex setup
+          const isExpanded = expandedGroups[group.label];
+          const toggleGroup = () => {
+            setExpandedGroups(prev => ({
+              ...prev,
+              [group.label]: !prev[group.label]
+            }));
+          };
+
 
           return (
             <div key={group.label}>
               {/* Group Label */}
               <button
                 className="flex justify-between items-center w-full text-left text-sm font-semibold text-gray-600 mb-1"
-                onClick={() => setExpanded(!expanded)}
+                onClick={toggleGroup}
               >
                 <span>{group.label}</span>
                 {isExpanded ? (
@@ -264,6 +279,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
                   <ChevronRightIcon className="w-4 h-4 text-gray-500" />
                 )}
               </button>
+
 
               {/* Group Items */}
               {isExpanded && (

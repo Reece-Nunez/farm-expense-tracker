@@ -93,7 +93,8 @@ type Livestock @model
   birthdate: AWSDate
   weight: Float
   gender: String
-  status: String 
+  status: String
+  notes: String 
   fieldID: ID @index(name: "byField")
   location: Field @belongsTo(fields: ["fieldID"])
   parents: [LivestockFamily] @hasMany(indexName: "byChild", fields: ["id"])

@@ -33,6 +33,7 @@ export default function LivestockUpdateForm(props) {
     weight: "",
     gender: "",
     status: "",
+    notes: "",
   };
   const [sub, setSub] = React.useState(initialValues.sub);
   const [name, setName] = React.useState(initialValues.name);
@@ -42,6 +43,7 @@ export default function LivestockUpdateForm(props) {
   const [weight, setWeight] = React.useState(initialValues.weight);
   const [gender, setGender] = React.useState(initialValues.gender);
   const [status, setStatus] = React.useState(initialValues.status);
+  const [notes, setNotes] = React.useState(initialValues.notes);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = livestockRecord
@@ -55,6 +57,7 @@ export default function LivestockUpdateForm(props) {
     setWeight(cleanValues.weight);
     setGender(cleanValues.gender);
     setStatus(cleanValues.status);
+    setNotes(cleanValues.notes);
     setErrors({});
   };
   const [livestockRecord, setLivestockRecord] =
@@ -83,6 +86,7 @@ export default function LivestockUpdateForm(props) {
     weight: [],
     gender: [],
     status: [],
+    notes: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -118,6 +122,7 @@ export default function LivestockUpdateForm(props) {
           weight: weight ?? null,
           gender: gender ?? null,
           status: status ?? null,
+          notes: notes ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -186,6 +191,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.sub ?? value;
@@ -217,6 +223,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -248,6 +255,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.species ?? value;
@@ -279,6 +287,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.breed ?? value;
@@ -311,6 +320,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.birthdate ?? value;
@@ -346,6 +356,7 @@ export default function LivestockUpdateForm(props) {
               weight: value,
               gender,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.weight ?? value;
@@ -377,6 +388,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender: value,
               status,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.gender ?? value;
@@ -408,6 +420,7 @@ export default function LivestockUpdateForm(props) {
               weight,
               gender,
               status: value,
+              notes,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -421,6 +434,38 @@ export default function LivestockUpdateForm(props) {
         errorMessage={errors.status?.errorMessage}
         hasError={errors.status?.hasError}
         {...getOverrideProps(overrides, "status")}
+      ></TextField>
+      <TextField
+        label="Notes"
+        isRequired={false}
+        isReadOnly={false}
+        value={notes}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub,
+              name,
+              species,
+              breed,
+              birthdate,
+              weight,
+              gender,
+              status,
+              notes: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.notes ?? value;
+          }
+          if (errors.notes?.hasError) {
+            runValidationTasks("notes", value);
+          }
+          setNotes(value);
+        }}
+        onBlur={() => runValidationTasks("notes", notes)}
+        errorMessage={errors.notes?.errorMessage}
+        hasError={errors.notes?.hasError}
+        {...getOverrideProps(overrides, "notes")}
       ></TextField>
       <Flex
         justifyContent="space-between"
