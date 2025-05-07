@@ -22,9 +22,10 @@ import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
 import { getCurrentUser } from "../../utils/getCurrentUser";
 
-const defaultProfileImage = "https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/profile-pictures/default.jpg";
+const defaultProfileImage =
+  "https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/profile-pictures/default.jpg";
 
-export default function Sidebar({ onCloseSidebar = () => { } }) {
+export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
@@ -181,7 +182,7 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
 
   const [expandedGroups, setExpandedGroups] = useState(() => {
     const initialState = {};
-    groupedNavItems.forEach(group => {
+    groupedNavItems.forEach((group) => {
       initialState[group.label] = true;
     });
     return initialState;
@@ -196,7 +197,6 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
   return (
     <div className="flex flex-col min-h-screen max-h-screen overflow-hidden">
       <div className="flex-shrink-0">
-
         {/* Profile display */}
         <div className="p-4 sm:p-2 border-b border-gray-200">
           <button
@@ -210,8 +210,9 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
             />
             <p className="text-sm font-medium">Hi, {farmName}</p>
             <ChevronDownIcon
-              className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${profileMenuOpen ? "rotate-180" : ""
-                }`}
+              className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${
+                profileMenuOpen ? "rotate-180" : ""
+              }`}
             />
           </button>
 
@@ -236,9 +237,9 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
         </div>
 
         {/* App Name */}
-        <div className="p-4 border-b border-gray-200 text-xl font-bold">
-          <a href="/" className="flex-shrink-0">
-            <img src={Logo} alt="AgTrackr Logo" className="h-10 sm:h-12" />
+        <div className="p-4 border-b border-gray-200">
+          <a href="/" className="flex justify-center items-center">
+            <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-14" />
           </a>
         </div>
       </div>
@@ -258,12 +259,11 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
         {groupedNavItems.map((group, groupIdx) => {
           const isExpanded = expandedGroups[group.label];
           const toggleGroup = () => {
-            setExpandedGroups(prev => ({
+            setExpandedGroups((prev) => ({
               ...prev,
-              [group.label]: !prev[group.label]
+              [group.label]: !prev[group.label],
             }));
           };
-
 
           return (
             <div key={group.label}>
@@ -279,7 +279,6 @@ export default function Sidebar({ onCloseSidebar = () => { } }) {
                   <ChevronRightIcon className="w-4 h-4 text-gray-500" />
                 )}
               </button>
-
 
               {/* Group Items */}
               {isExpanded && (
