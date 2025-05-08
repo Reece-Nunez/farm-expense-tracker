@@ -13,7 +13,7 @@ export const incomeSchema = z.object({
 
   paymentMethod: z.string().min(1, "Payment method is required"),
 
-  item: z.enum(["Eggs", "Beef", "Pork", "Other"], {
+  item: z.enum(["Eggs", "Beef", "Pork", "Animal", "Other"], {
     errorMap: () => ({ message: "Invalid item sold" }),
   }),
 

@@ -6,6 +6,7 @@ import { updateIncome as updateIncomeMutation } from "../../graphql/mutations";
 import IncomeForm from "./IncomeForm";
 import { toast } from "react-hot-toast";
 import GenericModal from "../Util/GenericModal";
+import { Button } from "@/components/ui/button";
 
 export default function EditIncome() {
   const { id } = useParams();
@@ -31,7 +32,16 @@ export default function EditIncome() {
           navigate("/dashboard/income");
           return;
         }
-        setCurrentIncome(found);
+
+        // Transform data to match form structure
+        const transformed = {
+          ...found,
+          date: found.date ? new Date(found.date) : null,
+          pricePerUnit: found.price?.toString() ?? "",
+          weightOrQuantity: found.quantity?.toString() ?? "",
+        };
+
+        setCurrentIncome(transformed);
       } catch (error) {
         toast.error("Error fetching income record.");
         console.error("[EditIncome] fetch error:", error);
@@ -70,7 +80,7 @@ export default function EditIncome() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-8">
+    <div className="max-w-xxl mx-auto p-8">
       <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow duration-300">
         <h2 className="text-3xl font-bold text-center mb-6">Edit Income</h2>
         <IncomeForm
@@ -78,7 +88,16 @@ export default function EditIncome() {
           editingIncome={currentIncome}
           onValidSubmit={handleUpdateIncome}
         />
+        <div className="mt-6 flex justify-center">
+          <Button
+            onClick={() => navigate("/dashboard/income")}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            Back to Income
+          </Button>
+        </div>
       </div>
+
       {showConfirm && (
         <GenericModal
           isOpen={showConfirm}
