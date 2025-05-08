@@ -15,7 +15,7 @@ import { incomeSchema } from "@/schemas/incomeSchema";
 import { CalendarIcon } from "@heroicons/react/outline";
 
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
-const itemsSold = ["Eggs", "Beef", "Pork", "Other"];
+const itemsSold = ["Eggs", "Beef", "Pork", "Animal", "Other"];
 
 const IncomeForm = forwardRef((props, ref) => {
   const { onValidSubmit, editingIncome } = props;
