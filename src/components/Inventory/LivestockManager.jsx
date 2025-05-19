@@ -35,8 +35,12 @@ const LivestockManager = () => {
     locationId: "",
   });
   const [selectedParents, setSelectedParents] = useState([]);
-
+  const [showArchived, setShowArchived] = useState(false);
   const navigate = useNavigate();
+
+  const filteredLivestock = showArchived
+    ? livestock.filter((a) => a.status === "Sold" || a.status === "Butchered")
+    : livestock.filter((a) => a.status !== "Sold" && a.status !== "Butchered");
 
   useEffect(() => {
     const init = async () => {
@@ -60,15 +64,13 @@ const LivestockManager = () => {
         limit: 1000,
       },
     });
-    const enriched = data.listLivestocks.items
-      .filter((a) => a.status !== "Sold" && a.status !== "Butchered")
-      .map((animal) => ({
-        ...animal,
-        age: animal.birthdate
-          ? formatDistanceToNowStrict(parseISO(animal.birthdate))
-          : "Unknown",
-        location: fields.find((f) => f.id === animal.fieldID) || null,
-      }));
+    const enriched = data.listLivestocks.items.map((animal) => ({
+      ...animal,
+      age: animal.birthdate
+        ? formatDistanceToNowStrict(parseISO(animal.birthdate))
+        : "Unknown",
+      location: fields.find((f) => f.id === animal.fieldID) || null,
+    }));
     setLivestock(enriched);
   };
 
@@ -151,13 +153,6 @@ const LivestockManager = () => {
             })
           )
         );
-        if (input.status === "Sold" || input.status === "Butchered") {
-          await client.graphql({
-            query: deleteLivestock,
-            variables: { input: { id: input.id } },
-          });
-          return;
-        }
       } else {
         const { data } = await client.graphql({
           query: `
@@ -440,8 +435,49 @@ const LivestockManager = () => {
 
       {/* -------- TABLE -------- */}
       <h3 className="text-xl font-semibold mb-2">Current Livestock</h3>
+      <div className="flex gap-4 mb-4">
+        <button
+          className={`px-4 py-2 rounded border font-medium ${
+            !showArchived
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-800"
+          }`}
+          onClick={() => setShowArchived(false)}
+        >
+          Active Livestock
+          <span className="ml-2 text-sm text-blue-200">
+            (
+            {
+              livestock.filter(
+                (a) => a.status !== "Sold" && a.status !== "Butchered"
+              ).length
+            }
+            )
+          </span>
+        </button>
+        <button
+          className={`px-4 py-2 rounded border font-medium ${
+            showArchived
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-800"
+          }`}
+          onClick={() => setShowArchived(true)}
+        >
+          Archived
+          <span className="ml-2 text-sm text-blue-200">
+            (
+            {
+              livestock.filter(
+                (a) => a.status === "Sold" || a.status === "Butchered"
+              ).length
+            }
+            )
+          </span>
+        </button>
+      </div>
+
       <ResponsiveLivestockTable
-        livestock={livestock}
+        livestock={filteredLivestock}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onView={handleViewProfile}

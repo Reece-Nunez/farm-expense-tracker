@@ -9,7 +9,7 @@ import {
   listInventoryItems,
   listEggLogs,
   listLineItems,
-  getExpense
+  getExpense,
 } from "../../graphql/queries";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,8 +34,18 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format, parseISO, getWeek, isValid } from "date-fns";
+import Modal from "../Util/Modal";
+import { createEggLog as createEggLogMutation } from "@/graphql/mutations";
+import { Button } from "@/components/ui/button";
 
-const CHICKEN_FEED_KEYWORDS = ["chicken feed", "poultry grain", "laying pellets", "scratch", "hens feed", "layer pellet"];
+const CHICKEN_FEED_KEYWORDS = [
+  "chicken feed",
+  "poultry grain",
+  "laying pellets",
+  "scratch",
+  "hens feed",
+  "layer pellet",
+];
 
 const InventoryDashboard = () => {
   const navigate = useNavigate();
@@ -55,22 +65,15 @@ const InventoryDashboard = () => {
   const [selectedType, setSelectedType] = useState("All");
   const [feedExpenses, setFeedExpenses] = useState([]);
   const [eggLogs, setEggLogs] = useState([]);
+  const [showEggModal, setShowEggModal] = useState(false);
+  const [eggForm, setEggForm] = useState({
+    flockId: "",
+    date: "",
+    eggsCollected: "",
+  });
+  const [flocks, setFlocks] = useState([]);
 
-  const inventoryTypes = useMemo(() => {
-    const uniqueTypes = [...new Set(analytics.items.map(item => item.type))];
-    return ["All", ...uniqueTypes];
-  }, [analytics.items]);
-
-  const filteredItems = useMemo(() => {
-    const items = [...analytics.items].sort((a, b) => a.quantity - b.quantity); // sort by quantity
-    return selectedType === "All"
-      ? items
-      : items.filter((item) => item.type === selectedType);
-  }, [analytics.items, selectedType]);
-
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
+  const fetchAnalytics = async () => {
       try {
         const user = await getCurrentUser();
         const sub = user?.attributes?.sub || user?.sub;
@@ -88,7 +91,7 @@ const InventoryDashboard = () => {
           fieldsData,
           itemsData,
           eggLogsData,
-          lineItemsData
+          lineItemsData,
         ] = await Promise.all([
           client.graphql({
             query: listLivestocks,
@@ -112,22 +115,31 @@ const InventoryDashboard = () => {
           }),
           client.graphql({
             query: listLineItems,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 }
+            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
           }),
         ]);
 
         const eggLogs = eggLogsData?.data?.listEggLogs?.items || [];
         setEggLogs(eggLogs);
 
-        const feedLines = lineItemsData.data.listLineItems.items.filter(item =>
-          CHICKEN_FEED_KEYWORDS.some(keyword => item.item?.toLowerCase().includes(keyword))
+        const feedLines = lineItemsData.data.listLineItems.items.filter(
+          (item) =>
+            CHICKEN_FEED_KEYWORDS.some((keyword) =>
+              item.item?.toLowerCase().includes(keyword)
+            )
         );
 
         const detailedFeedExpenses = [];
         for (const item of feedLines) {
-          const { data } = await client.graphql({ query: getExpense, variables: { id: item.expenseID } });
+          const { data } = await client.graphql({
+            query: getExpense,
+            variables: { id: item.expenseID },
+          });
           if (data.getExpense) {
-            detailedFeedExpenses.push({ date: data.getExpense.date, cost: item.lineTotal });
+            detailedFeedExpenses.push({
+              date: data.getExpense.date,
+              cost: item.lineTotal,
+            });
           }
         }
         setFeedExpenses(detailedFeedExpenses);
@@ -160,7 +172,6 @@ const InventoryDashboard = () => {
           return acc;
         }, {});
 
-
         setAnalytics({
           livestock: livestock.length,
           livestockBySpecies,
@@ -177,16 +188,58 @@ const InventoryDashboard = () => {
       }
     };
 
+  const inventoryTypes = useMemo(() => {
+    const uniqueTypes = [...new Set(analytics.items.map((item) => item.type))];
+    return ["All", ...uniqueTypes];
+  }, [analytics.items]);
+
+  const filteredItems = useMemo(() => {
+    const items = [...analytics.items].sort((a, b) => a.quantity - b.quantity);
+    return selectedType === "All"
+      ? items
+      : items.filter((item) => item.type === selectedType);
+  }, [analytics.items, selectedType]);
+
+  const fetchFlocks = async () => {
+    const user = await getCurrentUser();
+    const client = generateClient();
+    const { data } = await client.graphql({
+      query: listChickenFlocks,
+      variables: { filter: { sub: { eq: user.sub } }, limit: 1000 },
+    });
+    setFlocks(data.listChickenFlocks.items);
+  };
+
+  const handleSubmitEggLog = async () => {
+    const user = await getCurrentUser();
+    const client = generateClient();
+    try {
+      await client.graphql({
+        query: createEggLogMutation,
+        variables: {
+          input: {
+            chickenFlockID: eggForm.flockId,
+            date: eggForm.date,
+            eggsCollected: parseInt(eggForm.eggsCollected),
+            sub: user.sub,
+          },
+        },
+      });
+
+      // Clear form + close modal
+      setEggForm({ flockId: "", date: "", eggsCollected: "" });
+      setShowEggModal(false);
+
+      // 👇 Refresh dashboard analytics after submission
+      fetchAnalytics();
+    } catch (err) {
+      console.error("Failed to log egg:", err);
+    }
+  };
+
+  useEffect(() => {
     fetchAnalytics();
   }, []);
-
-  const getWeekString = (dateStr) => {
-    const date = new Date(dateStr);
-    const firstJan = new Date(date.getFullYear(), 0, 1);
-    const days = Math.floor((date - firstJan) / (24 * 60 * 60 * 1000));
-    const week = Math.ceil((days + firstJan.getDay() + 1) / 7);
-    return `${date.getFullYear()}-W${week.toString().padStart(2, "0")}`;
-  };
 
   const getKeyByTimeRange = (dateStr, groupBy) => {
     if (!dateStr) return "";
@@ -208,19 +261,19 @@ const InventoryDashboard = () => {
   const feedChartData = useMemo(() => {
     const dates = new Set();
 
-    feedExpenses.forEach(exp => dates.add(getKeyByTimeRange(exp.date, view)));
-    eggLogs.forEach(log => dates.add(getKeyByTimeRange(log.date, view)));
+    feedExpenses.forEach((exp) => dates.add(getKeyByTimeRange(exp.date, view)));
+    eggLogs.forEach((log) => dates.add(getKeyByTimeRange(log.date, view)));
 
     const sortedDates = Array.from(dates).sort();
 
     const feedMap = {};
-    feedExpenses.forEach(exp => {
+    feedExpenses.forEach((exp) => {
       const key = getKeyByTimeRange(exp.date, view);
       feedMap[key] = (feedMap[key] || 0) + exp.cost;
     });
 
     const eggMap = {};
-    eggLogs.forEach(log => {
+    eggLogs.forEach((log) => {
       const key = getKeyByTimeRange(log.date, view);
       eggMap[key] = (eggMap[key] || 0) + log.eggsCollected;
     });
@@ -228,19 +281,20 @@ const InventoryDashboard = () => {
     let cumulativeFeed = 0;
     let cumulativeEggs = 0;
 
-    return sortedDates.map(date => {
+    return sortedDates.map((date) => {
       cumulativeFeed += feedMap[date] || 0;
       cumulativeEggs += eggMap[date] || 0;
 
       return {
         period: date,
         feedCost: parseFloat(cumulativeFeed.toFixed(2)),
-        costPerEgg: cumulativeEggs > 0 ? parseFloat((cumulativeFeed / cumulativeEggs).toFixed(2)) : 0
+        costPerEgg:
+          cumulativeEggs > 0
+            ? parseFloat((cumulativeFeed / cumulativeEggs).toFixed(2))
+            : 0,
       };
     });
   }, [feedExpenses, eggLogs, view]);
-
-
 
   const aggregateData = (groupBy, expenses = [], incomes = []) => {
     const dataMap = {};
@@ -286,9 +340,9 @@ const InventoryDashboard = () => {
       }));
   }, [analytics.eggsPerDay, view]);
 
-  const chartData = feedExpenses.map(exp => ({
+  const chartData = feedExpenses.map((exp) => ({
     date: new Date(exp.expenseDate).toLocaleDateString(),
-    feedCost: exp.lineTotal
+    feedCost: exp.lineTotal,
   }));
 
   return (
@@ -296,7 +350,6 @@ const InventoryDashboard = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">
         Farm Inventory Dashboard
       </h1>
-
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div
           className="bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
@@ -311,15 +364,35 @@ const InventoryDashboard = () => {
         </div>
 
         <div
-          className="bg-yellow-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400"
-          onClick={() => navigate("/dashboard/inventory/chickens")}
+          className="relative group bg-yellow-200 p-4 rounded-lg text-center shadow 
+             cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400"
         >
-          <FontAwesomeIcon
-            icon={faCrow}
-            className="text-yellow-600 text-2xl mb-2"
-          />
-          <p className="font-bold text-lg">{analytics.chickens}</p>
-          <p className="text-sm">Chicken Flocks</p>
+          <div
+            onClick={() => navigate("/dashboard/inventory/chickens")}
+            className="cursor-pointer"
+          >
+            <FontAwesomeIcon
+              icon={faCrow}
+              className="text-yellow-600 text-2xl mb-2"
+            />
+            <p className="font-bold text-lg">{analytics.chickens}</p>
+            <p className="text-sm">Chicken Flocks</p>
+          </div>
+
+          {/* Log Egg button - doesn’t trigger navigate */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchFlocks();
+              setShowEggModal(true);
+            }}
+            className="mt-2 px-3 py-1 bg-yellow-100 text-black text-xs font-semibold rounded 
+       w-full sm:w-auto
+       opacity-100 md:opacity-0 md:group-hover:opacity-100 
+       transition-opacity duration-300"
+          >
+            🥚 Log Egg
+          </button>
         </div>
 
         <div
@@ -360,7 +433,6 @@ const InventoryDashboard = () => {
           <p className="text-sm">Total Acreage</p>
         </div>
       </div>
-
       {/* Egg Chart View Toggle + Chart */}
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <div className="flex justify-between items-center mb-4">
@@ -370,10 +442,11 @@ const InventoryDashboard = () => {
               <button
                 key={option}
                 onClick={() => setView(option)}
-                className={`px-3 py-1 rounded-full border text-sm font-medium ${view === option
-                  ? "bg-yellow-400 text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-                  }`}
+                className={`px-3 py-1 rounded-full border text-sm font-medium ${
+                  view === option
+                    ? "bg-yellow-400 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
               </button>
@@ -388,7 +461,7 @@ const InventoryDashboard = () => {
             <YAxis tickCount={6} />
             <Tooltip
               formatter={(value) => [`${value} eggs`, "Collected"]}
-              labelFormatter={label => {
+              labelFormatter={(label) => {
                 if (!label) return "";
                 try {
                   return "Date: " + format(parseISO(label), "MM-dd-yyyy");
@@ -410,7 +483,6 @@ const InventoryDashboard = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
       <div className="bg-gray-50 p-4 rounded border shadow mb-10">
         <h3 className="text-lg font-bold mb-4">Feed Expenses & Cost Per Egg</h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -419,20 +491,32 @@ const InventoryDashboard = () => {
             <XAxis dataKey="period" />
             <YAxis yAxisId="left" />
             <YAxis yAxisId="right" orientation="right" />
-            <Tooltip formatter={(value, name) => {
-              if (name.includes("Cost per Egg")) {
+            <Tooltip
+              formatter={(value, name) => {
+                if (name.includes("Cost per Egg")) {
+                  return [`$${value.toFixed(2)}`, name];
+                }
                 return [`$${value.toFixed(2)}`, name];
-              }
-              return [`$${value.toFixed(2)}`, name];
-            }} />
+              }}
+            />
             <Legend />
-            <Line yAxisId="left" type="monotone" dataKey="feedCost" stroke="#34d399" name="Feed Cost ($)" />
-            <Line yAxisId="right" type="monotone" dataKey="costPerEgg" stroke="#facc15" name="Cost per Egg ($)" />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="feedCost"
+              stroke="#34d399"
+              name="Feed Cost ($)"
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="costPerEgg"
+              stroke="#facc15"
+              name="Cost per Egg ($)"
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <h2 className="text-xl font-bold mb-6">Field Utilization</h2>
 
@@ -442,7 +526,9 @@ const InventoryDashboard = () => {
               key={name}
               className="bg-green-50 border border-green-200 p-4 rounded-lg shadow-sm hover:shadow-md transition"
             >
-              <h3 className="text-md font-semibold text-green-800 mb-1">{name}</h3>
+              <h3 className="text-md font-semibold text-green-800 mb-1">
+                {name}
+              </h3>
 
               <div className="flex justify-between items-center text-sm text-gray-700">
                 <div>
@@ -467,8 +553,6 @@ const InventoryDashboard = () => {
           ))}
         </div>
       </div>
-
-
       <div className="bg-white rounded-lg p-6 shadow mb-10">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Inventory Items</h2>
@@ -496,15 +580,56 @@ const InventoryDashboard = () => {
             />
           ))}
       </div>
-
-
-
       <div className="text-center mt-20 text-gray-600">
         <p>
           This feature is in early access, please be patient — we’d love your
           feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
         </p>
       </div>
+      <Modal
+        isOpen={showEggModal}
+        onClose={() => setShowEggModal(false)}
+        title="Log Egg Collection"
+      >
+        <div className="space-y-4">
+          <select
+            value={eggForm.flockId}
+            onChange={(e) =>
+              setEggForm({ ...eggForm, flockId: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Select Flock</option>
+            {flocks.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.breed} ({f.count})
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={eggForm.date}
+            onChange={(e) => setEggForm({ ...eggForm, date: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="number"
+            placeholder="Eggs Collected"
+            value={eggForm.eggsCollected}
+            onChange={(e) =>
+              setEggForm({ ...eggForm, eggsCollected: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+          <Button
+            onClick={handleSubmitEggLog}
+            className="bg-green-600 text-white w-full"
+          >
+            Submit
+          </Button>
+        </div>
+      </Modal>
+      ;
     </div>
   );
 };
@@ -512,7 +637,10 @@ const InventoryDashboard = () => {
 const InventoryItemGroup = ({ type, items }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const totalQuantity = items.reduce(
+    (sum, item) => sum + (item.quantity || 0),
+    0
+  );
 
   const isLowStock = () => {
     if (type === "Feed" && totalQuantity < 50) return true;
@@ -550,7 +678,9 @@ const InventoryItemGroup = ({ type, items }) => {
             <li key={id} className="flex justify-between text-sm">
               <div>
                 <p className="font-medium">{name}</p>
-                {notes && <p className="text-gray-500 italic text-xs">{notes}</p>}
+                {notes && (
+                  <p className="text-gray-500 italic text-xs">{notes}</p>
+                )}
               </div>
               <span className="text-gray-500">Qty: {quantity}</span>
             </li>
@@ -560,6 +690,5 @@ const InventoryItemGroup = ({ type, items }) => {
     </div>
   );
 };
-
 
 export default InventoryDashboard;

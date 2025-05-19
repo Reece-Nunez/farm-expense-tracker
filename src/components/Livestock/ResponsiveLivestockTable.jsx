@@ -45,9 +45,21 @@ const ResponsiveLivestockTable = ({
                 </td>
                 <td className="border px-4 py-2">{getParents(animal.id)}</td>
                 <td className="border px-4 py-2">{getChildren(animal.id)}</td>
+
                 <td className="border px-4 py-2">
-                  {animal.status || "Active"}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      animal.status === "Sold"
+                        ? "bg-gray-300 text-gray-800"
+                        : animal.status === "Butchered"
+                        ? "bg-red-200 text-red-800"
+                        : "bg-green-200 text-green-800"
+                    }`}
+                  >
+                    {animal.status || "Active"}
+                  </span>
                 </td>
+
                 <td className="border px-4 py-2 whitespace-pre-wrap text-left">
                   {animal.notes || "None"}
                 </td>
@@ -108,9 +120,22 @@ const ResponsiveLivestockTable = ({
             <p>
               <strong>Offspring:</strong> {getChildren(animal.id)}
             </p>
+            
             <p>
-              <strong>Status:</strong> {animal.status || "Active"}
+              <strong>Status:</strong>{" "}
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  animal.status === "Sold"
+                    ? "bg-gray-300 text-gray-800"
+                    : animal.status === "Butchered"
+                    ? "bg-red-200 text-red-800"
+                    : "bg-green-200 text-green-800"
+                }`}
+              >
+                {animal.status || "Active"}
+              </span>
             </p>
+
             <p>
               <strong>Notes:</strong> {animal.notes || "None"}
             </p>
