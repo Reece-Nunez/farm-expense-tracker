@@ -190,7 +190,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
 
   // Helper for nav clicks
   const handleNavClick = (route) => {
-    window.location.href = route;
+    navigate(route);
     onCloseSidebar(); // call the prop if provided
   };
 

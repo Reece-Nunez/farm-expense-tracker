@@ -30,6 +30,7 @@ export const updateLivestockStatus = /* GraphQL */ `
     updateLivestock(input: $input) {
       id
       status
+      fieldID
     }
   }
 `;

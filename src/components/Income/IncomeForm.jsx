@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { incomeSchema } from "@/schemas/incomeSchema";
 import { CalendarIcon } from "@heroicons/react/outline";
+import { updateField } from "../../graphql/mutations";
 
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Animal", "Other"];
@@ -211,6 +212,7 @@ const IncomeForm = forwardRef((props, ref) => {
               input: {
                 id: finalObj.livestockID,
                 status: "Sold",
+                fieldID: null,
               },
             },
           });
