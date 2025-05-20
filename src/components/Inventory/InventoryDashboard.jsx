@@ -36,6 +36,7 @@ import {
 import { format, parseISO, getWeek, isValid } from "date-fns";
 import Modal from "../Util/Modal";
 import { createEggLog as createEggLogMutation } from "@/graphql/mutations";
+import { createLivestock as createLivestockMutation } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 
 const CHICKEN_FEED_KEYWORDS = [
@@ -72,121 +73,134 @@ const InventoryDashboard = () => {
     eggsCollected: "",
   });
   const [flocks, setFlocks] = useState([]);
+  const [showLivestockModal, setShowLivestockModal] = useState(false);
+  const [livestockForm, setLivestockForm] = useState({
+    name: "",
+    species: "",
+    breed: "",
+    birthdate: "",
+    weight: "",
+    gender: "",
+    locationId: "",
+    status: "",
+    notes: "",
+  });
+  const [livestock, setLivestock] = useState([]);
+  const [parentIDs, setParentIDs] = useState([]);
 
   const fetchAnalytics = async () => {
-      try {
-        const user = await getCurrentUser();
-        const sub = user?.attributes?.sub || user?.sub;
+    try {
+      const user = await getCurrentUser();
+      const sub = user?.attributes?.sub || user?.sub;
 
-        if (!sub) {
-          console.warn("No user sub found – skipping analytics fetch.");
-          return;
-        }
-
-        const client = generateClient();
-
-        const [
-          livestockData,
-          chickensData,
-          fieldsData,
-          itemsData,
-          eggLogsData,
-          lineItemsData,
-        ] = await Promise.all([
-          client.graphql({
-            query: listLivestocks,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-          client.graphql({
-            query: listChickenFlocks,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-          client.graphql({
-            query: listFields,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-          client.graphql({
-            query: listInventoryItems,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-          client.graphql({
-            query: listEggLogs,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-          client.graphql({
-            query: listLineItems,
-            variables: { filter: { sub: { eq: sub } }, limit: 1000 },
-          }),
-        ]);
-
-        const eggLogs = eggLogsData?.data?.listEggLogs?.items || [];
-        setEggLogs(eggLogs);
-
-        const feedLines = lineItemsData.data.listLineItems.items.filter(
-          (item) =>
-            CHICKEN_FEED_KEYWORDS.some((keyword) =>
-              item.item?.toLowerCase().includes(keyword)
-            )
-        );
-
-        const detailedFeedExpenses = [];
-        for (const item of feedLines) {
-          const { data } = await client.graphql({
-            query: getExpense,
-            variables: { id: item.expenseID },
-          });
-          if (data.getExpense) {
-            detailedFeedExpenses.push({
-              date: data.getExpense.date,
-              cost: item.lineTotal,
-            });
-          }
-        }
-        setFeedExpenses(detailedFeedExpenses);
-
-        const livestock = livestockData?.data?.listLivestocks?.items || [];
-        const chickens = chickensData?.data?.listChickenFlocks?.items || [];
-        const fields = fieldsData?.data?.listFields?.items || [];
-        const items = itemsData?.data?.listInventoryItems?.items || [];
-
-        const livestockBySpecies = livestock.reduce((acc, l) => {
-          acc[l.species] = (acc[l.species] || 0) + 1;
-          return acc;
-        }, {});
-
-        const totalAcres = fields.reduce(
-          (sum, field) => sum + (field.acres || 0),
-          0
-        );
-        const fieldAcreage = fields.map((f) => ({
-          name: f.name,
-          acres: f.acres || 0,
-        }));
-        const fieldUtilization = fields.map((f) => {
-          const count = livestock.filter((l) => l.fieldID === f.id).length;
-          return { name: f.name, acres: f.acres || 0, livestockCount: count };
-        });
-
-        const eggsPerDay = eggLogs.reduce((acc, log) => {
-          acc[log.date] = (acc[log.date] || 0) + (log.eggsCollected || 0);
-          return acc;
-        }, {});
-
-        setAnalytics({
-          livestock: livestock.length,
-          livestockBySpecies,
-          chickens: chickensData?.data?.listChickenFlocks?.items.length || 0,
-          fields: fields.length,
-          totalAcres,
-          fieldAcreage,
-          fieldUtilization,
-          eggsPerDay,
-          items: items,
-        });
-      } catch (error) {
-        console.error("Error fetching analytics:", error);
+      if (!sub) {
+        console.warn("No user sub found – skipping analytics fetch.");
+        return;
       }
-    };
+
+      const client = generateClient();
+
+      const [
+        livestockData,
+        chickensData,
+        fieldsData,
+        itemsData,
+        eggLogsData,
+        lineItemsData,
+      ] = await Promise.all([
+        client.graphql({
+          query: listLivestocks,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+        client.graphql({
+          query: listChickenFlocks,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+        client.graphql({
+          query: listFields,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+        client.graphql({
+          query: listInventoryItems,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+        client.graphql({
+          query: listEggLogs,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+        client.graphql({
+          query: listLineItems,
+          variables: { filter: { sub: { eq: sub } }, limit: 1000 },
+        }),
+      ]);
+
+      const eggLogs = eggLogsData?.data?.listEggLogs?.items || [];
+      setEggLogs(eggLogs);
+
+      const feedLines = lineItemsData.data.listLineItems.items.filter((item) =>
+        CHICKEN_FEED_KEYWORDS.some((keyword) =>
+          item.item?.toLowerCase().includes(keyword)
+        )
+      );
+
+      const detailedFeedExpenses = [];
+      for (const item of feedLines) {
+        const { data } = await client.graphql({
+          query: getExpense,
+          variables: { id: item.expenseID },
+        });
+        if (data.getExpense) {
+          detailedFeedExpenses.push({
+            date: data.getExpense.date,
+            cost: item.lineTotal,
+          });
+        }
+      }
+      setFeedExpenses(detailedFeedExpenses);
+
+      const livestock = livestockData?.data?.listLivestocks?.items || [];
+      const chickens = chickensData?.data?.listChickenFlocks?.items || [];
+      const fields = fieldsData?.data?.listFields?.items || [];
+      const items = itemsData?.data?.listInventoryItems?.items || [];
+
+      const livestockBySpecies = livestock.reduce((acc, l) => {
+        acc[l.species] = (acc[l.species] || 0) + 1;
+        return acc;
+      }, {});
+
+      const totalAcres = fields.reduce(
+        (sum, field) => sum + (field.acres || 0),
+        0
+      );
+      const fieldAcreage = fields.map((f) => ({
+        name: f.name,
+        acres: f.acres || 0,
+      }));
+      const fieldUtilization = fields.map((f) => {
+        const count = livestock.filter((l) => l.fieldID === f.id).length;
+        return { name: f.name, acres: f.acres || 0, livestockCount: count };
+      });
+
+      const eggsPerDay = eggLogs.reduce((acc, log) => {
+        acc[log.date] = (acc[log.date] || 0) + (log.eggsCollected || 0);
+        return acc;
+      }, {});
+
+      setAnalytics({
+        livestock: livestock.length,
+        livestockBySpecies,
+        chickens: chickensData?.data?.listChickenFlocks?.items.length || 0,
+        fields: fields.length,
+        totalAcres,
+        fieldAcreage,
+        fieldUtilization,
+        eggsPerDay,
+        items: items,
+      });
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+    }
+  };
 
   const inventoryTypes = useMemo(() => {
     const uniqueTypes = [...new Set(analytics.items.map((item) => item.type))];
@@ -200,14 +214,23 @@ const InventoryDashboard = () => {
       : items.filter((item) => item.type === selectedType);
   }, [analytics.items, selectedType]);
 
-  const fetchFlocks = async () => {
+  const fetchLivestockAndFlocks = async () => {
     const user = await getCurrentUser();
     const client = generateClient();
-    const { data } = await client.graphql({
-      query: listChickenFlocks,
-      variables: { filter: { sub: { eq: user.sub } }, limit: 1000 },
-    });
-    setFlocks(data.listChickenFlocks.items);
+
+    const [flocksData, livestockData] = await Promise.all([
+      client.graphql({
+        query: listChickenFlocks,
+        variables: { filter: { sub: { eq: user.sub } }, limit: 1000 },
+      }),
+      client.graphql({
+        query: listLivestocks,
+        variables: { filter: { sub: { eq: user.sub } }, limit: 1000 },
+      }),
+    ]);
+
+    setFlocks(flocksData.data.listChickenFlocks.items);
+    setLivestock(livestockData.data.listLivestocks.items);
   };
 
   const handleSubmitEggLog = async () => {
@@ -240,6 +263,63 @@ const InventoryDashboard = () => {
   useEffect(() => {
     fetchAnalytics();
   }, []);
+
+  const handleSubmitLivestock = async () => {
+    const user = await getCurrentUser();
+    const client = generateClient();
+
+    try {
+      const { data } = await client.graphql({
+        query: createLivestockMutation,
+        variables: {
+          input: {
+            ...livestockForm,
+            weight: parseFloat(livestockForm.weight),
+            sub: user.sub,
+            fieldID: livestockForm.locationId || null,
+            status: livestockForm.status || "Active",
+          },
+        },
+      });
+
+      const savedId = data.createLivestock.id;
+
+      // 🔗 Create parent links if any were selected
+      await Promise.all(
+        parentIDs.map((parentId) =>
+          client.graphql({
+            query: createLivestockFamily,
+            variables: {
+              input: {
+                parentID: parentId,
+                childID: savedId,
+                sub: user.sub,
+              },
+            },
+          })
+        )
+      );
+
+      // 🧼 Reset state
+      setParentIDs([]);
+      setLivestockForm({
+        name: "",
+        species: "",
+        breed: "",
+        birthdate: "",
+        weight: "",
+        gender: "",
+        locationId: "",
+        status: "",
+        notes: "",
+      });
+
+      setShowLivestockModal(false);
+      fetchAnalytics(); // Refresh dashboard
+    } catch (err) {
+      console.error("Failed to add livestock:", err);
+    }
+  };
 
   const getKeyByTimeRange = (dateStr, groupBy) => {
     if (!dateStr) return "";
@@ -352,7 +432,7 @@ const InventoryDashboard = () => {
       </h1>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div
-          className="bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
+          className="relative group bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
           onClick={() => navigate("/dashboard/inventory/livestock")}
         >
           <FontAwesomeIcon
@@ -361,6 +441,20 @@ const InventoryDashboard = () => {
           />
           <p className="font-bold text-lg">{analytics.livestock}</p>
           <p className="text-sm">Livestock</p>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchLivestockAndFlocks();
+              setShowLivestockModal(true);
+            }}
+            className="mt-2 px-3 py-1 bg-brown-100 text-black text-xs font-semibold rounded 
+      w-full sm:w-auto 
+      opacity-100 md:opacity-0 md:group-hover:opacity-100 
+      transition-opacity duration-300"
+          >
+            ➕ Add Animal
+          </button>
         </div>
 
         <div
@@ -383,7 +477,7 @@ const InventoryDashboard = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              fetchFlocks();
+              fetchLivestockAndFlocks();
               setShowEggModal(true);
             }}
             className="mt-2 px-3 py-1 bg-yellow-100 text-black text-xs font-semibold rounded 
@@ -586,6 +680,8 @@ const InventoryDashboard = () => {
           feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
         </p>
       </div>
+
+      {/* Egg Modal */}
       <Modal
         isOpen={showEggModal}
         onClose={() => setShowEggModal(false)}
@@ -629,7 +725,170 @@ const InventoryDashboard = () => {
           </Button>
         </div>
       </Modal>
-      ;
+
+      {/* Livestock Modal */}
+      <Modal
+        isOpen={showLivestockModal}
+        onClose={() => setShowLivestockModal(false)}
+        title="Add Livestock"
+      >
+        <div className="space-y-3">
+          <input
+            placeholder="Name"
+            value={livestockForm.name}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, name: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+
+          <select
+            value={livestockForm.species}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, species: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Select Species</option>
+            <option value="Cow">Cow</option>
+            <option value="Pig">Pig</option>
+            <option value="Goat">Goat</option>
+            <option value="Sheep">Sheep</option>
+          </select>
+
+          <input
+            placeholder="Breed"
+            value={livestockForm.breed}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, breed: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+
+          <input
+            type="date"
+            value={livestockForm.birthdate}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, birthdate: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+
+          <input
+            type="number"
+            placeholder="Weight (lbs)"
+            value={livestockForm.weight}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, weight: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+
+          <select
+            value={livestockForm.gender}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, gender: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+
+          <select
+            value={livestockForm.locationId}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, locationId: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Select Field (Optional)</option>
+            {analytics.fieldAcreage.map((f) => (
+              <option key={f.name} value={f.name}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex justify-between gap-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="status"
+                value="Sold"
+                checked={livestockForm.status === "Sold"}
+                onChange={() =>
+                  setLivestockForm({ ...livestockForm, status: "Sold" })
+                }
+              />
+              Sold
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="status"
+                value="Butchered"
+                checked={livestockForm.status === "Butchered"}
+                onChange={() =>
+                  setLivestockForm({ ...livestockForm, status: "Butchered" })
+                }
+              />
+              Butchered
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="status"
+                value=""
+                checked={!livestockForm.status}
+                onChange={() =>
+                  setLivestockForm({ ...livestockForm, status: "" })
+                }
+              />
+              Active
+            </label>
+          </div>
+
+          <textarea
+            placeholder="Notes (optional)"
+            value={livestockForm.notes}
+            onChange={(e) =>
+              setLivestockForm({ ...livestockForm, notes: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+          <div>
+            <label className="font-semibold text-sm mb-1 block">
+              Select Parent(s)
+            </label>
+            <select
+              multiple
+              value={parentIDs}
+              onChange={(e) =>
+                setParentIDs(
+                  [...e.target.selectedOptions].map((opt) => opt.value)
+                )
+              }
+              className="border p-2 rounded w-full"
+            >
+              {livestock.map((animal) => (
+                <option key={animal.id} value={animal.id}>
+                  {animal.name} ({animal.species})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Button
+            onClick={handleSubmitLivestock}
+            className="bg-green-600 text-white w-full"
+          >
+            Add Animal
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

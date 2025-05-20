@@ -20,6 +20,7 @@ import { toast } from "react-hot-toast";
 import Modal from "react-modal";
 import { signOut } from "@aws-amplify/auth";
 import { useLoading, LoadingProvider } from "./context/LoadingContext";
+import { deleteIncomeSafe } from "./graphql/customMutations";
 import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
 import {
   deleteExpense,
@@ -520,7 +521,7 @@ function AppInner() {
 
       try {
         await client.graphql({
-          query: deleteIncome,
+          query: deleteIncomeSafe,
           variables: { input: { id } },
         });
         setFetchedIncomes((prev) => prev.filter((i) => i.id !== id));

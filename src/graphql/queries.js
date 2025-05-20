@@ -169,6 +169,23 @@ export const getIncome = /* GraphQL */ `
       amount
       item
       notes
+      livestockID
+      livestock {
+        id
+        sub
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        status
+        notes
+        fieldID
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -193,6 +210,7 @@ export const listIncomes = /* GraphQL */ `
         amount
         item
         notes
+        livestockID
         createdAt
         updatedAt
         __typename
@@ -275,6 +293,10 @@ export const getLivestock = /* GraphQL */ `
         __typename
       }
       medicalRecords {
+        nextToken
+        __typename
+      }
+      incomes {
         nextToken
         __typename
       }
@@ -596,6 +618,42 @@ export const lineItemsByExpenseID = /* GraphQL */ `
     }
   }
 `;
+export const incomesBySub = /* GraphQL */ `
+  query IncomesBySub(
+    $sub: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelIncomeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    incomesBySub(
+      sub: $sub
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        sub
+        userId
+        date
+        quantity
+        price
+        paymentMethod
+        amount
+        item
+        notes
+        livestockID
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const incomesByUserId = /* GraphQL */ `
   query IncomesByUserId(
     $userId: ID!
@@ -622,6 +680,43 @@ export const incomesByUserId = /* GraphQL */ `
         amount
         item
         notes
+        livestockID
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const incomesByLivestock = /* GraphQL */ `
+  query IncomesByLivestock(
+    $livestockID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelIncomeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    incomesByLivestock(
+      livestockID: $livestockID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        sub
+        userId
+        date
+        quantity
+        price
+        paymentMethod
+        amount
+        item
+        notes
+        livestockID
         createdAt
         updatedAt
         __typename

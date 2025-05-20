@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PencilAltIcon, TrashIcon } from "@heroicons/react/outline";
+import { listIncomesWithLivestock } from "@/graphql/customQueries";
+import { generateClient } from "aws-amplify/api";
+import { getCurrentUser } from "../../utils/getCurrentUser";
 
-export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
+export default function IncomeTable({ onEdit, onDelete }) {
   const navigate = useNavigate();
+  const [incomes, setIncomes] = useState([]);
 
-  const sortedIncomes = React.useMemo(() => {
+  useEffect(() => {
+    const fetchIncome = async () => {
+      try {
+        const client = generateClient();
+        const user = await getCurrentUser();
+
+        const { data } = await client.graphql({
+          query: listIncomesWithLivestock,
+          variables: {
+            filter: { sub: { eq: user.sub } },
+            limit: 1000,
+          },
+        });
+
+        const incomeItems = data?.listIncomes?.items || [];
+        setIncomes(incomeItems);
+      } catch (err) {
+        console.error("Failed to fetch incomes:", err);
+      }
+    };
+
+    fetchIncome();
+  }, []);
+
+  const sortedIncomes = useMemo(() => {
     return [...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [incomes]);
 
@@ -51,26 +79,42 @@ export default function IncomeTable({ incomes = [], onEdit, onDelete }) {
                     </div>
                     <div>
                       <p className="text-gray-500 font-medium">💰 Total</p>
-                      <p className="font-bold text-green-600">${amount.toFixed(2)}</p>
+                      <p className="font-bold text-green-600">
+                        ${amount.toFixed(2)}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-medium">💳 Payment</p>
                       <p>{inc.paymentMethod || "-"}</p>
                     </div>
+
+                    {inc.livestock && (
+                      <div>
+                        <p className="text-gray-500 font-medium">🐮 Animal Sold</p>
+                        <p className="text-purple-700 font-semibold">
+                          {inc.livestock.name} ({inc.livestock.species})
+                        </p>
+                      </div>
+                    )}
+
                     <div className="col-span-full">
                       <p className="text-gray-500 font-medium">📝 Notes</p>
-                      <p className="text-gray-700 whitespace-pre-wrap">{inc.notes || "-"}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {inc.notes || "-"}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex gap-4 justify-end pt-4">
                     <Button
-                      onClick={() => onEdit({
-                        ...inc,
-                        date: inc.date ? new Date(inc.date) : null,
-                        weightOrQuantity: inc.quantity,
-                        pricePerUnit: inc.price,
-                      })}
+                      onClick={() =>
+                        onEdit({
+                          ...inc,
+                          date: inc.date ? new Date(inc.date) : null,
+                          weightOrQuantity: inc.quantity,
+                          pricePerUnit: inc.price,
+                        })
+                      }
                       className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 text-white px-4 py-2 rounded-lg"
                     >
                       <PencilAltIcon className="w-4 h-4" />

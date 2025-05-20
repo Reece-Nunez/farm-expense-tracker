@@ -278,6 +278,23 @@ export const createIncome = /* GraphQL */ `
       amount
       item
       notes
+      livestockID
+      livestock {
+        id
+        sub
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        status
+        notes
+        fieldID
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -300,6 +317,23 @@ export const updateIncome = /* GraphQL */ `
       amount
       item
       notes
+      livestockID
+      livestock {
+        id
+        sub
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        status
+        notes
+        fieldID
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -322,6 +356,23 @@ export const deleteIncome = /* GraphQL */ `
       amount
       item
       notes
+      livestockID
+      livestock {
+        id
+        sub
+        name
+        species
+        breed
+        birthdate
+        weight
+        gender
+        status
+        notes
+        fieldID
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -430,6 +481,10 @@ export const createLivestock = /* GraphQL */ `
         nextToken
         __typename
       }
+      incomes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -475,6 +530,10 @@ export const updateLivestock = /* GraphQL */ `
         nextToken
         __typename
       }
+      incomes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -517,6 +576,10 @@ export const deleteLivestock = /* GraphQL */ `
         __typename
       }
       medicalRecords {
+        nextToken
+        __typename
+      }
+      incomes {
         nextToken
         __typename
       }
