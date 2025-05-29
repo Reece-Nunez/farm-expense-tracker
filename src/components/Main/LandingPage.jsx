@@ -43,13 +43,15 @@ const LandingPage = () => {
         <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-4 gap-4 sm:gap-0">
           {/* Logo */}
           <a href='/' className="flex-shrink-0">
-            <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-16" />
+            <img src={Logo} alt="HarvesTrackr Logo" className="h-12 sm:h-16" />
           </a>
 
           {/* About link */}
           <nav className="text-base text-gray-700">
+            <a href="/" className='mx-1 hover:underline hover:text-green-900'>Home</a>
             <a href="/about" className='mx-1 hover:underline hover:text-green-900'>About</a>
             <a href='/contact' className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
+
           </nav>
 
           {/* Login/Dashboard Button */}
@@ -66,25 +68,42 @@ const LandingPage = () => {
             Track Every Penny. Grow Every Acre.
           </h1>
           <p className="text-base sm:text-xl max-w-3xl text-gray-600">
-            AgTrackr helps farmers easily track expenses, analyze spending, and grow profits with powerful yet simple tools.
+            HarvesTrackr helps farmers easily track expenses, analyze spending, and grow profits with powerful yet simple tools.
           </p>
         </section>
 
 
         <section className="w-full px-4 sm:px-0 max-w-5xl mx-auto space-y-4">
-          <div className="flex justify-center items-center gap-2">
-            <h2 className="text-base sm:text-lg text-gray-700">
-              Instructional Videos coming soon...
-            </h2>
-            <ArrowDownIcon className="w-5 h-5 text-green-900" />
+
+
+          <div
+            style={{
+              position: "relative",
+              paddingBottom: "calc(54.63888888888889% + 41px)",
+              height: 0,
+              width: "100%",
+            }}
+          >
+            <iframe
+              src="https://demo.arcade.software/TFydEkCEIQUEBa0Rmc59?embed&embed_mobile=tab&embed_desktop=inline&show_copy_link=true"
+              title="Experience Effortless Farm Management with HarvestTrackr"
+              frameBorder="0"
+              loading="lazy"
+              webkitallowfullscreen="true"
+              mozallowfullscreen="true"
+              allowFullScreen
+              allow="clipboard-write"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                colorScheme: "light",
+              }}
+            ></iframe>
           </div>
 
-          <iframe
-            src="https://arcade.software/embed/your-video-id"
-            title="AgTrax Demo"
-            className="w-full h-[250px] sm:h-[480px] rounded-xl shadow-lg"
-            allowFullScreen
-          ></iframe>
         </section>
 
       </div>
@@ -95,7 +114,7 @@ const LandingPage = () => {
       </div>
 
       <footer className="text-center py-6 text-sm text-gray-500">
-        &copy; {new Date().getFullYear()} AgTrackr. All rights reserved.
+        &copy; {new Date().getFullYear()} HarvesTrackr. All rights reserved.
       </footer>
     </div>
   );

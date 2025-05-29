@@ -72,11 +72,12 @@ const About = () => {
                 <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-4 gap-4 sm:gap-0">
                     {/* Logo */}
                     <a href='/' className="flex-shrink-0">
-                        <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-16" />
+                        <img src={Logo} alt="HarvesTrackr Logo" className="h-12 sm:h-16" />
                     </a>
 
                     {/* About link */}
                     <nav className="text-base text-gray-700">
+                        <a href="/" className='mx-1 hover:underline hover:text-green-900'>Home</a>
                         <a href="/about" className='mx-1 hover:underline hover:text-green-900'>About</a>
                         <a href='/contact' className='mx-1 hover:underline hover:text-green-900'>Contact Me</a>
                     </nav>
@@ -94,7 +95,7 @@ const About = () => {
 
                     <p className="text-xl mb-6 text-center">
                         Have questions, feedback, or want to collaborate? I’d love to hear from you.
-                        Whether you're a farmer with ideas to improve AgTrackr or a small business owner looking for custom software solutions — let’s connect.
+                        Whether you're a farmer with ideas to improve HarvesTrackr or a small business owner looking for custom software solutions — let’s connect.
                     </p>
 
                     <div className="bg-white p-6 rounded-xl shadow-md">
@@ -156,7 +157,7 @@ const About = () => {
                     <div className="mt-10 text-center text-gray-600">
                         <p>Or email me directly at:</p>
                         <a
-                            href="mailto:reece@agtrackr.com"
+                            href="mailto:reece@HarvesTrackr.com"
                             className="text-green-700 font-medium hover:underline"
                         >
                             reece@nunezdev.com
