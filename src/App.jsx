@@ -126,10 +126,10 @@ function AppInner() {
   const [fetchedIncomes, setFetchedIncomes] = useState([]);
   const [editingIncome, setEditingIncome] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => {});
+  const [confirmAction, setConfirmAction] = useState(() => { });
   const [confirmMessage, setConfirmMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteAction, setDeleteAction] = useState(() => {});
+  const [deleteAction, setDeleteAction] = useState(() => { });
   const [deleteMessage, setDeleteMessage] = useState("");
   const incomeFormRef = useRef(null);
   const navigate = useNavigate();
@@ -143,6 +143,9 @@ function AppInner() {
   }, []);
 
   useEffect(() => {
+    const shouldFetch = location.pathname === "/dashboard/expenses";
+    if (!shouldFetch) return;
+
     async function fetchExpenses() {
       setIsLoading(true);
       try {
@@ -163,8 +166,10 @@ function AppInner() {
         setIsLoading(false);
       }
     }
+
     fetchExpenses();
-  }, [setIsLoading]);
+  }, [location.pathname]);
+
 
   useEffect(() => {
     async function fetchIncome() {
@@ -390,7 +395,7 @@ function AppInner() {
     } finally {
       setIsLoading(false);
       setConfirmMessage("");
-      setConfirmAction(() => {});
+      setConfirmAction(() => { });
       setShowConfirmModal(false);
       navigate(-1);
     }
@@ -503,7 +508,7 @@ function AppInner() {
       } finally {
         setIsLoading(false);
         setConfirmMessage("");
-        setConfirmAction(() => {});
+        setConfirmAction(() => { });
         setShowConfirmModal(false);
         incomeFormRef.current?.resetForm();
       }
