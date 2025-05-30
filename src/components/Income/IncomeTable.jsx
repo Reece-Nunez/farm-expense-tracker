@@ -10,6 +10,8 @@ import { getCurrentUser } from "../../utils/getCurrentUser";
 export default function IncomeTable({ onEdit, onDelete }) {
   const navigate = useNavigate();
   const [incomes, setIncomes] = useState([]);
+  const [sortField, setSortField] = useState("date");
+  const [sortDirection, setSortDirection] = useState("desc");
 
   useEffect(() => {
     const fetchIncome = async () => {
@@ -36,8 +38,36 @@ export default function IncomeTable({ onEdit, onDelete }) {
   }, []);
 
   const sortedIncomes = useMemo(() => {
-    return [...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [incomes]);
+    const sorted = [...incomes].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (sortField) {
+        case "item":
+          aVal = a.item?.toLowerCase() || "";
+          bVal = b.item?.toLowerCase() || "";
+          return sortDirection === "asc"
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal);
+        case "amount":
+          const aAmt = a.amount ?? (a.quantity ?? 0) * (a.price ?? 0);
+          const bAmt = b.amount ?? (b.quantity ?? 0) * (b.price ?? 0);
+          return sortDirection === "asc" ? aAmt - bAmt : bAmt - aAmt;
+        case "paymentMethod":
+          aVal = a.paymentMethod?.toLowerCase() || "";
+          bVal = b.paymentMethod?.toLowerCase() || "";
+          return sortDirection === "asc"
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal);
+        case "date":
+        default:
+          aVal = new Date(a.date);
+          bVal = new Date(b.date);
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+      }
+    });
+
+    return sorted;
+  }, [incomes, sortField, sortDirection]);
 
   return (
     <Card className="max-w-7xl mx-auto p-6 mb-6 shadow-lg border border-gray-200 rounded-2xl bg-white">
@@ -45,6 +75,33 @@ export default function IncomeTable({ onEdit, onDelete }) {
         Submitted Income
       </CardHeader>
       <CardContent>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex gap-2 items-center">
+            <label className="text-sm font-medium">Sort by:</label>
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={sortField}
+              onChange={(e) => setSortField(e.target.value)}
+            >
+              <option value="date">Date</option>
+              <option value="item">Item</option>
+              <option value="amount">Amount</option>
+              <option value="paymentMethod">Payment</option>
+            </select>
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-sm font-medium">Direction:</label>
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={sortDirection}
+              onChange={(e) => setSortDirection(e.target.value)}
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </div>
+
         {sortedIncomes.length ? (
           <div className="space-y-6">
             {sortedIncomes.map((inc) => {

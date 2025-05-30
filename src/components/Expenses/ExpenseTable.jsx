@@ -15,12 +15,36 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
   const [selectedImageUrl, setSelectedImageUrl] = React.useState(null);
   const [mergedExpenses, setMergedExpenses] = React.useState([]);
   const client = generateClient();
+  const [sortField, setSortField] = React.useState("date");
+  const [sortDirection, setSortDirection] = React.useState("desc");
+
 
   const sortedExpenses = React.useMemo(() => {
-    return [...mergedExpenses].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
-    );
-  }, [mergedExpenses]);
+    const sorted = [...mergedExpenses].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (sortField) {
+        case "vendor":
+          aVal = a.vendor?.toLowerCase() || "";
+          bVal = b.vendor?.toLowerCase() || "";
+          return sortDirection === "asc"
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal);
+        case "grandTotal":
+          aVal = parseFloat(a.grandTotal ?? 0);
+          bVal = parseFloat(b.grandTotal ?? 0);
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        case "date":
+        default:
+          aVal = new Date(a.date);
+          bVal = new Date(b.date);
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+      }
+    });
+
+    return sorted;
+  }, [mergedExpenses, sortField, sortDirection]);
+
 
   React.useEffect(() => {
     if (!expenses.length) return;
@@ -259,6 +283,33 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
           Submitted Expenses
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <div className="flex gap-2 items-center">
+              <label className="text-sm font-medium">Sort by:</label>
+              <select
+                className="border rounded px-3 py-2 text-sm"
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+              >
+                <option value="date">Date</option>
+                <option value="vendor">Vendor</option>
+                <option value="grandTotal">Amount</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <label className="text-sm font-medium">Direction:</label>
+              <select
+                className="border rounded px-3 py-2 text-sm"
+                value={sortDirection}
+                onChange={(e) => setSortDirection(e.target.value)}
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </div>
+          </div>
+
           {sortedExpenses.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
