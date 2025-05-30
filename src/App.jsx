@@ -63,6 +63,7 @@ import InventoryItemManager from "./components/Inventory/InventoryItemManager";
 import DebugComponent from "./components/Util/DebugComponent";
 import LivestockMedicalRecords from "./components/Livestock/LivestockMedicalRecords";
 import LivestockMedicalForm from "./components/Livestock/LivestockMedicalForm";
+import FloatingDonationButton from "./components/Util/FloatingDonationButton";
 
 Amplify.configure({ ...awsExports });
 Modal.setAppElement("#root");
@@ -647,6 +648,7 @@ function AppInner() {
           confirmText="Delete"
         />
       )}
+      <FloatingDonationButton />
     </>
   );
 }
