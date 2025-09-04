@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { getCurrentUser } from '../utils/getCurrentUser';
-import { teamMembersByFarmID, teamInvitationsByFarmID } from '../graphql/queries';
-import { listFarms, getFarm } from '../graphql/teamQueries';
+import { listFarms, getFarm, teamMembersByFarm, teamInvitationsByFarm } from '../graphql/teamQueries';
 import { createFarm, updateFarm, createTeamMember, updateTeamMember, deleteTeamMember, createTeamInvitation, updateTeamInvitation } from '../graphql/teamMutations';
 import { updateUser, createUser } from '../graphql/mutations';
 import toast from 'react-hot-toast';
@@ -121,7 +120,7 @@ export const FarmProvider = ({ children }) => {
       
       // Fetch real team members from the database
       const teamMembersResult = await client.graphql({
-        query: teamMembersByFarmID,
+        query: teamMembersByFarm,
         variables: {
           farmID: farmId,
           filter: {
@@ -130,7 +129,7 @@ export const FarmProvider = ({ children }) => {
         }
       });
 
-      let teamMembers = teamMembersResult.data.teamMembersByFarmID.items;
+      let teamMembers = teamMembersResult.data.teamMembersByFarm.items;
       
       // If no team members exist, create one for the current user (farm owner)
       if (teamMembers.length === 0 && user) {
@@ -190,7 +189,7 @@ export const FarmProvider = ({ children }) => {
       
       // Fetch pending invitations from the database
       const invitationsResult = await client.graphql({
-        query: teamInvitationsByFarmID,
+        query: teamInvitationsByFarm,
         variables: {
           farmID: farmId,
           filter: {
@@ -199,7 +198,7 @@ export const FarmProvider = ({ children }) => {
         }
       });
 
-      const invitations = invitationsResult.data.teamInvitationsByFarmID.items;
+      const invitations = invitationsResult.data.teamInvitationsByFarm.items;
       console.log('Loading pending invitations from database:', invitations);
       setPendingInvitations(invitations);
     } catch (error) {
