@@ -1,0 +1,260 @@
+# Analytics and Reporting Schema
+
+type AnalyticsReport @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  name: String!
+  reportType: ReportType!
+  dateRange: DateRange!
+  status: ReportStatus!
+  generatedAt: AWSDateTime
+  parameters: AWSJSON
+  data: AWSJSON
+  summary: ReportSummary
+  createdBy: ID! @index(name: "byCreatedBy")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ExpenseAnalytics @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  period: String! # YYYY-MM format
+  totalExpenses: Float!
+  categoryBreakdown: [CategoryAnalytics!]!
+  topCategories: [String!]!
+  monthlyTrend: [MonthlyExpense!]!
+  averageDaily: Float!
+  variance: Float!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type IncomeAnalytics @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  period: String! # YYYY-MM format
+  totalIncome: Float!
+  sourceBreakdown: [IncomeSourceAnalytics!]!
+  topSources: [String!]!
+  monthlyTrend: [MonthlyIncome!]!
+  averageDaily: Float!
+  growthRate: Float!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ProfitabilityReport @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  period: String!
+  totalRevenue: Float!
+  totalExpenses: Float!
+  netProfit: Float!
+  profitMargin: Float!
+  breakEvenPoint: Float!
+  monthlyProfitability: [MonthlyProfitability!]!
+  categoryProfitability: [CategoryProfitability!]!
+  recommendations: [String!]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type InventoryAnalytics @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  period: String!
+  totalItems: Int!
+  totalValue: Float!
+  turnoverRate: Float!
+  stockoutEvents: Int!
+  lowStockItems: Int!
+  categoryDistribution: [CategoryDistribution!]!
+  topMovingItems: [ItemMovement!]!
+  recommendations: [String!]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type BenchmarkData @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmType: FarmType!
+  region: String
+  metrics: BenchmarkMetrics!
+  sampleSize: Int!
+  lastUpdated: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type CustomDashboard @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarm")
+  name: String!
+  layout: AWSJSON!
+  widgets: [DashboardWidget!]!
+  isDefault: Boolean!
+  shareSettings: ShareSettings
+  createdBy: ID! @index(name: "byCreatedBy")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Enums
+enum ReportType {
+  EXPENSE_SUMMARY
+  INCOME_ANALYSIS
+  PROFITABILITY
+  CASH_FLOW
+  INVENTORY_ANALYSIS
+  TAX_SUMMARY
+  BUDGET_VARIANCE
+  CUSTOM
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+enum DateRange {
+  LAST_7_DAYS
+  LAST_30_DAYS
+  LAST_3_MONTHS
+  LAST_6_MONTHS
+  LAST_YEAR
+  YEAR_TO_DATE
+  CUSTOM
+}
+
+# Supporting Types
+type ReportSummary {
+  totalRecords: Int!
+  dateRange: String!
+  keyMetrics: AWSJSON!
+  highlights: [String!]!
+}
+
+type CategoryAnalytics {
+  category: String!
+  total: Float!
+  percentage: Float!
+  itemCount: Int!
+  averageAmount: Float!
+  trend: String! # UP, DOWN, STABLE
+}
+
+type MonthlyExpense {
+  month: String!
+  amount: Float!
+  change: Float!
+}
+
+type IncomeSourceAnalytics {
+  source: String!
+  total: Float!
+  percentage: Float!
+  transactionCount: Int!
+  averageAmount: Float!
+  trend: String!
+}
+
+type MonthlyIncome {
+  month: String!
+  amount: Float!
+  change: Float!
+}
+
+type MonthlyProfitability {
+  month: String!
+  revenue: Float!
+  expenses: Float!
+  profit: Float!
+  margin: Float!
+}
+
+type CategoryProfitability {
+  category: String!
+  revenue: Float!
+  expenses: Float!
+  profit: Float!
+  margin: Float!
+}
+
+type CategoryDistribution {
+  category: String!
+  itemCount: Int!
+  totalValue: Float!
+  percentage: Float!
+}
+
+type ItemMovement {
+  itemId: ID!
+  itemName: String!
+  movementCount: Int!
+  averageMovement: Float!
+  velocity: Float!
+}
+
+type BenchmarkMetrics {
+  avgRevenuePerAcre: Float
+  avgExpenseRatio: Float
+  avgProfitMargin: Float
+  avgInventoryTurnover: Float
+  operatingExpenseRatio: Float
+}
+
+type DashboardWidget {
+  id: String!
+  type: WidgetType!
+  title: String!
+  position: WidgetPosition!
+  size: WidgetSize!
+  configuration: AWSJSON!
+  dataSource: String!
+}
+
+type WidgetPosition {
+  x: Int!
+  y: Int!
+}
+
+type WidgetSize {
+  width: Int!
+  height: Int!
+}
+
+type ShareSettings {
+  isPublic: Boolean!
+  allowedUsers: [ID!]
+  shareUrl: String
+  expiresAt: AWSDateTime
+}
+
+enum WidgetType {
+  CHART_LINE
+  CHART_BAR
+  CHART_PIE
+  CHART_DOUGHNUT
+  KPI_CARD
+  DATA_TABLE
+  GAUGE
+  HEATMAP
+  TIMELINE
+}
+
+enum FarmType {
+  LIVESTOCK
+  CROP
+  DAIRY
+  POULTRY
+  MIXED
+  AQUACULTURE
+  ORGANIC
+  GREENHOUSE
+  ORCHARD
+  VINEYARD
+  OTHER
+}

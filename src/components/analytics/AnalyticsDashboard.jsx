@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import KPICard from './KPICard';
 import ExpenseChart from './ExpenseChart';
 import IncomeChart from './IncomeChart';

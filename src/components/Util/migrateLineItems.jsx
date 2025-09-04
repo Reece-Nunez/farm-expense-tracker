@@ -663,10 +663,13 @@ const lineItemsToCreate = [
   ]
 ];
 
-const client = generateClient();
+// Client will be created when needed to avoid Amplify configuration race condition
 
 export const runLineItemMutations = async ({ log = console.log } = {}) => {
   log("🚀 Running batch createLineItem mutations...");
+
+  // Create client at runtime when Amplify is configured
+  const client = generateClient();
 
   // Flatten the nested array
   const flatItems = lineItemsToCreate.flat();

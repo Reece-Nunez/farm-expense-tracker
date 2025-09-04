@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 
 const InvoiceViewTemp = ({ onEdit, onClose, onGeneratePDF }) => {
   return (

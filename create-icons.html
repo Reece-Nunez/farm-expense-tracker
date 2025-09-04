@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="downloadIcon(72)">Download 72x72</button>
+    <button onclick="downloadIcon(96)">Download 96x96</button>
+    <button onclick="downloadIcon(128)">Download 128x128</button>
+    <button onclick="downloadIcon(144)">Download 144x144</button>
+    <button onclick="downloadIcon(152)">Download 152x152</button>
+    <button onclick="downloadIcon(192)">Download 192x192</button>
+    <button onclick="downloadIcon(384)">Download 384x384</button>
+    <button onclick="downloadIcon(512)">Download 512x512</button>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Set color to green
+            ctx.fillStyle = '#16a34a';
+            
+            // Draw a simple barn shape
+            const scale = size / 512;
+            
+            // Barn base
+            ctx.fillRect(100 * scale, 250 * scale, 312 * scale, 200 * scale);
+            
+            // Barn roof
+            ctx.beginPath();
+            ctx.moveTo(80 * scale, 250 * scale);
+            ctx.lineTo(256 * scale, 150 * scale);
+            ctx.lineTo(432 * scale, 250 * scale);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Barn door
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(200 * scale, 300 * scale, 112 * scale, 150 * scale);
+            
+            // Door X pattern
+            ctx.fillStyle = '#16a34a';
+            ctx.lineWidth = 8 * scale;
+            ctx.beginPath();
+            ctx.moveTo(210 * scale, 310 * scale);
+            ctx.lineTo(302 * scale, 440 * scale);
+            ctx.moveTo(302 * scale, 310 * scale);
+            ctx.lineTo(210 * scale, 440 * scale);
+            ctx.stroke();
+            
+            // Window
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(340 * scale, 200 * scale, 40 * scale, 30 * scale);
+            
+            // Dollar sign
+            ctx.fillStyle = '#16a34a';
+            ctx.font = `${48 * scale}px Arial`;
+            ctx.fillText('$', 20 * scale, 100 * scale);
+        }
+        
+        function downloadIcon(size) {
+            const canvas = document.getElementById('canvas');
+            drawIcon(canvas, size);
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}x${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Draw initial icon
+        window.onload = function() {
+            const canvas = document.getElementById('canvas');
+            drawIcon(canvas, 512);
+        };
+    </script>
+</body>
+</html>

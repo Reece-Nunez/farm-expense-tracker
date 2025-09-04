@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaCamera, FaSearch, FaBox, FaExclamationTriangle } from 'react-icons/fa';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 
 const BarcodeScanner = ({ onScan, onClose, mode = 'scan' }) => {

@@ -14,12 +14,13 @@ import "@aws-amplify/ui-react/styles.css";
 import "../AuthOverides.css";
 import DataMigrationUI from "./components/Util/DataMigrationUI";
 import { getCurrentUser } from "./utils/getCurrentUser";
-import { Amplify } from "aws-amplify";
-import awsExports from "./aws-exports";
+// Amplify configuration moved to main.jsx
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
-import { signOut } from "@aws-amplify/auth";
+import { signOut } from "aws-amplify/auth";
 import { useLoading, LoadingProvider } from "./context/LoadingContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { FarmProvider } from "./context/FarmContext";
 import { deleteIncomeSafe } from "./graphql/customMutations";
 import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
 import {
@@ -64,20 +65,31 @@ import DebugComponent from "./components/Util/DebugComponent";
 import LivestockMedicalRecords from "./components/Livestock/LivestockMedicalRecords";
 import LivestockMedicalForm from "./components/Livestock/LivestockMedicalForm";
 import FloatingDonationButton from "./components/Util/FloatingDonationButton";
+import InvoicesPage from "./pages/InvoicesPage";
+import CustomersPage from "./pages/CustomersPage";
+import ReceiptScanPage from "./pages/ReceiptScanPage";
+import InventoryPage from "./pages/InventoryPage";
+import TeamPage from "./pages/TeamPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import FarmSettingsPage from "./pages/FarmSettingsPage";
 
-Amplify.configure({ ...awsExports });
+// Amplify configuration moved to main.jsx
 Modal.setAppElement("#root");
 
 export default function App() {
   return (
-    <LoadingProvider>
-      <Authenticator.Provider>
-        <GlobalLoadingSpinner />
-        <Router>
-          <AppInner />
-        </Router>
-      </Authenticator.Provider>
-    </LoadingProvider>
+    <ThemeProvider>
+      <LoadingProvider>
+        <FarmProvider>
+          <Authenticator.Provider>
+            <GlobalLoadingSpinner />
+            <Router>
+              <AppInner />
+            </Router>
+          </Authenticator.Provider>
+        </FarmProvider>
+      </LoadingProvider>
+    </ThemeProvider>
   );
 }
 
@@ -212,19 +224,6 @@ function AppInner() {
       events.forEach((event) => window.removeEventListener(event, resetTimer));
       clearTimeout(inactivityTimer);
     };
-  }, []);
-
-  useEffect(() => {
-    const handle = (e) => {
-      const validatedFormData = e.detail;
-      setPendingExpenseData(validatedFormData);
-      setConfirmMessage("Are you sure you want to accept this expense?");
-      setConfirmAction(() => () => handleExpenseSubmit(validatedFormData));
-      setShowConfirmModal(true);
-    };
-
-    window.addEventListener("expenseFormReady", handle);
-    return () => window.removeEventListener("expenseFormReady", handle);
   }, []);
 
   useEffect(() => {
@@ -624,6 +623,13 @@ function AppInner() {
             }
           />
           <Route path="edit-income/:id" element={<EditIncome />} />
+          <Route path="scan-receipt" element={<ReceiptScanPage />} />
+          <Route path="invoices" element={<InvoicesPage />} />
+          <Route path="customers" element={<CustomersPage />} />
+          <Route path="inventory-management" element={<InventoryPage />} />
+          <Route path="team" element={<TeamPage />} />
+          <Route path="farm-settings" element={<FarmSettingsPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<Profile />} />
           <Route path="import-csv" element={<ImportExpensesCSV />} />

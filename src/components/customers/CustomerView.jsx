@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import { generateClient } from 'aws-amplify/api';
 import { getCustomer } from '../../graphql/invoiceQueries';
 import toast from 'react-hot-toast';

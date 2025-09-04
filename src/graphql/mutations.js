@@ -11,9 +11,13 @@ export const createUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -22,6 +26,10 @@ export const createUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -41,9 +49,13 @@ export const updateUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -52,6 +64,10 @@ export const updateUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -71,9 +87,13 @@ export const deleteUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -82,6 +102,10 @@ export const deleteUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -919,6 +943,876 @@ export const deleteInventoryItem = /* GraphQL */ `
       location
       acquiredDate
       notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createCustomer = /* GraphQL */ `
+  mutation CreateCustomer(
+    $input: CreateCustomerInput!
+    $condition: ModelCustomerConditionInput
+  ) {
+    createCustomer(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const updateCustomer = /* GraphQL */ `
+  mutation UpdateCustomer(
+    $input: UpdateCustomerInput!
+    $condition: ModelCustomerConditionInput
+  ) {
+    updateCustomer(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const deleteCustomer = /* GraphQL */ `
+  mutation DeleteCustomer(
+    $input: DeleteCustomerInput!
+    $condition: ModelCustomerConditionInput
+  ) {
+    deleteCustomer(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const createInvoice = /* GraphQL */ `
+  mutation CreateInvoice(
+    $input: CreateInvoiceInput!
+    $condition: ModelInvoiceConditionInput
+  ) {
+    createInvoice(input: $input, condition: $condition) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const updateInvoice = /* GraphQL */ `
+  mutation UpdateInvoice(
+    $input: UpdateInvoiceInput!
+    $condition: ModelInvoiceConditionInput
+  ) {
+    updateInvoice(input: $input, condition: $condition) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const deleteInvoice = /* GraphQL */ `
+  mutation DeleteInvoice(
+    $input: DeleteInvoiceInput!
+    $condition: ModelInvoiceConditionInput
+  ) {
+    deleteInvoice(input: $input, condition: $condition) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const createInvoiceItem = /* GraphQL */ `
+  mutation CreateInvoiceItem(
+    $input: CreateInvoiceItemInput!
+    $condition: ModelInvoiceItemConditionInput
+  ) {
+    createInvoiceItem(input: $input, condition: $condition) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateInvoiceItem = /* GraphQL */ `
+  mutation UpdateInvoiceItem(
+    $input: UpdateInvoiceItemInput!
+    $condition: ModelInvoiceItemConditionInput
+  ) {
+    updateInvoiceItem(input: $input, condition: $condition) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteInvoiceItem = /* GraphQL */ `
+  mutation DeleteInvoiceItem(
+    $input: DeleteInvoiceItemInput!
+    $condition: ModelInvoiceItemConditionInput
+  ) {
+    deleteInvoiceItem(input: $input, condition: $condition) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createProduct = /* GraphQL */ `
+  mutation CreateProduct(
+    $input: CreateProductInput!
+    $condition: ModelProductConditionInput
+  ) {
+    createProduct(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateProduct = /* GraphQL */ `
+  mutation UpdateProduct(
+    $input: UpdateProductInput!
+    $condition: ModelProductConditionInput
+  ) {
+    updateProduct(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteProduct = /* GraphQL */ `
+  mutation DeleteProduct(
+    $input: DeleteProductInput!
+    $condition: ModelProductConditionInput
+  ) {
+    deleteProduct(input: $input, condition: $condition) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createFarm = /* GraphQL */ `
+  mutation CreateFarm(
+    $input: CreateFarmInput!
+    $condition: ModelFarmConditionInput
+  ) {
+    createFarm(input: $input, condition: $condition) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const updateFarm = /* GraphQL */ `
+  mutation UpdateFarm(
+    $input: UpdateFarmInput!
+    $condition: ModelFarmConditionInput
+  ) {
+    updateFarm(input: $input, condition: $condition) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const deleteFarm = /* GraphQL */ `
+  mutation DeleteFarm(
+    $input: DeleteFarmInput!
+    $condition: ModelFarmConditionInput
+  ) {
+    deleteFarm(input: $input, condition: $condition) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const createTeamMember = /* GraphQL */ `
+  mutation CreateTeamMember(
+    $input: CreateTeamMemberInput!
+    $condition: ModelTeamMemberConditionInput
+  ) {
+    createTeamMember(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateTeamMember = /* GraphQL */ `
+  mutation UpdateTeamMember(
+    $input: UpdateTeamMemberInput!
+    $condition: ModelTeamMemberConditionInput
+  ) {
+    updateTeamMember(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteTeamMember = /* GraphQL */ `
+  mutation DeleteTeamMember(
+    $input: DeleteTeamMemberInput!
+    $condition: ModelTeamMemberConditionInput
+  ) {
+    deleteTeamMember(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createTeamInvitation = /* GraphQL */ `
+  mutation CreateTeamInvitation(
+    $input: CreateTeamInvitationInput!
+    $condition: ModelTeamInvitationConditionInput
+  ) {
+    createTeamInvitation(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateTeamInvitation = /* GraphQL */ `
+  mutation UpdateTeamInvitation(
+    $input: UpdateTeamInvitationInput!
+    $condition: ModelTeamInvitationConditionInput
+  ) {
+    updateTeamInvitation(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteTeamInvitation = /* GraphQL */ `
+  mutation DeleteTeamInvitation(
+    $input: DeleteTeamInvitationInput!
+    $condition: ModelTeamInvitationConditionInput
+  ) {
+    deleteTeamInvitation(input: $input, condition: $condition) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
       createdAt
       updatedAt
       __typename

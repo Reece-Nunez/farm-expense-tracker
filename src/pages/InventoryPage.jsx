@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus, FaSearch, FaFilter, FaExclamationTriangle, FaBox, FaChartBar, FaShoppingCart, FaCamera } from 'react-icons/fa';
 import { Card } from '../components/ui/card';
-import Button from '../components/ui/button';
+import { Button } from '../components/ui/button';
 import InventoryStats from '../components/inventory/InventoryStats';
 import InventoryList from '../components/inventory/InventoryList';
 import InventoryFilters from '../components/inventory/InventoryFilters';

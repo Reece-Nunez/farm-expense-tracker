@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { DataStore } from "@aws-amplify/datastore";
+import { DataStore } from "aws-amplify/datastore";
 import { Field } from "../../models";
 
 function DebugComponent() {

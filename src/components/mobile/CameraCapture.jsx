@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 
 const CameraCapture = ({ onCapture, onClose, mode = 'receipt' }) => {
   const videoRef = useRef(null);

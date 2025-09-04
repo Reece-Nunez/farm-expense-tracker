@@ -12,10 +12,13 @@ export default function Profile() {
   const [userRecord, setUserRecord] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [farmName, setFarmName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [aboutMe, setAboutMe] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [location, setLocation] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
   const [newProfilePicFile, setNewProfilePicFile] = useState(null);
   const client = generateClient();
@@ -27,10 +30,13 @@ export default function Profile() {
         if (!foundUser) return;
 
         setUserRecord(foundUser);
-        setFarmName(foundUser.farmName || "");
+        setFirstName(foundUser.firstName || "");
+        setLastName(foundUser.lastName || "");
         setEmail(foundUser.email || "");
         setPhone(foundUser.phone || "");
         setAboutMe(foundUser.aboutMe || "");
+        setJobTitle(foundUser.jobTitle || "");
+        setLocation(foundUser.location || "");
 
         if (foundUser.profilePictureKey) {
           const { url } = await getUrl({ path: foundUser.profilePictureKey });
@@ -132,10 +138,13 @@ export default function Profile() {
       const input = {
         sub: user.sub,
         username: user.username, // keep it fixed from auth
-        farmName,
+        firstName,
+        lastName,
         email,
         phone,
         aboutMe,
+        jobTitle,
+        location,
         profilePictureKey,
       };
 
@@ -156,10 +165,13 @@ export default function Profile() {
     try {
       const input = {
         id: userRecord.id,
-        farmName,
+        firstName,
+        lastName,
         email,
         phone,
         aboutMe,
+        jobTitle,
+        location,
         profilePictureKey: profilePictureKey || userRecord.profilePictureKey,
       };
 
@@ -186,8 +198,11 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-4 bg-white shadow rounded">
-      <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Personal Profile</h1>
+        <p className="text-gray-600 dark:text-gray-400">Manage your personal information and account settings</p>
+      </div>
 
       <div className="relative flex justify-center mb-4 group">
         <img
@@ -219,63 +234,133 @@ export default function Profile() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-1">Farm Name</label>
-          <input
-            type="text"
-            value={farmName}
-            onChange={(e) => setFarmName(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-          />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Personal Information Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
+            👤 Personal Information
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+                placeholder="Your first name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+                placeholder="Your last name"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title / Role</label>
+            <input
+              type="text"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+              placeholder="Farm Manager, Owner, etc."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+              placeholder="City, State or Region"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-          />
+        {/* Contact Information Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
+            📞 Contact Information
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+                placeholder="your.email@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+                placeholder="(555) 123-4567"
+              />
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Phone</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-          />
+        {/* Bio Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
+            📝 About Me
+          </h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio / Description</label>
+            <textarea
+              value={aboutMe}
+              onChange={(e) => setAboutMe(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+              rows={4}
+              placeholder="Tell us about yourself, your experience, and your role in farming..."
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">About Me</label>
-          <textarea
-            value={aboutMe}
-            onChange={(e) => setAboutMe(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-            rows={3}
-          />
+        {/* Profile Picture Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
+            📸 Profile Picture
+          </h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload New Picture</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePicChange}
+              className="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-200 hover:file:bg-blue-100 dark:hover:file:bg-blue-800"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Recommended: Square image, at least 200x200px</p>
+          </div>
         </div>
 
-        <div>
-          <label className="block font-medium mb-1">Profile Picture</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleProfilePicChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            💾 Save Profile
+          </button>
         </div>
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Save
-        </button>
       </form>
     </div>
   );

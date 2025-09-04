@@ -1,0 +1,318 @@
+# Inventory Management Schema
+
+type InventoryCategory @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  name: String! @index(name: "byName")
+  description: String
+  color: String # Hex color for UI
+  icon: String # Icon identifier
+  
+  # Relationships
+  items: [InventoryItem] @hasMany(indexName: "byCategoryId", fields: ["id"])
+  
+  # Metadata
+  sub: String! # User identifier
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type InventoryLocation @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  name: String! @index(name: "byName")
+  description: String
+  locationType: LocationType!
+  
+  # Location details
+  building: String
+  room: String
+  section: String
+  coordinates: String # GPS coordinates if outdoor
+  
+  # Relationships
+  items: [InventoryItem] @hasMany(indexName: "byLocationId", fields: ["id"])
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum LocationType {
+  BARN
+  SHED
+  GREENHOUSE
+  FIELD
+  STORAGE_ROOM
+  VEHICLE
+  OUTDOOR
+  OTHER
+}
+
+type InventoryItem @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  
+  # Basic Information
+  name: String! @index(name: "byName")
+  description: String
+  sku: String @index(name: "bySKU")
+  barcode: String @index(name: "byBarcode")
+  
+  # Categorization
+  categoryId: ID! @index(name: "byCategoryId")
+  category: InventoryCategory @belongsTo(fields: ["categoryId"])
+  
+  # Location
+  locationId: ID! @index(name: "byLocationId")
+  location: InventoryLocation @belongsTo(fields: ["locationId"])
+  
+  # Stock Information
+  currentStock: Float!
+  minimumStock: Float!
+  maximumStock: Float
+  unit: StockUnit!
+  
+  # Pricing
+  unitCost: Float
+  totalValue: Float
+  lastPurchasePrice: Float
+  lastPurchaseDate: AWSDate
+  
+  # Supplier Information
+  supplierName: String
+  supplierContact: String
+  supplierItemCode: String
+  
+  # Status and Alerts
+  status: ItemStatus!
+  isLowStock: Boolean!
+  expirationDate: AWSDate
+  
+  # Physical Properties
+  weight: Float
+  dimensions: String
+  storageRequirements: String
+  
+  # Relationships
+  stockMovements: [StockMovement] @hasMany(indexName: "byItemId", fields: ["id"])
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum StockUnit {
+  PIECES
+  POUNDS
+  OUNCES
+  KILOGRAMS
+  GRAMS
+  GALLONS
+  LITERS
+  MILLILITERS
+  FEET
+  METERS
+  SQUARE_FEET
+  SQUARE_METERS
+  BAGS
+  BOXES
+  PALLETS
+  OTHER
+}
+
+enum ItemStatus {
+  ACTIVE
+  LOW_STOCK
+  OUT_OF_STOCK
+  DISCONTINUED
+  EXPIRED
+  DAMAGED
+}
+
+type StockMovement @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  
+  # Item Reference
+  itemId: ID! @index(name: "byItemId")
+  item: InventoryItem @belongsTo(fields: ["itemId"])
+  
+  # Movement Details
+  movementType: MovementType!
+  quantity: Float!
+  unit: StockUnit!
+  
+  # Before/After Stock Levels
+  stockBefore: Float!
+  stockAfter: Float!
+  
+  # Context
+  reason: String
+  reference: String # Link to expense, sale, or other transaction
+  notes: String
+  
+  # Location Movement (if applicable)
+  fromLocationId: ID
+  toLocationId: ID
+  fromLocation: InventoryLocation @belongsTo(fields: ["fromLocationId"])
+  toLocation: InventoryLocation @belongsTo(fields: ["toLocationId"])
+  
+  # Pricing (for purchases/sales)
+  unitPrice: Float
+  totalCost: Float
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum MovementType {
+  PURCHASE
+  SALE
+  USAGE
+  WASTE
+  DAMAGE
+  TRANSFER
+  ADJUSTMENT
+  RETURN
+  EXPIRATION
+}
+
+type InventoryAlert @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  
+  # Item Reference
+  itemId: ID! @index(name: "byItemId")
+  item: InventoryItem @belongsTo(fields: ["itemId"])
+  
+  # Alert Details
+  alertType: AlertType!
+  severity: AlertSeverity!
+  message: String!
+  isRead: Boolean!
+  isResolved: Boolean!
+  
+  # Thresholds
+  currentStock: Float
+  thresholdStock: Float
+  expirationDate: AWSDate
+  
+  # Resolution
+  resolvedAt: AWSDateTime
+  resolvedBy: String
+  resolutionNotes: String
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum AlertType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  EXPIRING_SOON
+  EXPIRED
+  OVERSTOCK
+  DAMAGED
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type PurchaseOrder @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  
+  # Order Details
+  orderNumber: String! @index(name: "byOrderNumber")
+  supplierName: String!
+  supplierContact: String
+  
+  # Status
+  status: OrderStatus!
+  orderDate: AWSDate!
+  expectedDeliveryDate: AWSDate
+  actualDeliveryDate: AWSDate
+  
+  # Financial
+  subtotal: Float!
+  tax: Float!
+  shipping: Float
+  total: Float!
+  
+  # Relationships
+  items: [PurchaseOrderItem] @hasMany(indexName: "byOrderId", fields: ["id"])
+  
+  # Notes
+  notes: String
+  deliveryInstructions: String
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  ORDERED
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+type PurchaseOrderItem @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  
+  # Order Reference
+  orderId: ID! @index(name: "byOrderId")
+  order: PurchaseOrder @belongsTo(fields: ["orderId"])
+  
+  # Item Reference (optional - might be new item)
+  inventoryItemId: ID
+  inventoryItem: InventoryItem @belongsTo(fields: ["inventoryItemId"])
+  
+  # Item Details (for new items or overrides)
+  name: String!
+  description: String
+  sku: String
+  
+  # Order Quantities
+  quantityOrdered: Float!
+  quantityReceived: Float!
+  quantityBackordered: Float
+  unit: StockUnit!
+  
+  # Pricing
+  unitPrice: Float!
+  totalPrice: Float!
+  
+  # Status
+  status: OrderItemStatus!
+  
+  # Metadata
+  sub: String!
+  userId: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum OrderItemStatus {
+  PENDING
+  ORDERED
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+  BACKORDERED
+}

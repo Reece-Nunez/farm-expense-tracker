@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 
 const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {

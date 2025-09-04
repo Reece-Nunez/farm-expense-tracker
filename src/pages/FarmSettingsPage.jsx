@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../components/ui/card';
-import Button from '../components/ui/button';
+import { Button } from '../components/ui/button';
 import { useFarm } from '../context/FarmContext';
 import { getCurrentUser } from '../utils/getCurrentUser';
 import toast from 'react-hot-toast';

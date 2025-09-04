@@ -11,9 +11,13 @@ export const onCreateUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -22,6 +26,10 @@ export const onCreateUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -41,9 +49,13 @@ export const onUpdateUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -52,6 +64,10 @@ export const onUpdateUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -71,9 +87,13 @@ export const onDeleteUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -82,6 +102,10 @@ export const onDeleteUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -919,6 +943,873 @@ export const onDeleteInventoryItem = /* GraphQL */ `
       location
       acquiredDate
       notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateCustomer = /* GraphQL */ `
+  subscription OnCreateCustomer(
+    $filter: ModelSubscriptionCustomerFilterInput
+    $sub: String
+  ) {
+    onCreateCustomer(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onUpdateCustomer = /* GraphQL */ `
+  subscription OnUpdateCustomer(
+    $filter: ModelSubscriptionCustomerFilterInput
+    $sub: String
+  ) {
+    onUpdateCustomer(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onDeleteCustomer = /* GraphQL */ `
+  subscription OnDeleteCustomer(
+    $filter: ModelSubscriptionCustomerFilterInput
+    $sub: String
+  ) {
+    onDeleteCustomer(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onCreateInvoice = /* GraphQL */ `
+  subscription OnCreateInvoice(
+    $filter: ModelSubscriptionInvoiceFilterInput
+    $sub: String
+  ) {
+    onCreateInvoice(filter: $filter, sub: $sub) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onUpdateInvoice = /* GraphQL */ `
+  subscription OnUpdateInvoice(
+    $filter: ModelSubscriptionInvoiceFilterInput
+    $sub: String
+  ) {
+    onUpdateInvoice(filter: $filter, sub: $sub) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onDeleteInvoice = /* GraphQL */ `
+  subscription OnDeleteInvoice(
+    $filter: ModelSubscriptionInvoiceFilterInput
+    $sub: String
+  ) {
+    onDeleteInvoice(filter: $filter, sub: $sub) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onCreateInvoiceItem = /* GraphQL */ `
+  subscription OnCreateInvoiceItem(
+    $filter: ModelSubscriptionInvoiceItemFilterInput
+    $sub: String
+  ) {
+    onCreateInvoiceItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateInvoiceItem = /* GraphQL */ `
+  subscription OnUpdateInvoiceItem(
+    $filter: ModelSubscriptionInvoiceItemFilterInput
+    $sub: String
+  ) {
+    onUpdateInvoiceItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteInvoiceItem = /* GraphQL */ `
+  subscription OnDeleteInvoiceItem(
+    $filter: ModelSubscriptionInvoiceItemFilterInput
+    $sub: String
+  ) {
+    onDeleteInvoiceItem(filter: $filter, sub: $sub) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateProduct = /* GraphQL */ `
+  subscription OnCreateProduct(
+    $filter: ModelSubscriptionProductFilterInput
+    $sub: String
+  ) {
+    onCreateProduct(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateProduct = /* GraphQL */ `
+  subscription OnUpdateProduct(
+    $filter: ModelSubscriptionProductFilterInput
+    $sub: String
+  ) {
+    onUpdateProduct(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteProduct = /* GraphQL */ `
+  subscription OnDeleteProduct(
+    $filter: ModelSubscriptionProductFilterInput
+    $sub: String
+  ) {
+    onDeleteProduct(filter: $filter, sub: $sub) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateFarm = /* GraphQL */ `
+  subscription OnCreateFarm(
+    $filter: ModelSubscriptionFarmFilterInput
+    $ownerSub: String
+  ) {
+    onCreateFarm(filter: $filter, ownerSub: $ownerSub) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onUpdateFarm = /* GraphQL */ `
+  subscription OnUpdateFarm(
+    $filter: ModelSubscriptionFarmFilterInput
+    $ownerSub: String
+  ) {
+    onUpdateFarm(filter: $filter, ownerSub: $ownerSub) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onDeleteFarm = /* GraphQL */ `
+  subscription OnDeleteFarm(
+    $filter: ModelSubscriptionFarmFilterInput
+    $ownerSub: String
+  ) {
+    onDeleteFarm(filter: $filter, ownerSub: $ownerSub) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const onCreateTeamMember = /* GraphQL */ `
+  subscription OnCreateTeamMember(
+    $filter: ModelSubscriptionTeamMemberFilterInput
+    $userSub: String
+  ) {
+    onCreateTeamMember(filter: $filter, userSub: $userSub) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTeamMember = /* GraphQL */ `
+  subscription OnUpdateTeamMember(
+    $filter: ModelSubscriptionTeamMemberFilterInput
+    $userSub: String
+  ) {
+    onUpdateTeamMember(filter: $filter, userSub: $userSub) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTeamMember = /* GraphQL */ `
+  subscription OnDeleteTeamMember(
+    $filter: ModelSubscriptionTeamMemberFilterInput
+    $userSub: String
+  ) {
+    onDeleteTeamMember(filter: $filter, userSub: $userSub) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateTeamInvitation = /* GraphQL */ `
+  subscription OnCreateTeamInvitation(
+    $filter: ModelSubscriptionTeamInvitationFilterInput
+  ) {
+    onCreateTeamInvitation(filter: $filter) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTeamInvitation = /* GraphQL */ `
+  subscription OnUpdateTeamInvitation(
+    $filter: ModelSubscriptionTeamInvitationFilterInput
+  ) {
+    onUpdateTeamInvitation(filter: $filter) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTeamInvitation = /* GraphQL */ `
+  subscription OnDeleteTeamInvitation(
+    $filter: ModelSubscriptionTeamInvitationFilterInput
+  ) {
+    onDeleteTeamInvitation(filter: $filter) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
       createdAt
       updatedAt
       __typename

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuPencil, LuEye, LuPlus, LuMinus, LuMapPin } from 'react-icons/lu';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 
 const InventoryList = ({ items, view, onItemClick, onStockUpdate }) => {
   const [editingStock, setEditingStock] = useState(null);

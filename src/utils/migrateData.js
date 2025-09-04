@@ -3,9 +3,8 @@ import { listExpenses } from '../graphql/queries.js';
 import { updateExpense } from '../graphql/mutations.js';
 import { getCurrentUser } from './getCurrentUser.js';
 
-const client = generateClient();
-
 async function addSubToMissingExpenses() {
+  const client = generateClient();
   const user = await getCurrentUser();
   const { data } = await client.graphql({
     query: listExpenses,

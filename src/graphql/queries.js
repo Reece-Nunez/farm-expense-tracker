@@ -8,9 +8,13 @@ export const getUser = /* GraphQL */ `
       sub
       username
       email
+      firstName
+      lastName
       farmName
       phone
       aboutMe
+      jobTitle
+      location
       profilePictureKey
       role
       preferences
@@ -19,6 +23,10 @@ export const getUser = /* GraphQL */ `
         __typename
       }
       income {
+        nextToken
+        __typename
+      }
+      teamMemberships {
         nextToken
         __typename
       }
@@ -40,9 +48,13 @@ export const listUsers = /* GraphQL */ `
         sub
         username
         email
+        firstName
+        lastName
         farmName
         phone
         aboutMe
+        jobTitle
+        location
         profilePictureKey
         role
         preferences
@@ -552,6 +564,482 @@ export const listInventoryItems = /* GraphQL */ `
     }
   }
 `;
+export const getCustomer = /* GraphQL */ `
+  query GetCustomer($id: ID!) {
+    getCustomer(id: $id) {
+      id
+      sub
+      name
+      email
+      phone
+      address
+      city
+      state
+      zipCode
+      country
+      taxNumber
+      notes
+      createdAt
+      updatedAt
+      invoices {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const listCustomers = /* GraphQL */ `
+  query ListCustomers(
+    $filter: ModelCustomerFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listCustomers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getInvoice = /* GraphQL */ `
+  query GetInvoice($id: ID!) {
+    getInvoice(id: $id) {
+      id
+      sub
+      customerID
+      customer {
+        id
+        sub
+        name
+        email
+        phone
+        address
+        city
+        state
+        zipCode
+        country
+        taxNumber
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      invoiceNumber
+      date
+      dueDate
+      status
+      subtotal
+      taxRate
+      taxAmount
+      discountAmount
+      total
+      notes
+      terms
+      paidDate
+      createdAt
+      updatedAt
+      items {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const listInvoices = /* GraphQL */ `
+  query ListInvoices(
+    $filter: ModelInvoiceFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listInvoices(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getInvoiceItem = /* GraphQL */ `
+  query GetInvoiceItem($id: ID!) {
+    getInvoiceItem(id: $id) {
+      id
+      sub
+      invoiceID
+      invoice {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      description
+      quantity
+      unitPrice
+      total
+      category
+      unit
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listInvoiceItems = /* GraphQL */ `
+  query ListInvoiceItems(
+    $filter: ModelInvoiceItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listInvoiceItems(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        sub
+        invoiceID
+        description
+        quantity
+        unitPrice
+        total
+        category
+        unit
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getProduct = /* GraphQL */ `
+  query GetProduct($id: ID!) {
+    getProduct(id: $id) {
+      id
+      sub
+      name
+      description
+      category
+      unitPrice
+      unit
+      sku
+      barcode
+      stockQuantity
+      minStockLevel
+      isActive
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listProducts = /* GraphQL */ `
+  query ListProducts(
+    $filter: ModelProductFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listProducts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        sub
+        name
+        description
+        category
+        unitPrice
+        unit
+        sku
+        barcode
+        stockQuantity
+        minStockLevel
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getFarm = /* GraphQL */ `
+  query GetFarm($id: ID!) {
+    getFarm(id: $id) {
+      id
+      ownerSub
+      name
+      farmType
+      description
+      address
+      city
+      state
+      zipCode
+      country
+      acres
+      establishedYear
+      website
+      businessRegistration
+      taxId
+      phoneNumber
+      email
+      isActive
+      createdAt
+      updatedAt
+      members {
+        nextToken
+        __typename
+      }
+      invitations {
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+export const listFarms = /* GraphQL */ `
+  query ListFarms(
+    $filter: ModelFarmFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listFarms(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getTeamMember = /* GraphQL */ `
+  query GetTeamMember($id: ID!) {
+    getTeamMember(id: $id) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      userID
+      user {
+        id
+        sub
+        username
+        email
+        firstName
+        lastName
+        farmName
+        phone
+        aboutMe
+        jobTitle
+        location
+        profilePictureKey
+        role
+        preferences
+        createdAt
+        updatedAt
+        __typename
+      }
+      userSub
+      role
+      permissions
+      isActive
+      joinedAt
+      lastLoginAt
+      invitedBy
+      notes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTeamMembers = /* GraphQL */ `
+  query ListTeamMembers(
+    $filter: ModelTeamMemberFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTeamMembers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        farmID
+        userID
+        userSub
+        role
+        permissions
+        isActive
+        joinedAt
+        lastLoginAt
+        invitedBy
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getTeamInvitation = /* GraphQL */ `
+  query GetTeamInvitation($id: ID!) {
+    getTeamInvitation(id: $id) {
+      id
+      farmID
+      farm {
+        id
+        ownerSub
+        name
+        farmType
+        description
+        address
+        city
+        state
+        zipCode
+        country
+        acres
+        establishedYear
+        website
+        businessRegistration
+        taxId
+        phoneNumber
+        email
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
+      email
+      role
+      status
+      invitedByUserSub
+      invitedByName
+      message
+      expiresAt
+      acceptedAt
+      rejectedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTeamInvitations = /* GraphQL */ `
+  query ListTeamInvitations(
+    $filter: ModelTeamInvitationFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTeamInvitations(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        farmID
+        email
+        role
+        status
+        invitedByUserSub
+        invitedByName
+        message
+        expiresAt
+        acceptedAt
+        rejectedAt
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const expensesByUserId = /* GraphQL */ `
   query ExpensesByUserId(
     $userId: ID!
@@ -877,6 +1365,188 @@ export const eggLogsByChickenFlockID = /* GraphQL */ `
         createdAt
         updatedAt
         chickenFlockEggLogsId
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const invoicesByCustomerID = /* GraphQL */ `
+  query InvoicesByCustomerID(
+    $customerID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelInvoiceFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    invoicesByCustomerID(
+      customerID: $customerID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        sub
+        customerID
+        invoiceNumber
+        date
+        dueDate
+        status
+        subtotal
+        taxRate
+        taxAmount
+        discountAmount
+        total
+        notes
+        terms
+        paidDate
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const invoiceItemsByInvoiceID = /* GraphQL */ `
+  query InvoiceItemsByInvoiceID(
+    $invoiceID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelInvoiceItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    invoiceItemsByInvoiceID(
+      invoiceID: $invoiceID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        sub
+        invoiceID
+        description
+        quantity
+        unitPrice
+        total
+        category
+        unit
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const teamMembersByFarmID = /* GraphQL */ `
+  query TeamMembersByFarmID(
+    $farmID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelTeamMemberFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    teamMembersByFarmID(
+      farmID: $farmID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        farmID
+        userID
+        userSub
+        role
+        permissions
+        isActive
+        joinedAt
+        lastLoginAt
+        invitedBy
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const teamMembersByUserID = /* GraphQL */ `
+  query TeamMembersByUserID(
+    $userID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelTeamMemberFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    teamMembersByUserID(
+      userID: $userID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        farmID
+        userID
+        userSub
+        role
+        permissions
+        isActive
+        joinedAt
+        lastLoginAt
+        invitedBy
+        notes
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const teamInvitationsByFarmID = /* GraphQL */ `
+  query TeamInvitationsByFarmID(
+    $farmID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelTeamInvitationFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    teamInvitationsByFarmID(
+      farmID: $farmID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        farmID
+        email
+        role
+        status
+        invitedByUserSub
+        invitedByName
+        message
+        expiresAt
+        acceptedAt
+        rejectedAt
+        createdAt
+        updatedAt
         __typename
       }
       nextToken

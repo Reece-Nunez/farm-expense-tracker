@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaExclamationTriangle, FaTimes, FaClock, FaCircle } from 'react-icons/fa';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 
 const LowStockAlerts = ({ alerts, onAlertClick, onMarkAsRead }) => {
   const getSeverityIcon = (severity) => {

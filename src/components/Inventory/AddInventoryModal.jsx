@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuPackage, LuDollarSign, LuMapPin, LuTag } from 'react-icons/lu';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 
 const AddInventoryModal = ({ onClose, onSubmit, categories, locations }) => {

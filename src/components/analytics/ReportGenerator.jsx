@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 
 const ReportGenerator = ({ farmId, analyticsData, onExport }) => {

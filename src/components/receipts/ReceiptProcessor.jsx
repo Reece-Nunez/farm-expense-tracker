@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import { processReceiptImage } from '../../services/ocrService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';

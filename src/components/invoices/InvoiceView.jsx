@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
-import Button from '../ui/button';
+import { Button } from '../ui/button';
 import { generateClient } from 'aws-amplify/api';
 import { getInvoice } from '../../graphql/invoiceQueries';
 import { updateInvoice } from '../../graphql/invoiceMutations';

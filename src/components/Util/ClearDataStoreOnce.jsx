@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { DataStore } from "@aws-amplify/datastore";
+import { DataStore } from "aws-amplify/datastore";
 
 export default function ClearDataStoreOnce() {
   useEffect(() => {
