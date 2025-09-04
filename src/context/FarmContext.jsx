@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { getCurrentUser } from '../utils/getCurrentUser';
-import { listFarms, getFarm, teamMembersByFarmID, teamInvitationsByFarmID } from '../graphql/queries';
-import { createFarm, updateFarm, createTeamMember, updateTeamMember, deleteTeamMember, createTeamInvitation, updateTeamInvitation } from '../graphql/mutations';
+import { teamMembersByFarmID, teamInvitationsByFarmID } from '../graphql/queries';
+import { listFarms, getFarm } from '../graphql/teamQueries';
+import { createFarm, updateFarm } from '../graphql/mutations';
+import { createTeamMember, updateTeamMember, deleteTeamMember, createTeamInvitation, updateTeamInvitation } from '../graphql/teamMutations';
 import { updateUser, createUser } from '../graphql/mutations';
 import toast from 'react-hot-toast';
 
