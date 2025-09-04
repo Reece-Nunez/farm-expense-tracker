@@ -22,6 +22,8 @@ import {
   faMap,
   faWheatAwn,
   faCrow,
+  faChartLine,
+  faChartBar,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   LineChart,
@@ -64,6 +66,8 @@ const InventoryDashboard = () => {
   const [view, setView] = useState("day");
   const formatted = format(parseISO("2024-04-20"), "MM-dd-yyyy");
   const [selectedType, setSelectedType] = useState("All");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [searchTerm, setSearchTerm] = useState("");
   const [feedExpenses, setFeedExpenses] = useState([]);
   const [eggLogs, setEggLogs] = useState([]);
   const [showEggModal, setShowEggModal] = useState(false);
@@ -71,6 +75,17 @@ const InventoryDashboard = () => {
     flockId: "",
     date: "",
     eggsCollected: "",
+  });
+  const [showSuppliesModal, setShowSuppliesModal] = useState(false);
+  const [suppliesForm, setSuppliesForm] = useState({
+    name: "",
+    description: "",
+    category: "FEED_NUTRITION",
+    location: "MAIN_STORAGE",
+    currentStock: 0,
+    minimumStock: 0,
+    unit: "PIECES",
+    unitCost: 0,
   });
   const [flocks, setFlocks] = useState([]);
   const [showLivestockModal, setShowLivestockModal] = useState(false);
@@ -426,11 +441,68 @@ const InventoryDashboard = () => {
   }));
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Farm Inventory Dashboard
-      </h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Modern Header */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <FontAwesomeIcon icon={faTractor} className="h-8 w-8 text-green-600" />
+                Farm Inventory
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Manage livestock, equipment, supplies, and field operations
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search inventory..."
+                  className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
+                />
+                <FontAwesomeIcon icon={faCow} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8">
+            {[
+              { id: 'overview', label: 'Overview', icon: faChartBar },
+              { id: 'livestock', label: 'Livestock', icon: faCow },
+              { id: 'supplies', label: 'Equipment & Supplies', icon: faTractor },
+              { id: 'analytics', label: 'Analytics', icon: faChartLine }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-green-500 text-green-600 dark:text-green-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                <FontAwesomeIcon icon={tab.icon} className="h-4 w-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* Overview Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div
           className="relative group bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
           onClick={() => navigate("/dashboard/inventory/livestock")}
@@ -501,16 +573,28 @@ const InventoryDashboard = () => {
           <p className="text-sm">Fields</p>
         </div>
 
-        <div
-          className="bg-gray-300 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-gray-400"
-          onClick={() => navigate("/dashboard/inventory/inventory-items")}
-        >
-          <FontAwesomeIcon
-            icon={faTractor}
-            className="text-gray-600 text-2xl mb-2"
-          />
-          <p className="font-bold text-lg">{analytics.items.length}</p>
-          <p className="text-sm">Items</p>
+        <div className="relative group bg-purple-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-purple-400">
+          <div onClick={() => navigate("/dashboard/inventory/inventory-items")}>
+            <FontAwesomeIcon
+              icon={faTractor}
+              className="text-purple-600 text-2xl mb-2"
+            />
+            <p className="font-bold text-lg">{analytics.items.length}</p>
+            <p className="text-sm">Equipment & Supplies</p>
+          </div>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSuppliesModal(true);
+            }}
+            className="mt-2 px-3 py-1 bg-purple-100 text-black text-xs font-semibold rounded 
+       w-full sm:w-auto 
+       opacity-100 md:opacity-0 md:group-hover:opacity-100 
+       transition-opacity duration-300"
+          >
+            📦 Add Supply
+          </button>
         </div>
 
         <div
@@ -526,159 +610,315 @@ const InventoryDashboard = () => {
           </p>
           <p className="text-sm">Total Acreage</p>
         </div>
-      </div>
-      {/* Egg Chart View Toggle + Chart */}
-      <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Egg Collection Trend</h2>
-          <div className="space-x-2">
-            {["day", "week", "month"].map((option) => (
-              <button
-                key={option}
-                onClick={() => setView(option)}
-                className={`px-3 py-1 rounded-full border text-sm font-medium ${
-                  view === option
-                    ? "bg-yellow-400 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </button>
-            ))}
           </div>
-        </div>
 
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={eggChartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-            <YAxis tickCount={6} />
-            <Tooltip
-              formatter={(value) => [`${value} eggs`, "Collected"]}
-              labelFormatter={(label) => {
-                if (!label) return "";
-                try {
-                  return "Date: " + format(parseISO(label), "MM-dd-yyyy");
-                } catch {
-                  return "Date: " + label;
-                }
-              }}
-            />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="eggs"
-              name="Eggs Collected"
-              stroke="#facc15"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="bg-gray-50 p-4 rounded border shadow mb-10">
-        <h3 className="text-lg font-bold mb-4">Feed Expenses & Cost Per Egg</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={feedChartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis yAxisId="left" />
-            <YAxis yAxisId="right" orientation="right" />
-            <Tooltip
-              formatter={(value, name) => {
-                if (name.includes("Cost per Egg")) {
-                  return [`$${value.toFixed(2)}`, name];
-                }
-                return [`$${value.toFixed(2)}`, name];
-              }}
-            />
-            <Legend />
-            <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="feedCost"
-              stroke="#34d399"
-              name="Feed Cost ($)"
-            />
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="costPerEgg"
-              stroke="#facc15"
-              name="Cost per Egg ($)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <h2 className="text-xl font-bold mb-6">Field Utilization</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {analytics.fieldUtilization.map(({ name, acres, livestockCount }) => (
-            <div
-              key={name}
-              className="bg-green-50 border border-green-200 p-4 rounded-lg shadow-sm hover:shadow-md transition"
-            >
-              <h3 className="text-md font-semibold text-green-800 mb-1">
-                {name}
-              </h3>
-
-              <div className="flex justify-between items-center text-sm text-gray-700">
-                <div>
-                  <p>
-                    <span className="font-medium text-green-700">{acres}</span>{" "}
-                    acres
-                  </p>
-                  <p>
-                    <span className="font-medium text-green-700">
-                      {livestockCount}
-                    </span>{" "}
-                    livestock
-                  </p>
-                </div>
-
-                {/* Optional icon or label */}
-                <div className="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                  Utilized
-                </div>
+          {/* Egg Collection Chart - Overview */}
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Egg Collection Trend</h2>
+              <div className="flex gap-2">
+                {["day", "week", "month"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setView(option)}
+                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-300 ${
+                      view === option
+                        ? "bg-yellow-500 text-white border-yellow-500 shadow-md"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50 hover:border-yellow-300"
+                    }`}
+                  >
+                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="bg-white rounded-lg p-6 shadow mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Inventory Items</h2>
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
-          >
-            {inventoryTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
 
-        {inventoryTypes
-          .filter((type) => type !== "All")
-          .filter((type) => selectedType === "All" || selectedType === type)
-          .map((type) => (
-            <InventoryItemGroup
-              key={type}
-              type={type}
-              items={filteredItems.filter((item) => item.type === type)}
-            />
-          ))}
-      </div>
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={eggChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="period" tick={{ fontSize: 12 }} />
+                <YAxis tickCount={6} />
+                <Tooltip
+                  formatter={(value) => [`${value} eggs`, "Collected"]}
+                  labelFormatter={(label) => {
+                    if (!label) return "";
+                    try {
+                      return "Date: " + format(parseISO(label), "MM-dd-yyyy");
+                    } catch {
+                      return "Date: " + label;
+                    }
+                  }}
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="eggs"
+                  name="Eggs Collected"
+                  stroke="#facc15"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#facc15' }}
+                  activeDot={{ r: 6, fill: '#f59e0b' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Livestock Tab */}
+      {activeTab === 'livestock' && (
+        <div className="space-y-8">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Livestock Management</h2>
+                <p className="text-gray-600">Track your animals, breeding, and livestock health</p>
+              </div>
+              <Button
+                onClick={() => {
+                  fetchLivestockAndFlocks();
+                  setShowLivestockModal(true);
+                }}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105"
+              >
+                🐄 Add Livestock
+              </Button>
+            </div>
+
+            {/* Livestock Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-100 p-6 rounded-xl border border-amber-200">
+                <h3 className="text-lg font-semibold text-amber-800 mb-2">Total Animals</h3>
+                <p className="text-3xl font-bold text-amber-600">{analytics.livestock}</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-100 p-6 rounded-xl border border-yellow-200">
+                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Chicken Flocks</h3>
+                <p className="text-3xl font-bold text-yellow-600">{analytics.chickens}</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-green-50 to-emerald-100 p-6 rounded-xl border border-green-200">
+                <h3 className="text-lg font-semibold text-green-800 mb-2">Species Types</h3>
+                <p className="text-3xl font-bold text-green-600">{Object.keys(analytics.livestockBySpecies).length}</p>
+              </div>
+            </div>
+
+            {/* Species Breakdown */}
+            {Object.keys(analytics.livestockBySpecies).length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Species Breakdown</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(analytics.livestockBySpecies).map(([species, count]) => (
+                    <div key={species} className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                      <p className="text-2xl font-bold text-gray-800">{count}</p>
+                      <p className="text-sm text-gray-600 capitalize">{species}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="space-y-8">
+          {/* Feed Expenses Chart */}
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <h3 className="text-xl font-bold mb-6 text-gray-900">Feed Expenses & Cost Per Egg</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={feedChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="period" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip
+                  formatter={(value, name) => {
+                    if (name.includes("Cost per Egg")) {
+                      return [`$${value.toFixed(2)}`, name];
+                    }
+                    return [`$${value.toFixed(2)}`, name];
+                  }}
+                />
+                <Legend />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="feedCost"
+                  stroke="#34d399"
+                  name="Feed Cost ($)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="costPerEgg"
+                  stroke="#facc15"
+                  name="Cost per Egg ($)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Field Utilization */}
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <h2 className="text-xl font-bold mb-6 text-gray-900">Field Utilization</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {analytics.fieldUtilization.map(({ name, acres, livestockCount }) => (
+                <div
+                  key={name}
+                  className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                >
+                  <h3 className="text-lg font-semibold text-green-800 mb-3">
+                    {name}
+                  </h3>
+
+                  <div className="flex justify-between items-center text-sm text-gray-700">
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span className="font-medium text-green-700">{acres}</span>{" "}
+                        acres
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span className="font-medium text-blue-700">
+                          {livestockCount}
+                        </span>{" "}
+                        livestock
+                      </p>
+                    </div>
+
+                    <div className="text-xs text-green-700 bg-green-100 px-3 py-1 rounded-full font-medium">
+                      Active
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Equipment & Supplies Tab */}
+      {activeTab === 'supplies' && (
+        <div className="space-y-8">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-2 text-gray-900">Equipment & Supplies</h2>
+                <p className="text-gray-600">Manage your farm equipment, tools, feed, and supplies</p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search supplies..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                >
+                  {inventoryTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                
+                <Button
+                  onClick={() => setShowSuppliesModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all duration-300 hover:scale-105"
+                >
+                  <span>📦</span> Add Supply
+                </Button>
+              </div>
+            </div>
+
+            {/* Enhanced Stats Dashboard */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl text-center border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FontAwesomeIcon icon={faTractor} className="text-white text-lg" />
+                </div>
+                <div className="text-3xl font-bold text-blue-600 mb-1">{analytics.items.length}</div>
+                <div className="text-sm text-blue-700 font-medium">Total Items</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl text-center border border-green-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-white text-xl">💰</span>
+                </div>
+                <div className="text-3xl font-bold text-green-600 mb-1">
+                  ${analytics.items.reduce((sum, item) => sum + (item.quantity * (item.unitCost || 0)), 0).toFixed(0)}
+                </div>
+                <div className="text-sm text-green-700 font-medium">Total Value</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 rounded-xl text-center border border-yellow-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-yellow-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-white text-xl">⚠️</span>
+                </div>
+                <div className="text-3xl font-bold text-yellow-600 mb-1">
+                  {analytics.items.filter(item => (item.quantity || 0) <= (item.minStock || 0)).length}
+                </div>
+                <div className="text-sm text-yellow-700 font-medium">Low Stock</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-xl text-center border border-red-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="bg-red-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-white text-xl">❌</span>
+                </div>
+                <div className="text-3xl font-bold text-red-600 mb-1">
+                  {analytics.items.filter(item => (item.quantity || 0) === 0).length}
+                </div>
+                <div className="text-sm text-red-700 font-medium">Out of Stock</div>
+              </div>
+            </div>
+
+            {/* Inventory Items with improved styling */}
+            <div className="space-y-4">
+              {inventoryTypes
+                .filter((type) => type !== "All")
+                .filter((type) => selectedType === "All" || selectedType === type)
+                .map((type) => (
+                  <InventoryItemGroup
+                    key={type}
+                    type={type}
+                    items={filteredItems.filter((item) => 
+                      item.type === type && 
+                      (!searchTerm || item.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                       item.notes?.toLowerCase().includes(searchTerm.toLowerCase()))
+                    )}
+                  />
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mt-20 text-gray-600">
         <p>
-          This feature is in early access, please be patient — we’d love your
+          This feature is in early access, please be patient — we'd love your
           feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
         </p>
+      </div>
       </div>
 
       {/* Egg Modal */}
@@ -889,6 +1129,118 @@ const InventoryDashboard = () => {
           </Button>
         </div>
       </Modal>
+
+      {/* Supplies Modal */}
+      <Modal
+        isOpen={showSuppliesModal}
+        onClose={() => setShowSuppliesModal(false)}
+        title="Add Equipment/Supply Item"
+      >
+        <div className="space-y-4">
+          <input
+            placeholder="Item Name"
+            value={suppliesForm.name}
+            onChange={(e) => setSuppliesForm({ ...suppliesForm, name: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+          
+          <textarea
+            placeholder="Description (optional)"
+            value={suppliesForm.description}
+            onChange={(e) => setSuppliesForm({ ...suppliesForm, description: e.target.value })}
+            className="border p-2 rounded w-full"
+            rows={2}
+          />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <select
+              value={suppliesForm.category}
+              onChange={(e) => setSuppliesForm({ ...suppliesForm, category: e.target.value })}
+              className="border p-2 rounded"
+            >
+              <option value="FEED_NUTRITION">Feed & Nutrition</option>
+              <option value="TOOLS_EQUIPMENT">Tools & Equipment</option>
+              <option value="FERTILIZERS">Fertilizers</option>
+              <option value="SEEDS_PLANTS">Seeds & Plants</option>
+              <option value="PESTICIDES">Pesticides</option>
+              <option value="SUPPLIES">General Supplies</option>
+            </select>
+            
+            <select
+              value={suppliesForm.location}
+              onChange={(e) => setSuppliesForm({ ...suppliesForm, location: e.target.value })}
+              className="border p-2 rounded"
+            >
+              <option value="MAIN_STORAGE">Main Storage</option>
+              <option value="BARN">Barn</option>
+              <option value="GREENHOUSE">Greenhouse</option>
+              <option value="FIELD_SHED">Field Shed</option>
+              <option value="OUTDOOR">Outdoor Storage</option>
+            </select>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <input
+              type="number"
+              placeholder="Current Stock"
+              value={suppliesForm.currentStock}
+              onChange={(e) => setSuppliesForm({ ...suppliesForm, currentStock: parseInt(e.target.value) || 0 })}
+              className="border p-2 rounded"
+            />
+            
+            <input
+              type="number"
+              placeholder="Min Stock"
+              value={suppliesForm.minimumStock}
+              onChange={(e) => setSuppliesForm({ ...suppliesForm, minimumStock: parseInt(e.target.value) || 0 })}
+              className="border p-2 rounded"
+            />
+            
+            <select
+              value={suppliesForm.unit}
+              onChange={(e) => setSuppliesForm({ ...suppliesForm, unit: e.target.value })}
+              className="border p-2 rounded"
+            >
+              <option value="PIECES">Pieces</option>
+              <option value="BAGS">Bags</option>
+              <option value="GALLONS">Gallons</option>
+              <option value="POUNDS">Pounds</option>
+              <option value="BOTTLES">Bottles</option>
+            </select>
+          </div>
+          
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Unit Cost ($)"
+            value={suppliesForm.unitCost}
+            onChange={(e) => setSuppliesForm({ ...suppliesForm, unitCost: parseFloat(e.target.value) || 0 })}
+            className="border p-2 rounded w-full"
+          />
+          
+          <Button
+            onClick={() => {
+              // TODO: Implement add supply functionality
+              console.log('Add supply:', suppliesForm);
+              setShowSuppliesModal(false);
+              // Reset form
+              setSuppliesForm({
+                name: "",
+                description: "",
+                category: "FEED_NUTRITION",
+                location: "MAIN_STORAGE",
+                currentStock: 0,
+                minimumStock: 0,
+                unit: "PIECES",
+                unitCost: 0,
+              });
+            }}
+            className="bg-purple-600 text-white w-full"
+          >
+            Add Supply Item
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
@@ -901,50 +1253,123 @@ const InventoryItemGroup = ({ type, items }) => {
     0
   );
 
+  const totalValue = items.reduce(
+    (sum, item) => sum + (item.quantity || 0) * (item.unitCost || 0),
+    0
+  );
+
   const isLowStock = () => {
     if (type === "Feed" && totalQuantity < 50) return true;
     if (type === "Hay" && totalQuantity < 5) return true;
-    return false;
+    return items.some(item => (item.quantity || 0) <= (item.minStock || 0));
   };
 
+  const getCategoryIcon = (type) => {
+    const icons = {
+      'Feed': '🌾',
+      'Tools': '🔧',
+      'Seeds': '🌱',
+      'Equipment': '🚜',
+      'Supplies': '📦',
+      'Hay': '🌿',
+      'Fertilizer': '🧪',
+      'Pesticides': '🦟',
+    };
+    return icons[type] || '📦';
+  };
+
+  if (items.length === 0) return null;
+
   return (
-    <div className="mb-4 border rounded-lg bg-white shadow-sm">
+    <div className="mb-6 border rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
       <div
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="flex justify-between items-center px-4 py-3 bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-t-lg transition"
+        className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 cursor-pointer transition-all duration-300"
       >
-        <div className="flex items-center gap-3">
-          <h3 className="font-semibold text-gray-800">{type}</h3>
+        <div className="flex items-center gap-4">
+          <div className="text-2xl">{getCategoryIcon(type)}</div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-lg">{type}</h3>
+            <div className="flex items-center gap-4 mt-1">
+              <span className="text-sm text-gray-600">
+                {items.length} item{items.length !== 1 ? 's' : ''}
+              </span>
+              <span className="text-sm text-green-600 font-medium">
+                Total: ${totalValue.toFixed(2)}
+              </span>
+            </div>
+          </div>
           {isLowStock() && (
-            <span className="text-red-600 text-xs bg-red-100 px-2 py-0.5 rounded-full">
-              Low Stock
+            <span className="text-red-600 text-xs bg-red-100 px-3 py-1 rounded-full font-medium border border-red-200 animate-pulse">
+              ⚠️ Low Stock
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">Qty: {totalQuantity}</span>
-          <FontAwesomeIcon
-            icon={isExpanded ? faChevronUp : faChevronDown}
-            className="text-gray-500"
-          />
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-lg font-bold text-gray-800">Qty: {totalQuantity}</p>
+            <p className="text-xs text-gray-500">Total Quantity</p>
+          </div>
+          <div className={`p-2 rounded-full transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-blue-100' : 'bg-gray-100'}`}>
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              className={`w-4 h-4 ${isExpanded ? 'text-blue-600' : 'text-gray-500'}`}
+            />
+          </div>
         </div>
       </div>
 
       {isExpanded && (
-        <ul className="px-4 py-2 space-y-2 border-t transition-all">
-          {items.map(({ id, name, quantity, notes }) => (
-            <li key={id} className="flex justify-between text-sm">
-              <div>
-                <p className="font-medium">{name}</p>
-                {notes && (
-                  <p className="text-gray-500 italic text-xs">{notes}</p>
-                )}
-              </div>
-              <span className="text-gray-500">Qty: {quantity}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="space-y-3">
+            {items.map(({ id, name, quantity, notes, unitCost, minStock }) => {
+              const isItemLowStock = (quantity || 0) <= (minStock || 0);
+              const itemValue = (quantity || 0) * (unitCost || 0);
+              
+              return (
+                <div 
+                  key={id} 
+                  className={`bg-white p-4 rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${
+                    isItemLowStock ? 'border-red-200 bg-red-50' : 'border-gray-200'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="font-semibold text-gray-900">{name}</p>
+                        {isItemLowStock && (
+                          <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
+                            Low Stock
+                          </span>
+                        )}
+                      </div>
+                      {notes && (
+                        <p className="text-gray-600 text-sm mb-2 italic">{notes}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        {unitCost && <span>Unit Cost: ${unitCost.toFixed(2)}</span>}
+                        {minStock && <span>Min Stock: {minStock}</span>}
+                      </div>
+                    </div>
+                    
+                    <div className="text-right ml-4">
+                      <p className={`text-lg font-bold ${isItemLowStock ? 'text-red-600' : 'text-gray-800'}`}>
+                        {quantity || 0}
+                      </p>
+                      <p className="text-xs text-gray-500">in stock</p>
+                      {itemValue > 0 && (
+                        <p className="text-sm font-medium text-green-600 mt-1">
+                          ${itemValue.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
