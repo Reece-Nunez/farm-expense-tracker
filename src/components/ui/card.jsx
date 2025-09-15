@@ -18,15 +18,15 @@ export function Card({
 
   const paddings = {
     none: "",
-    sm: "p-4",
-    default: "p-6",
-    lg: "p-8",
-    xl: "p-10",
+    sm: "p-3 sm:p-4",
+    default: "p-4 sm:p-6",
+    lg: "p-6 sm:p-8",
+    xl: "p-8 sm:p-10",
   };
 
   const baseStyles = `
-    rounded-xl transition-all duration-200 ease-in-out
-    ${hover ? "hover:shadow-md hover:scale-[1.02] cursor-pointer" : ""}
+    rounded-lg sm:rounded-xl transition-all duration-200 ease-in-out
+    ${hover ? "hover:shadow-md active:scale-[0.98] sm:hover:scale-[1.02] cursor-pointer touch-manipulation" : ""}
   `;
 
   return (
@@ -51,10 +51,10 @@ export function CardHeader({
   ...props 
 }) {
   const sizes = {
-    sm: "text-lg font-semibold mb-2",
-    default: "text-xl font-bold mb-4",
-    lg: "text-2xl font-bold mb-4",
-    xl: "text-3xl font-bold mb-6",
+    sm: "text-base sm:text-lg font-semibold mb-2 sm:mb-3",
+    default: "text-lg sm:text-xl font-bold mb-3 sm:mb-4",
+    lg: "text-xl sm:text-2xl font-bold mb-3 sm:mb-4",
+    xl: "text-2xl sm:text-3xl font-bold mb-4 sm:mb-6",
   };
 
   return (

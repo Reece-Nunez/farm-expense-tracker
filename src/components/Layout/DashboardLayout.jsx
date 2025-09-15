@@ -4,6 +4,8 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { PlusIcon, HomeIcon } from "@heroicons/react/outline";
 import { useTheme } from "../../context/ThemeContext";
 import { Button } from "../ui/button";
+import ThemeToggle from "../ui/ThemeToggle";
+import { haptics } from "../../utils/haptics";
 
 export default function DashboardLayout() {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -34,24 +36,34 @@ export default function DashboardLayout() {
 
   // Close FAB menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (showFABMenu) {
+    const handleClickOutside = (event) => {
+      if (showFABMenu && !event.target.closest('[data-fab-menu]')) {
         setShowFABMenu(false);
       }
     };
 
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('touchend', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
+    };
   }, [showFABMenu]);
 
-  const handleAddExpense = () => {
-    navigate("/dashboard/add-expense");
+  const handleAddExpense = (event) => {
+    console.log("Add Expense clicked");
+    event?.stopPropagation();
+    setShowFABMenu(false);
     setShowSidebar(false);
+    navigate("/dashboard/add-expense");
   };
 
-  const handleAddIncome = () => {
-    navigate("/dashboard/add-income");
+  const handleAddIncome = (event) => {
+    console.log("Add Income clicked");
+    event?.stopPropagation();
+    setShowFABMenu(false);
     setShowSidebar(false);
+    navigate("/dashboard/add-income");
   };
 
   const getPageTitle = () => {
@@ -87,8 +99,9 @@ export default function DashboardLayout() {
         </div>
         
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setShowSidebar(true)} 
+          <ThemeToggle variant="icon" showLabel={false} />
+          <button
+            onClick={() => setShowSidebar(true)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +153,7 @@ export default function DashboardLayout() {
         </aside>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+        <main className="flex-1 overflow-y-auto pb-24 lg:pb-0 mobile-scroll">
           {/* Desktop quick action buttons */}
           <div className="hidden lg:block sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-end gap-3">
@@ -162,12 +175,12 @@ export default function DashboardLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className={`
-        lg:hidden fixed bottom-0 left-0 right-0 z-30 
+        lg:hidden fixed bottom-0 left-0 right-0 z-30
         bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700
-        transition-transform duration-300 ease-in-out
+        transition-transform duration-300 ease-in-out mobile-safe-area
         ${showBottomNav ? 'translate-y-0' : 'translate-y-full'}
       `}>
-        <div className="grid grid-cols-5 h-16">
+        <div className="grid grid-cols-5 h-20 px-2">
           <NavButton 
             icon={HomeIcon} 
             label="Dashboard" 
@@ -182,53 +195,134 @@ export default function DashboardLayout() {
           />
           
           {/* Central FAB */}
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center" data-fab-menu>
             {/* FAB Menu Options */}
             {showFABMenu && (
-              <div className="absolute -top-44 flex flex-col gap-2">
-                <button
-                  onClick={() => {
-                    navigate('/dashboard/scan-receipt');
-                    setShowFABMenu(false);
-                  }}
-                  className="w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105"
-                  title="Scan Receipt"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => {
-                    handleAddExpense();
-                    setShowFABMenu(false);
-                  }}
-                  className="w-12 h-12 bg-orange-600 hover:bg-orange-700 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105"
-                  title="Add Expense"
-                >
-                  <span className="text-white text-lg">💸</span>
-                </button>
-                <button
-                  onClick={() => {
-                    navigate('/dashboard/add-income');
-                    setShowFABMenu(false);
-                  }}
-                  className="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105"
-                  title="Add Income"
-                >
-                  <span className="text-white text-lg">💰</span>
-                </button>
+              <div className="absolute -top-80 flex flex-col gap-3" data-fab-menu>
+                <div className="flex flex-col items-center gap-1" data-fab-menu>
+                  <button
+                    onClick={() => {
+                      haptics.light();
+                      setShowFABMenu(false);
+                      navigate('/dashboard/scan-receipt');
+                    }}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      backgroundColor: '#7c3aed',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      touchAction: 'manipulation'
+                    }}
+                    title="Scan Receipt"
+                    type="button"
+                    data-fab-menu
+                  >
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                  <span className="text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm border border-gray-200 dark:border-gray-600 whitespace-nowrap" data-fab-menu>
+                    Scan Receipt
+                  </span>
+                </div>
+
+                <div className="flex flex-col items-center gap-1" data-fab-menu>
+                  <button
+                    onClick={() => {
+                      haptics.light();
+                      setShowFABMenu(false);
+                      navigate("/dashboard/add-expense");
+                    }}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      backgroundColor: '#ea580c',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      touchAction: 'manipulation'
+                    }}
+                    title="Add Expense"
+                    type="button"
+                    data-fab-menu
+                  >
+                    <span className="text-white text-lg">💸</span>
+                  </button>
+                  <span className="text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm border border-gray-200 dark:border-gray-600 whitespace-nowrap" data-fab-menu>
+                    Add Expense
+                  </span>
+                </div>
+
+                <div className="flex flex-col items-center gap-1" data-fab-menu>
+                  <button
+                    onClick={() => {
+                      haptics.light();
+                      setShowFABMenu(false);
+                      navigate("/dashboard/add-income");
+                    }}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      backgroundColor: '#2563eb',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      touchAction: 'manipulation'
+                    }}
+                    title="Add Income"
+                    type="button"
+                    data-fab-menu
+                  >
+                    <span className="text-white text-lg">💰</span>
+                  </button>
+                  <span className="text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm border border-gray-200 dark:border-gray-600 whitespace-nowrap" data-fab-menu>
+                    Add Income
+                  </span>
+                </div>
               </div>
             )}
-            
+
             <button
-              onClick={() => setShowFABMenu(!showFABMenu)}
-              className={`absolute -top-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all transform ${
-                showFABMenu ? 'bg-red-600 hover:bg-red-700 rotate-45' : 'bg-green-600 hover:bg-green-700'
-              }`}
+              onClick={() => {
+                haptics.medium();
+                setShowFABMenu(!showFABMenu);
+              }}
+              style={{
+                position: 'absolute',
+                top: '-20px',
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.2s',
+                backgroundColor: showFABMenu ? '#dc2626' : '#16a34a',
+                border: 'none',
+                cursor: 'pointer',
+                zIndex: 60,
+                transform: showFABMenu ? 'rotate(45deg)' : 'rotate(0deg)',
+                touchAction: 'manipulation'
+              }}
+              type="button"
             >
-              <PlusIcon className="w-6 h-6 text-white" />
+              <PlusIcon className="w-6 h-6 text-white" style={{ pointerEvents: 'none' }} />
             </button>
           </div>
 
@@ -252,25 +346,32 @@ export default function DashboardLayout() {
 
 // Mobile Navigation Button Component
 const NavButton = ({ icon: Icon, label, onClick, active = false }) => {
+  const handleClick = () => {
+    haptics.light();
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className={`
-        flex flex-col items-center justify-center px-2 py-2 transition-colors
-        ${active 
-          ? 'text-green-600 dark:text-green-400' 
-          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+        flex flex-col items-center justify-center px-1 py-2 transition-all duration-200
+        min-h-[60px] touch-manipulation select-none
+        ${active
+          ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'
         }
+        rounded-lg mx-1 active:scale-95
       `}
     >
-      <div className="w-6 h-6 flex items-center justify-center mb-1">
+      <div className="w-7 h-7 flex items-center justify-center mb-1">
         {typeof Icon === 'string' ? (
-          <span className="text-lg">{Icon}</span>
+          <span className="text-xl">{Icon}</span>
         ) : (
-          <Icon className="w-5 h-5" />
+          <Icon className="w-6 h-6" />
         )}
       </div>
-      <span className="text-xs font-medium">{label}</span>
+      <span className="text-[10px] font-medium leading-tight">{label}</span>
     </button>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import React, { useEffect, forwardRef, useImperativeHandle, useCallback, useMemo } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
@@ -16,6 +16,7 @@ import { uploadData } from "aws-amplify/storage";
 import { generateClient } from "aws-amplify/api";
 import { expenseFormSchema } from "@/schemas/expenseFormSchema";
 import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/outline";
+import { haptics } from "../../utils/haptics";
 
 const categories = [
   "Chemicals", "Conservation Expenses", "Custom Hire", "Feed Purchased",
@@ -43,7 +44,7 @@ const ExpenseForm = forwardRef(function ExpenseForm(
   const navigate = useNavigate();
 
   // merge defaults
-  const merged = {
+  const merged = useMemo(() => ({
     ...blankExpense,
     ...defaultValues,
     date: defaultValues.date ? new Date(defaultValues.date) : blankExpense.date,
@@ -54,7 +55,7 @@ const ExpenseForm = forwardRef(function ExpenseForm(
       unitCost: String(li.unitCost ?? ""),
       quantity: String(li.quantity ?? ""),
     })),
-  };
+  }), [defaultValues]);
 
   const {
     control,
@@ -69,10 +70,11 @@ const ExpenseForm = forwardRef(function ExpenseForm(
     defaultValues: merged,
   });
 
-  // reset when defaultValues prop changes
+  // reset when defaultValues prop changes (memoize to prevent unnecessary resets)
+  const defaultValuesString = JSON.stringify(defaultValues);
   useEffect(() => {
     reset(merged);
-  }, [JSON.stringify(defaultValues), reset]);
+  }, [defaultValuesString]);
 
   useImperativeHandle(ref, () => ({
     resetForm: () => reset(merged),
@@ -84,13 +86,15 @@ const ExpenseForm = forwardRef(function ExpenseForm(
     name: "lineItems",
   });
 
-  // compute grand total
+  // compute grand total (memoized to prevent recalculation on every render)
   const watchedItems = watch("lineItems") || [];
-  const grandTotal = watchedItems.reduce((sum, li) => {
-    const cost = parseFloat(li.unitCost) || 0;
-    const qty = parseFloat(li.quantity) || 0;
-    return sum + cost * qty;
-  }, 0);
+  const grandTotal = useMemo(() => {
+    return watchedItems.reduce((sum, li) => {
+      const cost = parseFloat(li.unitCost) || 0;
+      const qty = parseFloat(li.quantity) || 0;
+      return sum + cost * qty;
+    }, 0);
+  }, [watchedItems]);
 
   const onSubmit = useCallback(async data => {
     try {
@@ -138,17 +142,22 @@ const ExpenseForm = forwardRef(function ExpenseForm(
   };
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 shadow">
-      <CardHeader className="text-2xl font-bold text-center mb-4">
+    <Card className="max-w-4xl mx-auto mx-3 sm:mx-auto shadow" padding="sm">
+      <CardHeader size="default" className="text-center mb-3 sm:mb-4">
         Expense Form
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <form
+          onSubmit={handleSubmit(onSubmit, onError)}
+          style={{ minHeight: 'auto' }}
+          noValidate
+        >
           {/* Date */}
-          <label className="font-medium flex items-center gap-1 mb-1">
-            <CalendarIcon className="w-5 h-5 text-blue-500" /> Date{" "}
-            <span className="text-red-500">*</span>
-          </label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+              <CalendarIcon className="w-4 h-4 text-blue-500" /> Date{" "}
+              <span className="text-red-500">*</span>
+            </label>
           <Controller
             name="date"
             control={control}
@@ -160,37 +169,46 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                 {...field}
                 placeholderText="yyyy-MM-dd"
                 dateFormat="yyyy-MM-dd"
-                className={`w-full border rounded px-3 py-2 focus:ring ${errors.date ? "border-red-500 animate-shake" : ""
+                className={`w-full border rounded-lg px-3 py-3 text-base focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.date ? "border-red-500 animate-shake" : "border-gray-300"
                   }`}
                 isClearable
               />
             )}
           />
           {errors.date && (
-            <p className="text-red-500 text-sm">{errors.date.message}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
           )}
+          </div>
 
           {/* Vendor */}
           <div className="mb-4">
-            <label className="block font-medium mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Vendor/Supplier <span className="text-red-500">*</span>
             </label>
             <Input
               {...register("vendor")}
               placeholder="Vendor name"
               className={errors.vendor ? "border-red-500 animate-shake" : ""}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
             />
             {errors.vendor && (
-              <p className="text-red-500 text-sm">{errors.vendor.message}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.vendor.message}</p>
             )}
           </div>
 
           {/* Description */}
           <div className="mb-4">
-            <label className="block font-medium mb-1">Notes (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (Optional)</label>
             <Textarea
               {...register("description")}
               placeholder="Enter any notes"
+              autoComplete="off"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+              spellCheck="true"
             />
           </div>
 
@@ -215,22 +233,27 @@ const ExpenseForm = forwardRef(function ExpenseForm(
 
           {/* Line Items */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold mb-2">Line Items</h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-gray-100">Line Items</h2>
             {fields.map((field, idx) => {
-              const cost = watch(`lineItems.${idx}.unitCost`);
-              const qty = watch(`lineItems.${idx}.quantity`);
+              const cost = watchedItems[idx]?.unitCost || "";
+              const qty = watchedItems[idx]?.quantity || "";
               const total = (parseFloat(cost || 0) * parseFloat(qty || 0)).toFixed(2);
 
               return (
-                <div key={field.id} className="p-4 mb-4 border rounded shadow">
+                <div key={field.id} className="p-3 sm:p-4 mb-3 sm:mb-4 border rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800">
                   {/* Item */}
                   <div className="mb-3">
-                    <label className="block font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Item <span className="text-red-500">*</span>
                     </label>
                     <Input
                       {...register(`lineItems.${idx}.item`)}
                       className={errors.lineItems?.[idx]?.item ? "border-red-500 animate-shake" : ""}
+                      placeholder="Enter item name"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck="false"
                     />
                     {errors.lineItems?.[idx]?.item && (
                       <p className="text-red-500 text-sm">
@@ -263,18 +286,24 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                   </div>
 
                   {/* Unit Cost & Quantity */}
-                  <div className="flex gap-4 mb-3">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3">
                     <div className="flex-1">
-                      <label className="block font-medium mb-1 flex items-center gap-1">
-                        <CurrencyDollarIcon className="w-5 h-5 text-blue-500" />{" "}
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                        <CurrencyDollarIcon className="w-4 h-4 text-blue-500" />{" "}
                         Unit Cost <span className="text-red-500">*</span>
                       </label>
                       <CurrencyInput
-                        {...register(`lineItems.${idx}.unitCost`)}
                         prefix="$"
                         className={errors.lineItems?.[idx]?.unitCost ? "border-red-500 animate-shake w-full px-4 py-3" : "w-full px-4 py-3 border rounded"}
-                        onValueChange={val => setValue(`lineItems.${idx}.unitCost`, val || "")}
-                        value={watch(`lineItems.${idx}.unitCost`)}
+                        onValueChange={(val) => {
+                          setValue(`lineItems.${idx}.unitCost`, val || "", { shouldValidate: false });
+                        }}
+                        value={cost}
+                        placeholder="0.00"
+                        allowNegativeValue={false}
+                        decimalsLimit={2}
+                        disableGroupSeparators={false}
+                        autoComplete="off"
                       />
                       {errors.lineItems?.[idx]?.unitCost && (
                         <p className="text-red-500 text-sm">
@@ -283,13 +312,17 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                       )}
                     </div>
                     <div className="flex-1">
-                      <label className="block font-medium mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Quantity <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="number"
                         {...register(`lineItems.${idx}.quantity`)}
                         className={errors.lineItems?.[idx]?.quantity ? "border-red-500 animate-shake" : ""}
+                        placeholder="0"
+                        autoComplete="off"
+                        inputMode="decimal"
+                        pattern="[0-9]*"
                       />
                       {errors.lineItems?.[idx]?.quantity && (
                         <p className="text-red-500 text-sm">
@@ -309,7 +342,10 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                     <Button
                       type="button"
                       className="bg-red-500 hover:bg-red-700 text-white"
-                      onClick={() => remove(idx)}
+                      onClick={() => {
+                        haptics.medium();
+                        remove(idx);
+                      }}
                     >
                       Remove Item
                     </Button>
@@ -317,7 +353,10 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                 </div>
               );
             })}
-            <Button type="button" className="bg-green-500 hover:bg-green-600 text-white px-6 py-2" onClick={() => append(defaultLineItem)}>
+            <Button type="button" className="bg-green-500 hover:bg-green-600 text-white px-6 py-2" onClick={() => {
+              haptics.light();
+              append(defaultLineItem);
+            }}>
               Add Line Item
             </Button>
           </div>
@@ -333,14 +372,36 @@ const ExpenseForm = forwardRef(function ExpenseForm(
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4 justify-end">
-            <Button type="button" className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3" onClick={() => reset(blankExpense)}>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              type="button"
+              variant="outline"
+              className="order-2 sm:order-1"
+              onClick={() => {
+                haptics.light();
+                reset(blankExpense);
+              }}
+            >
               Clear Form
             </Button>
-            <Button type="button" className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3" onClick={() => navigate("/dashboard")}>
+            <Button
+              type="button"
+              variant="outline"
+              className="order-3 sm:order-2"
+              onClick={() => {
+                haptics.light();
+                navigate("/dashboard");
+              }}
+            >
               Back to Dashboard
             </Button>
-            <Button type="submit">Submit</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="order-1 sm:order-3 w-full sm:w-auto"
+            >
+              Submit Expense
+            </Button>
           </div>
         </form>
       </CardContent>

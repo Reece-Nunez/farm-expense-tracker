@@ -11,6 +11,9 @@ import {
   listLineItems,
   getExpense,
 } from "../../graphql/queries";
+import { haptics } from "../../utils/haptics";
+import { useSwipe } from "../../hooks/useSwipe";
+import { MobileLoader, SkeletonCard } from "../ui/MobileLoader";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
@@ -442,173 +445,187 @@ const InventoryDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Modern Header */}
+      {/* Mobile-Optimized Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <FontAwesomeIcon icon={faTractor} className="h-8 w-8 text-green-600" />
-                Farm Inventory
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="py-3 sm:py-6">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <FontAwesomeIcon icon={faTractor} className="h-5 w-5 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+                <span>Farm Inventory</span>
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Manage livestock, equipment, supplies, and field operations
-              </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search inventory..."
-                  className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
-                />
-                <FontAwesomeIcon icon={faCow} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
-            </div>
+            <p className="text-xs sm:text-base text-gray-600 dark:text-gray-400">
+              Manage livestock, equipment, supplies, and field operations
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
+      {/* Mobile-Optimized Tab Navigation */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto scrollbar-hide -mb-px">
             {[
-              { id: 'overview', label: 'Overview', icon: faChartBar },
-              { id: 'livestock', label: 'Livestock', icon: faCow },
-              { id: 'supplies', label: 'Equipment & Supplies', icon: faTractor },
-              { id: 'analytics', label: 'Analytics', icon: faChartLine }
+              { id: 'overview', label: 'Overview', icon: faChartBar, shortLabel: 'Overview' },
+              { id: 'livestock', label: 'Livestock', icon: faCow, shortLabel: 'Animals' },
+              { id: 'supplies', label: 'Equipment & Supplies', icon: faTractor, shortLabel: 'Items' },
+              { id: 'analytics', label: 'Analytics', icon: faChartLine, shortLabel: 'Charts' }
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                onClick={() => {
+                  haptics.light();
+                  setActiveTab(tab.id);
+                }}
+                className={`flex flex-col items-center gap-1 py-2 px-2 sm:px-4 border-b-2 font-medium text-xs transition-all duration-200 whitespace-nowrap min-w-0 touch-manipulation flex-1 ${
                   activeTab === tab.id
-                    ? 'border-green-500 text-green-600 dark:text-green-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
+                    ? 'border-green-500 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 active:bg-gray-50 dark:active:bg-gray-700/50'
                 }`}
               >
-                <FontAwesomeIcon icon={tab.icon} className="h-4 w-4" />
-                {tab.label}
+                <FontAwesomeIcon icon={tab.icon} className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="text-center leading-tight text-xs">
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                </span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-8">
       
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="space-y-8">
-          {/* Overview Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="space-y-4 sm:space-y-8">
+          {/* Mobile-Optimized Overview Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <div
-          className="relative group bg-brown-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-brown-400"
-          onClick={() => navigate("/dashboard/inventory/livestock")}
+          className="relative group bg-amber-200 dark:bg-amber-800 p-3 sm:p-6 rounded-lg text-center shadow cursor-pointer hover:shadow-lg transition-all duration-300 hover:bg-amber-300 dark:hover:bg-amber-700 touch-manipulation active:scale-95"
+          onClick={() => {
+            haptics.light();
+            navigate("/dashboard/inventory/livestock");
+          }}
         >
           <FontAwesomeIcon
             icon={faCow}
-            className="text-brown-600 text-2xl mb-2"
+            className="text-amber-700 dark:text-amber-200 text-lg sm:text-2xl mb-1 sm:mb-2"
           />
-          <p className="font-bold text-lg">{analytics.livestock}</p>
-          <p className="text-sm">Livestock</p>
+          <p className="font-bold text-base sm:text-xl text-amber-900 dark:text-amber-100">{analytics.livestock}</p>
+          <p className="text-xs text-amber-800 dark:text-amber-200 mb-2">Livestock</p>
 
           <button
             onClick={(e) => {
               e.stopPropagation();
+              haptics.medium();
               fetchLivestockAndFlocks();
               setShowLivestockModal(true);
             }}
-            className="mt-2 px-3 py-1 bg-brown-100 text-black text-xs font-semibold rounded 
-      w-full sm:w-auto 
-      opacity-100 md:opacity-0 md:group-hover:opacity-100 
-      transition-opacity duration-300"
+            className="mt-1 px-2 py-1 bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100 text-xs font-semibold rounded
+      w-full
+      opacity-100
+      transition-all duration-300 hover:bg-amber-50 dark:hover:bg-amber-800 active:scale-95 touch-manipulation"
           >
             ➕ Add Animal
           </button>
         </div>
 
         <div
-          className="relative group bg-yellow-200 p-4 rounded-lg text-center shadow 
-             cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-yellow-400"
+          className="relative group bg-yellow-200 dark:bg-yellow-800 p-3 sm:p-6 rounded-lg text-center shadow
+             cursor-pointer hover:shadow-lg transition-all duration-300 hover:bg-yellow-300 dark:hover:bg-yellow-700 touch-manipulation active:scale-95"
         >
           <div
-            onClick={() => navigate("/dashboard/inventory/chickens")}
+            onClick={() => {
+              haptics.light();
+              navigate("/dashboard/inventory/chickens");
+            }}
             className="cursor-pointer"
           >
             <FontAwesomeIcon
               icon={faCrow}
-              className="text-yellow-600 text-2xl mb-2"
+              className="text-yellow-700 dark:text-yellow-200 text-lg sm:text-2xl mb-1 sm:mb-2"
             />
-            <p className="font-bold text-lg">{analytics.chickens}</p>
-            <p className="text-sm">Chicken Flocks</p>
+            <p className="font-bold text-base sm:text-xl text-yellow-900 dark:text-yellow-100">{analytics.chickens}</p>
+            <p className="text-xs text-yellow-800 dark:text-yellow-200 mb-2">Chicken Flocks</p>
           </div>
 
-          {/* Log Egg button - doesn’t trigger navigate */}
+          {/* Log Egg button - doesn't trigger navigate */}
           <button
             onClick={(e) => {
               e.stopPropagation();
+              haptics.medium();
               fetchLivestockAndFlocks();
               setShowEggModal(true);
             }}
-            className="mt-2 px-3 py-1 bg-yellow-100 text-black text-xs font-semibold rounded 
-       w-full sm:w-auto
-       opacity-100 md:opacity-0 md:group-hover:opacity-100 
-       transition-opacity duration-300"
+            className="mt-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 text-xs font-semibold rounded
+       w-full
+       opacity-100
+       transition-all duration-300 hover:bg-yellow-50 dark:hover:bg-yellow-800 active:scale-95 touch-manipulation"
           >
             🥚 Log Egg
           </button>
         </div>
 
         <div
-          className="bg-green-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-green-400"
-          onClick={() => navigate("/dashboard/inventory/fields")}
+          className="bg-green-200 dark:bg-green-800 p-3 sm:p-6 rounded-lg text-center shadow cursor-pointer hover:shadow-lg transition-all duration-300 hover:bg-green-300 dark:hover:bg-green-700 touch-manipulation active:scale-95"
+          onClick={() => {
+            haptics.light();
+            navigate("/dashboard/inventory/fields");
+          }}
         >
           <FontAwesomeIcon
             icon={faWheatAwn}
-            className="text-green-600 text-2xl mb-2"
+            className="text-green-700 dark:text-green-200 text-lg sm:text-2xl mb-1 sm:mb-2"
           />
-          <p className="font-bold text-lg">{analytics.fields}</p>
-          <p className="text-sm">Fields</p>
+          <p className="font-bold text-base sm:text-xl text-green-900 dark:text-green-100">{analytics.fields}</p>
+          <p className="text-xs text-green-800 dark:text-green-200">Fields</p>
         </div>
 
-        <div className="relative group bg-purple-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-purple-400">
-          <div onClick={() => navigate("/dashboard/inventory/inventory-items")}>
+        <div className="relative group bg-purple-200 dark:bg-purple-800 p-3 sm:p-6 rounded-lg text-center shadow cursor-pointer hover:shadow-lg transition-all duration-300 hover:bg-purple-300 dark:hover:bg-purple-700 touch-manipulation active:scale-95">
+          <div onClick={() => {
+            haptics.light();
+            navigate("/dashboard/inventory/inventory-items");
+          }}>
             <FontAwesomeIcon
               icon={faTractor}
-              className="text-purple-600 text-2xl mb-2"
+              className="text-purple-700 dark:text-purple-200 text-lg sm:text-2xl mb-1 sm:mb-2"
             />
-            <p className="font-bold text-lg">{analytics.items.length}</p>
-            <p className="text-sm">Equipment & Supplies</p>
+            <p className="font-bold text-base sm:text-xl text-purple-900 dark:text-purple-100">{analytics.items.length}</p>
+            <p className="text-xs text-purple-800 dark:text-purple-200 mb-2">Equipment</p>
           </div>
-          
+
           <button
             onClick={(e) => {
               e.stopPropagation();
+              haptics.medium();
               setShowSuppliesModal(true);
             }}
-            className="mt-2 px-3 py-1 bg-purple-100 text-black text-xs font-semibold rounded 
-       w-full sm:w-auto 
-       opacity-100 md:opacity-0 md:group-hover:opacity-100 
-       transition-opacity duration-300"
+            className="mt-1 px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-900 dark:text-purple-100 text-xs font-semibold rounded
+       w-full
+       opacity-100
+       transition-all duration-300 hover:bg-purple-50 dark:hover:bg-purple-800 active:scale-95 touch-manipulation"
           >
             📦 Add Supply
           </button>
         </div>
 
         <div
-          className="col-span-2 md:col-span-4 bg-indigo-200 p-4 rounded-lg text-center shadow cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:bg-indigo-400"
-          onClick={() => navigate("/dashboard/inventory/fields")}
+          className="col-span-2 lg:col-span-4 bg-indigo-200 dark:bg-indigo-800 p-3 sm:p-6 rounded-lg text-center shadow cursor-pointer hover:shadow-lg transition-all duration-300 hover:bg-indigo-300 dark:hover:bg-indigo-700 touch-manipulation active:scale-95"
+          onClick={() => {
+            haptics.light();
+            navigate("/dashboard/inventory/fields");
+          }}
         >
           <FontAwesomeIcon
             icon={faMap}
-            className="text-indigo-600 text-2xl mb-2"
+            className="text-indigo-700 dark:text-indigo-200 text-lg sm:text-2xl mb-1 sm:mb-2"
           />
-          <p className="font-bold text-xl">
+          <p className="font-bold text-base sm:text-xl text-indigo-900 dark:text-indigo-100">
             {analytics.totalAcres.toFixed(1)} acres
           </p>
-          <p className="text-sm">Total Acreage</p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">Total Acreage</p>
         </div>
           </div>
 
@@ -913,15 +930,15 @@ const InventoryDashboard = () => {
         </div>
       )}
 
-      <div className="text-center mt-20 text-gray-600">
-        <p>
+      <div className="text-center mt-12 sm:mt-20 text-gray-600 dark:text-gray-400 px-4">
+        <p className="text-sm sm:text-base">
           This feature is in early access, please be patient — we'd love your
           feedback! <FontAwesomeIcon icon={faFaceLaughBeam} />
         </p>
       </div>
       </div>
 
-      {/* Egg Modal */}
+      {/* Mobile-Optimized Egg Modal */}
       <Modal
         isOpen={showEggModal}
         onClose={() => setShowEggModal(false)}
@@ -933,7 +950,7 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setEggForm({ ...eggForm, flockId: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           >
             <option value="">Select Flock</option>
             {flocks.map((f) => (
@@ -946,40 +963,41 @@ const InventoryDashboard = () => {
             type="date"
             value={eggForm.date}
             onChange={(e) => setEggForm({ ...eggForm, date: e.target.value })}
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
           <input
             type="number"
+            inputMode="numeric"
             placeholder="Eggs Collected"
             value={eggForm.eggsCollected}
             onChange={(e) =>
               setEggForm({ ...eggForm, eggsCollected: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
           <Button
             onClick={handleSubmitEggLog}
-            className="bg-green-600 text-white w-full"
+            className="bg-green-600 hover:bg-green-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            Submit
+            🥚 Submit Log
           </Button>
         </div>
       </Modal>
 
-      {/* Livestock Modal */}
+      {/* Mobile-Optimized Livestock Modal */}
       <Modal
         isOpen={showLivestockModal}
         onClose={() => setShowLivestockModal(false)}
         title="Add Livestock"
       >
-        <div className="space-y-3">
+        <div className="space-y-4 max-h-96 overflow-y-auto">
           <input
-            placeholder="Name"
+            placeholder="Animal Name"
             value={livestockForm.name}
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, name: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
 
           <select
@@ -987,13 +1005,13 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, species: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           >
             <option value="">Select Species</option>
-            <option value="Cow">Cow</option>
-            <option value="Pig">Pig</option>
-            <option value="Goat">Goat</option>
-            <option value="Sheep">Sheep</option>
+            <option value="Cow">🐄 Cow</option>
+            <option value="Pig">🐷 Pig</option>
+            <option value="Goat">🐐 Goat</option>
+            <option value="Sheep">🐑 Sheep</option>
           </select>
 
           <input
@@ -1002,7 +1020,7 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, breed: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
 
           <input
@@ -1011,17 +1029,18 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, birthdate: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
 
           <input
             type="number"
+            inputMode="decimal"
             placeholder="Weight (lbs)"
             value={livestockForm.weight}
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, weight: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
 
           <select
@@ -1029,12 +1048,12 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, gender: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           >
             <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Unknown">Unknown</option>
+            <option value="Male">♂️ Male</option>
+            <option value="Female">♀️ Female</option>
+            <option value="Unknown">❓ Unknown</option>
           </select>
 
           <select
@@ -1042,18 +1061,18 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, locationId: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           >
             <option value="">Select Field (Optional)</option>
             {analytics.fieldAcreage.map((f) => (
               <option key={f.name} value={f.name}>
-                {f.name}
+                🌾 {f.name}
               </option>
             ))}
           </select>
 
-          <div className="flex justify-between gap-2">
-            <label className="flex items-center gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            <label className="flex flex-col items-center gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation">
               <input
                 type="radio"
                 name="status"
@@ -1062,10 +1081,11 @@ const InventoryDashboard = () => {
                 onChange={() =>
                   setLivestockForm({ ...livestockForm, status: "Sold" })
                 }
+                className="w-4 h-4"
               />
-              Sold
+              <span className="text-sm font-medium">💰 Sold</span>
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex flex-col items-center gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation">
               <input
                 type="radio"
                 name="status"
@@ -1074,10 +1094,11 @@ const InventoryDashboard = () => {
                 onChange={() =>
                   setLivestockForm({ ...livestockForm, status: "Butchered" })
                 }
+                className="w-4 h-4"
               />
-              Butchered
+              <span className="text-sm font-medium">🥩 Butchered</span>
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex flex-col items-center gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation">
               <input
                 type="radio"
                 name="status"
@@ -1086,8 +1107,9 @@ const InventoryDashboard = () => {
                 onChange={() =>
                   setLivestockForm({ ...livestockForm, status: "" })
                 }
+                className="w-4 h-4"
               />
-              Active
+              <span className="text-sm font-medium">✅ Active</span>
             </label>
           </div>
 
@@ -1097,11 +1119,13 @@ const InventoryDashboard = () => {
             onChange={(e) =>
               setLivestockForm({ ...livestockForm, notes: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
+            rows={3}
           />
+
           <div>
-            <label className="font-semibold text-sm mb-1 block">
-              Select Parent(s)
+            <label className="font-semibold text-sm mb-2 block dark:text-gray-200">
+              Select Parent(s) (Optional)
             </label>
             <select
               multiple
@@ -1111,7 +1135,8 @@ const InventoryDashboard = () => {
                   [...e.target.selectedOptions].map((opt) => opt.value)
                 )
               }
-              className="border p-2 rounded w-full"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
+              size={3}
             >
               {livestock.map((animal) => (
                 <option key={animal.id} value={animal.id}>
@@ -1123,83 +1148,85 @@ const InventoryDashboard = () => {
 
           <Button
             onClick={handleSubmitLivestock}
-            className="bg-green-600 text-white w-full"
+            className="bg-green-600 hover:bg-green-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            Add Animal
+            🐄 Add Animal
           </Button>
         </div>
       </Modal>
 
-      {/* Supplies Modal */}
+      {/* Mobile-Optimized Supplies Modal */}
       <Modal
         isOpen={showSuppliesModal}
         onClose={() => setShowSuppliesModal(false)}
         title="Add Equipment/Supply Item"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-96 overflow-y-auto">
           <input
             placeholder="Item Name"
             value={suppliesForm.name}
             onChange={(e) => setSuppliesForm({ ...suppliesForm, name: e.target.value })}
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
-          
+
           <textarea
             placeholder="Description (optional)"
             value={suppliesForm.description}
             onChange={(e) => setSuppliesForm({ ...suppliesForm, description: e.target.value })}
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
             rows={2}
           />
-          
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <select
               value={suppliesForm.category}
               onChange={(e) => setSuppliesForm({ ...suppliesForm, category: e.target.value })}
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
             >
-              <option value="FEED_NUTRITION">Feed & Nutrition</option>
-              <option value="TOOLS_EQUIPMENT">Tools & Equipment</option>
-              <option value="FERTILIZERS">Fertilizers</option>
-              <option value="SEEDS_PLANTS">Seeds & Plants</option>
-              <option value="PESTICIDES">Pesticides</option>
-              <option value="SUPPLIES">General Supplies</option>
+              <option value="FEED_NUTRITION">🌾 Feed & Nutrition</option>
+              <option value="TOOLS_EQUIPMENT">🔧 Tools & Equipment</option>
+              <option value="FERTILIZERS">🧪 Fertilizers</option>
+              <option value="SEEDS_PLANTS">🌱 Seeds & Plants</option>
+              <option value="PESTICIDES">🦟 Pesticides</option>
+              <option value="SUPPLIES">📦 General Supplies</option>
             </select>
-            
+
             <select
               value={suppliesForm.location}
               onChange={(e) => setSuppliesForm({ ...suppliesForm, location: e.target.value })}
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
             >
-              <option value="MAIN_STORAGE">Main Storage</option>
-              <option value="BARN">Barn</option>
-              <option value="GREENHOUSE">Greenhouse</option>
-              <option value="FIELD_SHED">Field Shed</option>
-              <option value="OUTDOOR">Outdoor Storage</option>
+              <option value="MAIN_STORAGE">🏢 Main Storage</option>
+              <option value="BARN">🏠 Barn</option>
+              <option value="GREENHOUSE">🌿 Greenhouse</option>
+              <option value="FIELD_SHED">🏚️ Field Shed</option>
+              <option value="OUTDOOR">🌤️ Outdoor Storage</option>
             </select>
           </div>
-          
-          <div className="grid grid-cols-3 gap-4">
+
+          <div className="grid grid-cols-3 gap-2">
             <input
               type="number"
-              placeholder="Current Stock"
+              inputMode="numeric"
+              placeholder="Current"
               value={suppliesForm.currentStock}
               onChange={(e) => setSuppliesForm({ ...suppliesForm, currentStock: parseInt(e.target.value) || 0 })}
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation text-sm"
             />
-            
+
             <input
               type="number"
+              inputMode="numeric"
               placeholder="Min Stock"
               value={suppliesForm.minimumStock}
               onChange={(e) => setSuppliesForm({ ...suppliesForm, minimumStock: parseInt(e.target.value) || 0 })}
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation text-sm"
             />
-            
+
             <select
               value={suppliesForm.unit}
               onChange={(e) => setSuppliesForm({ ...suppliesForm, unit: e.target.value })}
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation text-sm"
             >
               <option value="PIECES">Pieces</option>
               <option value="BAGS">Bags</option>
@@ -1208,18 +1235,20 @@ const InventoryDashboard = () => {
               <option value="BOTTLES">Bottles</option>
             </select>
           </div>
-          
+
           <input
             type="number"
+            inputMode="decimal"
             step="0.01"
             placeholder="Unit Cost ($)"
             value={suppliesForm.unitCost}
             onChange={(e) => setSuppliesForm({ ...suppliesForm, unitCost: parseFloat(e.target.value) || 0 })}
-            className="border p-2 rounded w-full"
+            className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           />
-          
+
           <Button
             onClick={() => {
+              haptics.medium();
               // TODO: Implement add supply functionality
               console.log('Add supply:', suppliesForm);
               setShowSuppliesModal(false);
@@ -1234,10 +1263,11 @@ const InventoryDashboard = () => {
                 unit: "PIECES",
                 unitCost: 0,
               });
+              haptics.success();
             }}
-            className="bg-purple-600 text-white w-full"
+            className="bg-purple-600 hover:bg-purple-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            Add Supply Item
+            📦 Add Supply Item
           </Button>
         </div>
       </Modal>
@@ -1264,6 +1294,11 @@ const InventoryItemGroup = ({ type, items }) => {
     return items.some(item => (item.quantity || 0) <= (item.minStock || 0));
   };
 
+  const handleToggle = () => {
+    haptics.light();
+    setIsExpanded((prev) => !prev);
+  };
+
   const getCategoryIcon = (type) => {
     const icons = {
       'Feed': '🌾',
@@ -1281,85 +1316,85 @@ const InventoryItemGroup = ({ type, items }) => {
   if (items.length === 0) return null;
 
   return (
-    <div className="mb-6 border rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <div className="mb-4 sm:mb-6 border rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
       <div
-        onClick={() => setIsExpanded((prev) => !prev)}
-        className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 cursor-pointer transition-all duration-300"
+        onClick={handleToggle}
+        className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-500 cursor-pointer transition-all duration-300 touch-manipulation active:scale-98"
       >
-        <div className="flex items-center gap-4">
-          <div className="text-2xl">{getCategoryIcon(type)}</div>
-          <div>
-            <h3 className="font-bold text-gray-800 text-lg">{type}</h3>
-            <div className="flex items-center gap-4 mt-1">
-              <span className="text-sm text-gray-600">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div className="text-xl sm:text-2xl flex-shrink-0">{getCategoryIcon(type)}</div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base sm:text-lg truncate">{type}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
+              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                 {items.length} item{items.length !== 1 ? 's' : ''}
               </span>
-              <span className="text-sm text-green-600 font-medium">
+              <span className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-medium">
                 Total: ${totalValue.toFixed(2)}
               </span>
             </div>
           </div>
           {isLowStock() && (
-            <span className="text-red-600 text-xs bg-red-100 px-3 py-1 rounded-full font-medium border border-red-200 animate-pulse">
-              ⚠️ Low Stock
+            <span className="text-red-600 text-xs bg-red-100 dark:bg-red-900 px-2 sm:px-3 py-1 rounded-full font-medium border border-red-200 dark:border-red-700 animate-pulse flex-shrink-0">
+              ⚠️ <span className="hidden sm:inline ml-1">Low Stock</span>
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           <div className="text-right">
-            <p className="text-lg font-bold text-gray-800">Qty: {totalQuantity}</p>
-            <p className="text-xs text-gray-500">Total Quantity</p>
+            <p className="text-sm sm:text-lg font-bold text-gray-800 dark:text-gray-200">Qty: {totalQuantity}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Total Quantity</p>
           </div>
-          <div className={`p-2 rounded-full transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-blue-100' : 'bg-gray-100'}`}>
+          <div className={`p-1.5 sm:p-2 rounded-full transition-transform duration-300 ${isExpanded ? 'rotate-180 bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-700'}`}>
             <FontAwesomeIcon
               icon={faChevronDown}
-              className={`w-4 h-4 ${isExpanded ? 'text-blue-600' : 'text-gray-500'}`}
+              className={`w-3 h-3 sm:w-4 sm:h-4 ${isExpanded ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
             />
           </div>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
           <div className="space-y-3">
             {items.map(({ id, name, quantity, notes, unitCost, minStock }) => {
               const isItemLowStock = (quantity || 0) <= (minStock || 0);
               const itemValue = (quantity || 0) * (unitCost || 0);
-              
+
               return (
-                <div 
-                  key={id} 
-                  className={`bg-white p-4 rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${
-                    isItemLowStock ? 'border-red-200 bg-red-50' : 'border-gray-200'
+                <div
+                  key={id}
+                  className={`bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${
+                    isItemLowStock ? 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600'
                   }`}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="font-semibold text-gray-900">{name}</p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{name}</p>
                         {isItemLowStock && (
-                          <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
+                          <span className="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-2 py-0.5 rounded-full self-start">
                             Low Stock
                           </span>
                         )}
                       </div>
                       {notes && (
-                        <p className="text-gray-600 text-sm mb-2 italic">{notes}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 italic">{notes}</p>
                       )}
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
                         {unitCost && <span>Unit Cost: ${unitCost.toFixed(2)}</span>}
                         {minStock && <span>Min Stock: {minStock}</span>}
                       </div>
                     </div>
-                    
-                    <div className="text-right ml-4">
-                      <p className={`text-lg font-bold ${isItemLowStock ? 'text-red-600' : 'text-gray-800'}`}>
+
+                    <div className="text-right sm:text-right self-start sm:ml-4">
+                      <p className={`text-base sm:text-lg font-bold ${isItemLowStock ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>
                         {quantity || 0}
                       </p>
-                      <p className="text-xs text-gray-500">in stock</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">in stock</p>
                       {itemValue > 0 && (
-                        <p className="text-sm font-medium text-green-600 mt-1">
+                        <p className="text-sm font-medium text-green-600 dark:text-green-400 mt-1">
                           ${itemValue.toFixed(2)}
                         </p>
                       )}

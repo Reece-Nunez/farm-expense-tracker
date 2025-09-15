@@ -26,7 +26,8 @@
       "Bash(npm ci:*)",
       "Bash(node:*)",
       "Bash(find:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Read(//c/Users/reece/Downloads/**)"
     ],
     "deny": [],
     "ask": []

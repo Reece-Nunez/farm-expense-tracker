@@ -13,12 +13,13 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check for saved theme preference or default to system preference
+    // Check for saved theme preference or default to light mode
     const saved = localStorage.getItem('harvesTrackr-theme');
     if (saved) {
       return saved === 'dark';
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Default to light mode instead of system preference
+    return false;
   });
 
   const [currentTheme, setCurrentTheme] = useState(isDarkMode ? darkTheme : theme);

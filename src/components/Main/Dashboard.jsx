@@ -19,7 +19,9 @@ import { getCurrentUser } from "../../utils/getCurrentUser";
 import { LIST_EXPENSES_WITH_LINE_ITEMS } from "../../graphql/customQueries";
 import { Card, CardHeader, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { usePullToRefresh } from "../../hooks/useSwipe";
+import { usePullToRefresh, useSwipe } from "../../hooks/useSwipe";
+import { haptics } from "../../utils/haptics";
+import { MobileLoader, SkeletonCard } from "../ui/MobileLoader";
 
 const COLORS = [
   "#FF6384",
@@ -54,6 +56,7 @@ export default function Dashboard() {
   const [recentIncomes, setRecentIncomes] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const client = generateClient();
   const navigate = useNavigate();
 
@@ -75,20 +78,43 @@ export default function Dashboard() {
   const pullToRefreshHook = usePullToRefresh(refreshData, 80);
   const { onTouchStart, onTouchMove, onTouchEnd, isRefreshing, isPulling } = pullToRefreshHook;
 
+  // Add swipe navigation
+  const handleSwipe = (direction) => {
+    haptics.light();
+    if (direction === 'left') {
+      navigate('/dashboard/expenses');
+    } else if (direction === 'right') {
+      navigate('/dashboard/income');
+    }
+  };
+
+  const swipeHook = useSwipe(handleSwipe, 75);
+  const { onTouchStart: onSwipeStart, onTouchMove: onSwipeMove, onTouchEnd: onSwipeEnd } = swipeHook;
+
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const user = await getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
 
-      // Pass both id and sub
-      await fetchDashboardData(
-        user.id,
-        user.sub,
-        setExpenses,
-        setIncomes,
-        setRecentExpenses,
-        setRecentIncomes,
-      );
+      try {
+        // Pass both id and sub
+        await fetchDashboardData(
+          user.id,
+          user.sub,
+          setExpenses,
+          setIncomes,
+          setRecentExpenses,
+          setRecentIncomes,
+        );
+      } catch (error) {
+        console.error("Error loading dashboard:", error);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, []);
 
@@ -181,12 +207,20 @@ export default function Dashboard() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showQuickAdd && !event.target.closest('.quick-add-container')) {
+        console.log("Clicking outside, closing menu");
         setShowQuickAdd(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (showQuickAdd) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [showQuickAdd]);
 
   const handleExportReport = async () => {
@@ -212,11 +246,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-gray-50 dark:bg-gray-900"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
+      onTouchStart={(e) => {
+        onTouchStart(e);
+        onSwipeStart(e);
+      }}
+      onTouchMove={(e) => {
+        onTouchMove(e);
+        onSwipeMove(e);
+      }}
+      onTouchEnd={(e) => {
+        onTouchEnd(e);
+        onSwipeEnd(e);
+      }}
     >
       {/* Pull to refresh indicator */}
       {isPulling && (
@@ -241,8 +284,8 @@ export default function Dashboard() {
           
           {/* Desktop Quick Actions */}
           <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleExportReport}
             >
@@ -302,7 +345,7 @@ export default function Dashboard() {
           </div>
           
           {/* Mobile Quick Actions */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2 relative quick-add-container">
             <Button 
               variant="outline" 
               size="sm"
@@ -311,16 +354,19 @@ export default function Dashboard() {
             >
               📊 Export
             </Button>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="sm"
-              onClick={() => setShowQuickAdd(!showQuickAdd)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowQuickAdd(prev => !prev);
+              }}
               className="flex-1"
             >
               ➕ Add
             </Button>
             {showQuickAdd && (
-              <div className="absolute right-4 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+              <div className="absolute -right-2 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                 <div className="p-2">
                   <Button
                     variant="ghost"
@@ -328,8 +374,8 @@ export default function Dashboard() {
                     fullWidth
                     className="justify-start"
                     onClick={() => {
-                      navigate('/dashboard/add-expense');
                       setShowQuickAdd(false);
+                      navigate('/dashboard/add-expense');
                     }}
                   >
                     💸 Add Expense
@@ -340,8 +386,8 @@ export default function Dashboard() {
                     fullWidth
                     className="justify-start"
                     onClick={() => {
-                      navigate('/dashboard/add-income');
                       setShowQuickAdd(false);
+                      navigate('/dashboard/add-income');
                     }}
                   >
                     💰 Add Income
@@ -352,8 +398,8 @@ export default function Dashboard() {
                     fullWidth
                     className="justify-start"
                     onClick={() => {
-                      navigate('/dashboard/inventory');
                       setShowQuickAdd(false);
+                      navigate('/dashboard/inventory');
                     }}
                   >
                     📦 Inventory
@@ -365,34 +411,64 @@ export default function Dashboard() {
         </div>
 
         {/* Summary Cards */}
-        <SummaryCards
-          totalExpense={totalExpense}
-          totalIncome={totalIncome}
-          net={net}
-        />
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8 px-3 sm:px-0">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : (
+          <SummaryCards
+            totalExpense={totalExpense}
+            totalIncome={totalIncome}
+            net={net}
+          />
+        )}
 
         {/* Main Charts Grid - Mobile Optimized */}
-        <div className="space-y-6">
-          <LineChartCard
-            timeRange={timeRange}
-            setTimeRange={setTimeRange}
-            data={aggregatedData}
-          />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PieChartCard
-              data={expenseCategoryData}
-              total={totalCategoryAmount}
-            />
-            <IncomeItemPieChart data={incomeItemData} />
+        {isLoading ? (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="mx-3 sm:mx-0">
+              <SkeletonCard />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="mx-3 sm:mx-0">
+                <SkeletonCard />
+              </div>
+              <div className="mx-3 sm:mx-0">
+                <SkeletonCard />
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4 sm:space-y-6">
+            <LineChartCard
+              timeRange={timeRange}
+              setTimeRange={setTimeRange}
+              data={aggregatedData}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <PieChartCard
+                data={expenseCategoryData}
+                total={totalCategoryAmount}
+              />
+              <IncomeItemPieChart data={incomeItemData} />
+            </div>
+          </div>
+        )}
 
         {/* Recent Activity - Full Width on Mobile */}
-        <RecentActivity
-          recentExpenses={recentExpenses}
-          recentIncomes={recentIncomes}
-        />
+        {isLoading ? (
+          <div className="mx-3 sm:mx-0">
+            <SkeletonCard />
+          </div>
+        ) : (
+          <RecentActivity
+            recentExpenses={recentExpenses}
+            recentIncomes={recentIncomes}
+          />
+        )}
       </div>
     </div>
   );
@@ -462,7 +538,7 @@ const getIncomeItemData = (incomes = []) => {
 };
 
 const SummaryCards = ({ totalExpense, totalIncome, net }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8 px-3 sm:px-0">
     <SummaryCard 
       title="Total Expenses" 
       value={totalExpense} 
@@ -499,17 +575,17 @@ const SummaryCard = ({ title, value, color, icon, trend }) => {
   };
 
   return (
-    <Card variant="elevated" className="hover:shadow-lg transition-shadow duration-200">
+    <Card variant="elevated" className="hover:shadow-lg transition-shadow duration-200" padding="sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">{icon}</span>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+            <span className="text-xl sm:text-2xl">{icon}</span>
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 leading-tight">{title}</p>
           </div>
-          <h2 className={`text-3xl font-bold ${colorClassMap[color]} mb-2`}>
+          <h2 className={`text-2xl sm:text-3xl font-bold ${colorClassMap[color]} mb-2 leading-tight`}>
             ${Math.abs(value).toFixed(2)}
           </h2>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap">
             <span className={`text-xs px-2 py-1 rounded-full ${bgColorMap[color]} ${colorClassMap[color]} font-medium`}>
               {trend > 0 ? '+' : ''}{trend}%
             </span>
@@ -522,17 +598,17 @@ const SummaryCard = ({ title, value, color, icon, trend }) => {
 };
 
 const LineChartCard = ({ timeRange, setTimeRange, data }) => (
-  <Card variant="elevated" className="h-full">
-    <div className="flex items-center justify-between mb-6">
-      <CardHeader size="lg">📊 Expenses vs. Income Over Time</CardHeader>
-      <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+  <Card variant="elevated" className="h-full mx-3 sm:mx-0">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+      <CardHeader size="default" className="mb-0">📊 Expenses vs. Income Over Time</CardHeader>
+      <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 self-start sm:self-auto">
         {["day", "week", "month"].map((range) => (
           <Button
             key={range}
             size="sm"
             variant={timeRange === range ? "primary" : "ghost"}
             onClick={() => setTimeRange(range)}
-            className="text-xs"
+            className="text-xs px-2 py-1"
           >
             {range.charAt(0).toUpperCase() + range.slice(1)}
           </Button>
@@ -540,7 +616,7 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
       </div>
     </div>
 
-    <div className="h-80">
+    <div className="h-64 sm:h-80">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -592,20 +668,20 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
 
 const PieChartCard = ({ data, total }) => {
   return (
-    <Card variant="elevated" className="h-full">
-      <CardHeader size="lg">🏷️ Expenses by Category</CardHeader>
+    <Card variant="elevated" className="h-full mx-3 sm:mx-0">
+      <CardHeader size="default">🏷️ Expenses by Category</CardHeader>
       
       {data.length > 0 ? (
         <>
-          <div className="h-64 mb-6">
+          <div className="h-48 sm:h-64 mb-4 sm:mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={data}
                   dataKey="total"
                   nameKey="category"
-                  outerRadius={80}
-                  innerRadius={40}
+                  outerRadius={60}
+                  innerRadius={30}
                   paddingAngle={2}
                   label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                 >
@@ -678,20 +754,20 @@ const PieChartCard = ({ data, total }) => {
 };
 
 const IncomeItemPieChart = ({ data }) => (
-  <Card variant="elevated" className="h-full">
-    <CardHeader size="lg">💰 Income by Source</CardHeader>
+  <Card variant="elevated" className="h-full mx-3 sm:mx-0">
+    <CardHeader size="default">💰 Income by Source</CardHeader>
     
     {data.length > 0 ? (
       <>
-        <div className="h-64 mb-6">
+        <div className="h-48 sm:h-64 mb-4 sm:mb-6">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 dataKey="total"
                 nameKey="item"
-                outerRadius={80}
-                innerRadius={40}
+                outerRadius={60}
+                innerRadius={30}
                 paddingAngle={2}
                 label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
               >
@@ -777,46 +853,46 @@ const RecentActivity = ({ recentExpenses, recentIncomes }) => {
   ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
 
   return (
-    <Card variant="elevated" className="h-full">
-      <div className="flex items-center justify-between mb-6">
-        <CardHeader size="lg">⚡ Recent Activity</CardHeader>
+    <Card variant="elevated" className="h-full mx-3 sm:mx-0">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <CardHeader size="default" className="mb-0">⚡ Recent Activity</CardHeader>
         <Button variant="ghost" size="sm" className="text-xs">
           View All
         </Button>
       </div>
       
       {allActivity.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {allActivity.map((item, index) => (
-            <div 
+            <div
               key={`${item.type}-${item.id}-${index}`}
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+              className="flex items-center gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer active:scale-[0.98] touch-manipulation"
               onClick={() => navigate(item.type === 'expense' ? '/dashboard/expenses' : '/dashboard/income')}
             >
-              <div className={`w-10 h-10 rounded-full ${item.bgColor} flex items-center justify-center text-lg`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${item.bgColor} flex items-center justify-center text-base sm:text-lg flex-shrink-0`}>
                 {item.icon}
               </div>
-              
+
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {item.type === 'expense' ? item.vendor : item.item}
                   </p>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${item.bgColor} ${item.color}`}>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${item.bgColor} ${item.color} flex-shrink-0`}>
                     {item.type}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(item.date).toLocaleDateString('en-US', { 
-                    month: 'short', 
+                  {new Date(item.date).toLocaleDateString('en-US', {
+                    month: 'short',
                     day: 'numeric',
                     hour: 'numeric',
                     minute: '2-digit'
                   })}
                 </p>
               </div>
-              
-              <div className="text-right">
+
+              <div className="text-right flex-shrink-0">
                 <p className={`text-sm font-bold ${item.color}`}>
                   {item.type === 'expense' ? '-' : '+'}${(item.type === 'expense' ? item.grandTotal : item.amount)?.toFixed(2)}
                 </p>
