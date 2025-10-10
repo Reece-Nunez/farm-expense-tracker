@@ -1,0 +1,349 @@
+# Multi-Farm Team Collaboration Schema
+
+type Farm @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["AdminGroup"]}, {allow: private, operations: [read]}]) {
+  id: ID!
+  name: String! @index(name: "byName")
+  description: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String @default(value: "US")
+  phoneNumber: String
+  email: String
+  website: String
+  farmType: FarmType
+  establishedDate: AWSDate
+  owner: ID! @index(name: "byOwner") # The main farm owner
+  settings: FarmSettings
+  isActive: Boolean! @default(value: true)
+  
+  # Team and access management
+  teamMembers: [TeamMember] @hasMany(indexName: "byFarmId", fields: ["id"])
+  invitations: [TeamInvitation] @hasMany(indexName: "byFarmId", fields: ["id"])
+  
+  # Farm-specific data
+  expenses: [Expense] @hasMany(indexName: "byFarmId", fields: ["id"])
+  income: [Income] @hasMany(indexName: "byFarmId", fields: ["id"])
+  inventory: [InventoryItem] @hasMany(indexName: "byFarmId", fields: ["id"])
+  customers: [Customer] @hasMany(indexName: "byFarmId", fields: ["id"])
+  invoices: [Invoice] @hasMany(indexName: "byFarmId", fields: ["id"])
+  
+  # Audit fields
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  createdBy: ID!
+  updatedBy: ID
+}
+
+enum FarmType {
+  LIVESTOCK
+  CROP
+  DAIRY
+  POULTRY
+  MIXED
+  AQUACULTURE
+  ORGANIC
+  GREENHOUSE
+  ORCHARD
+  VINEYARD
+  OTHER
+}
+
+type FarmSettings @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["AdminGroup"]}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarmId")
+  farm: Farm @belongsTo(fields: ["farmId"])
+  
+  # Currency and locale settings
+  currency: String! @default(value: "USD")
+  locale: String! @default(value: "en-US")
+  timezone: String! @default(value: "America/New_York")
+  
+  # Business settings
+  fiscalYearStart: String @default(value: "01-01") # MM-DD format
+  taxIdNumber: String
+  businessRegistrationNumber: String
+  
+  # Feature flags
+  enableInventoryManagement: Boolean! @default(value: true)
+  enableInvoicing: Boolean! @default(value: true)
+  enableTeamCollaboration: Boolean! @default(value: true)
+  enableAdvancedReporting: Boolean! @default(value: true)
+  
+  # Notification settings
+  lowStockAlerts: Boolean! @default(value: true)
+  expenseThresholds: AWSJSON # JSON for different expense categories
+  emailNotifications: Boolean! @default(value: true)
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type TeamMember @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["AdminGroup"]}, {allow: private, operations: [read]}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarmId")
+  farm: Farm @belongsTo(fields: ["farmId"])
+  
+  # User information
+  userId: ID! @index(name: "byUserId") # Reference to Cognito user
+  email: String! @index(name: "byEmail")
+  firstName: String!
+  lastName: String!
+  profilePictureKey: String
+  
+  # Role and permissions
+  role: TeamRole!
+  permissions: [Permission!]!
+  isActive: Boolean! @default(value: true)
+  
+  # Access tracking
+  lastLoginAt: AWSDateTime
+  invitedBy: ID # User ID who sent the invitation
+  joinedAt: AWSDateTime!
+  
+  # Contact information
+  phoneNumber: String
+  emergencyContact: String
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum TeamRole {
+  OWNER      # Full access to everything
+  ADMIN      # Can manage team, view/edit most data
+  MANAGER    # Can view/edit operational data, limited admin access
+  EMPLOYEE   # Can add expenses/income, view assigned data
+  VIEWER     # Read-only access to assigned data
+  CONTRACTOR # Limited access to specific projects/areas
+}
+
+enum Permission {
+  # Expense management
+  VIEW_EXPENSES
+  CREATE_EXPENSES
+  EDIT_EXPENSES
+  DELETE_EXPENSES
+  APPROVE_EXPENSES
+  
+  # Income management
+  VIEW_INCOME
+  CREATE_INCOME
+  EDIT_INCOME
+  DELETE_INCOME
+  
+  # Inventory management
+  VIEW_INVENTORY
+  CREATE_INVENTORY
+  EDIT_INVENTORY
+  DELETE_INVENTORY
+  MANAGE_STOCK
+  
+  # Customer and invoicing
+  VIEW_CUSTOMERS
+  CREATE_CUSTOMERS
+  EDIT_CUSTOMERS
+  DELETE_CUSTOMERS
+  VIEW_INVOICES
+  CREATE_INVOICES
+  EDIT_INVOICES
+  DELETE_INVOICES
+  
+  # Team management
+  VIEW_TEAM
+  INVITE_MEMBERS
+  EDIT_MEMBERS
+  REMOVE_MEMBERS
+  MANAGE_ROLES
+  
+  # Farm management
+  VIEW_FARM_SETTINGS
+  EDIT_FARM_SETTINGS
+  
+  # Reports and analytics
+  VIEW_BASIC_REPORTS
+  VIEW_ADVANCED_REPORTS
+  EXPORT_DATA
+  
+  # System administration
+  MANAGE_INTEGRATIONS
+  VIEW_AUDIT_LOGS
+}
+
+type TeamInvitation @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["AdminGroup"]}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarmId")
+  farm: Farm @belongsTo(fields: ["farmId"])
+  
+  # Invitation details
+  email: String! @index(name: "byEmail")
+  invitedBy: ID! # User ID who sent the invitation
+  invitedByName: String!
+  role: TeamRole!
+  permissions: [Permission!]!
+  
+  # Invitation status
+  status: InvitationStatus! @default(value: PENDING)
+  token: String! @index(name: "byToken") # Unique invitation token
+  
+  # Message and expiration
+  message: String
+  expiresAt: AWSDateTime!
+  
+  # Response tracking
+  acceptedAt: AWSDateTime
+  rejectedAt: AWSDateTime
+  responseMessage: String
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+# Farm Activity Log for audit trail
+type FarmActivity @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["AdminGroup"]}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarmId")
+  farm: Farm @belongsTo(fields: ["farmId"])
+  
+  # Activity details
+  action: ActivityAction!
+  entityType: EntityType!
+  entityId: ID!
+  entityName: String
+  
+  # User and context
+  userId: ID! @index(name: "byUserId")
+  userName: String!
+  userRole: TeamRole!
+  
+  # Change tracking
+  oldValues: AWSJSON # Previous values (for updates)
+  newValues: AWSJSON # New values
+  changesSummary: String # Human-readable summary
+  
+  # Metadata
+  ipAddress: String
+  userAgent: String
+  timestamp: AWSDateTime! @index(name: "byTimestamp")
+}
+
+enum ActivityAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  INVITE
+  JOIN
+  LEAVE
+  LOGIN
+  EXPORT
+  IMPORT
+}
+
+enum EntityType {
+  EXPENSE
+  INCOME
+  INVENTORY_ITEM
+  CUSTOMER
+  INVOICE
+  TEAM_MEMBER
+  FARM_SETTINGS
+  CATEGORY
+}
+
+# User Profile extension for multi-farm support
+type UserProfile @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId") # Cognito User ID
+  
+  # Personal information
+  firstName: String!
+  lastName: String!
+  email: String! @index(name: "byEmail")
+  phoneNumber: String
+  profilePictureKey: String
+  
+  # Multi-farm access
+  currentFarmId: ID # Currently selected farm
+  farmMemberships: [TeamMember] @hasMany(indexName: "byUserId", fields: ["userId"])
+  
+  # Preferences
+  language: String @default(value: "en")
+  theme: String @default(value: "system") # light, dark, system
+  notifications: NotificationSettings
+  
+  # Activity tracking
+  lastLoginAt: AWSDateTime
+  isActive: Boolean! @default(value: true)
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type NotificationSettings @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId")
+  
+  # Email notifications
+  emailEnabled: Boolean! @default(value: true)
+  lowStockAlerts: Boolean! @default(value: true)
+  expenseApprovals: Boolean! @default(value: true)
+  teamInvitations: Boolean! @default(value: true)
+  weeklyReports: Boolean! @default(value: false)
+  monthlyReports: Boolean! @default(value: false)
+  
+  # Push notifications (for mobile apps)
+  pushEnabled: Boolean! @default(value: true)
+  criticalAlerts: Boolean! @default(value: true)
+  
+  # SMS notifications
+  smsEnabled: Boolean! @default(value: false)
+  smsNumber: String
+  emergencyAlerts: Boolean! @default(value: true)
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Farm statistics and metrics
+type FarmMetrics @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {
+  id: ID!
+  farmId: ID! @index(name: "byFarmId")
+  farm: Farm @belongsTo(fields: ["farmId"])
+  
+  # Time period
+  year: Int! @index(name: "byYear")
+  month: Int! @index(name: "byMonth")
+  
+  # Financial metrics
+  totalExpenses: Float! @default(value: 0)
+  totalIncome: Float! @default(value: 0)
+  netProfit: Float! @default(value: 0)
+  
+  # Operational metrics
+  activeTeamMembers: Int! @default(value: 0)
+  totalInventoryItems: Int! @default(value: 0)
+  lowStockItems: Int! @default(value: 0)
+  totalCustomers: Int! @default(value: 0)
+  
+  # Activity metrics
+  expenseTransactions: Int! @default(value: 0)
+  incomeTransactions: Int! @default(value: 0)
+  inventoryMovements: Int! @default(value: 0)
+  invoicesSent: Int! @default(value: 0)
+  
+  # Generated timestamp
+  calculatedAt: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

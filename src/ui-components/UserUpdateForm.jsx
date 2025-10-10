@@ -34,9 +34,13 @@ export default function UserUpdateForm(props) {
     sub: "",
     username: "",
     email: "",
+    firstName: "",
+    lastName: "",
     farmName: "",
     phone: "",
     aboutMe: "",
+    jobTitle: "",
+    location: "",
     profilePictureKey: "",
     role: "",
     preferences: "",
@@ -44,9 +48,13 @@ export default function UserUpdateForm(props) {
   const [sub, setSub] = React.useState(initialValues.sub);
   const [username, setUsername] = React.useState(initialValues.username);
   const [email, setEmail] = React.useState(initialValues.email);
+  const [firstName, setFirstName] = React.useState(initialValues.firstName);
+  const [lastName, setLastName] = React.useState(initialValues.lastName);
   const [farmName, setFarmName] = React.useState(initialValues.farmName);
   const [phone, setPhone] = React.useState(initialValues.phone);
   const [aboutMe, setAboutMe] = React.useState(initialValues.aboutMe);
+  const [jobTitle, setJobTitle] = React.useState(initialValues.jobTitle);
+  const [location, setLocation] = React.useState(initialValues.location);
   const [profilePictureKey, setProfilePictureKey] = React.useState(
     initialValues.profilePictureKey
   );
@@ -62,9 +70,13 @@ export default function UserUpdateForm(props) {
     setSub(cleanValues.sub);
     setUsername(cleanValues.username);
     setEmail(cleanValues.email);
+    setFirstName(cleanValues.firstName);
+    setLastName(cleanValues.lastName);
     setFarmName(cleanValues.farmName);
     setPhone(cleanValues.phone);
     setAboutMe(cleanValues.aboutMe);
+    setJobTitle(cleanValues.jobTitle);
+    setLocation(cleanValues.location);
     setProfilePictureKey(cleanValues.profilePictureKey);
     setRole(cleanValues.role);
     setPreferences(
@@ -95,9 +107,13 @@ export default function UserUpdateForm(props) {
     sub: [{ type: "Required" }],
     username: [{ type: "Required" }],
     email: [],
+    firstName: [],
+    lastName: [],
     farmName: [],
     phone: [],
     aboutMe: [],
+    jobTitle: [],
+    location: [],
     profilePictureKey: [],
     role: [],
     preferences: [{ type: "JSON" }],
@@ -131,9 +147,13 @@ export default function UserUpdateForm(props) {
           sub,
           username,
           email: email ?? null,
+          firstName: firstName ?? null,
+          lastName: lastName ?? null,
           farmName: farmName ?? null,
           phone: phone ?? null,
           aboutMe: aboutMe ?? null,
+          jobTitle: jobTitle ?? null,
+          location: location ?? null,
           profilePictureKey: profilePictureKey ?? null,
           role: role ?? null,
           preferences: preferences ?? null,
@@ -200,9 +220,13 @@ export default function UserUpdateForm(props) {
               sub: value,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -232,9 +256,13 @@ export default function UserUpdateForm(props) {
               sub,
               username: value,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -264,9 +292,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email: value,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -285,6 +317,78 @@ export default function UserUpdateForm(props) {
         {...getOverrideProps(overrides, "email")}
       ></TextField>
       <TextField
+        label="First name"
+        isRequired={false}
+        isReadOnly={false}
+        value={firstName}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub,
+              username,
+              email,
+              firstName: value,
+              lastName,
+              farmName,
+              phone,
+              aboutMe,
+              jobTitle,
+              location,
+              profilePictureKey,
+              role,
+              preferences,
+            };
+            const result = onChange(modelFields);
+            value = result?.firstName ?? value;
+          }
+          if (errors.firstName?.hasError) {
+            runValidationTasks("firstName", value);
+          }
+          setFirstName(value);
+        }}
+        onBlur={() => runValidationTasks("firstName", firstName)}
+        errorMessage={errors.firstName?.errorMessage}
+        hasError={errors.firstName?.hasError}
+        {...getOverrideProps(overrides, "firstName")}
+      ></TextField>
+      <TextField
+        label="Last name"
+        isRequired={false}
+        isReadOnly={false}
+        value={lastName}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub,
+              username,
+              email,
+              firstName,
+              lastName: value,
+              farmName,
+              phone,
+              aboutMe,
+              jobTitle,
+              location,
+              profilePictureKey,
+              role,
+              preferences,
+            };
+            const result = onChange(modelFields);
+            value = result?.lastName ?? value;
+          }
+          if (errors.lastName?.hasError) {
+            runValidationTasks("lastName", value);
+          }
+          setLastName(value);
+        }}
+        onBlur={() => runValidationTasks("lastName", lastName)}
+        errorMessage={errors.lastName?.errorMessage}
+        hasError={errors.lastName?.hasError}
+        {...getOverrideProps(overrides, "lastName")}
+      ></TextField>
+      <TextField
         label="Farm name"
         isRequired={false}
         isReadOnly={false}
@@ -296,9 +400,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName: value,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -328,9 +436,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone: value,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -360,9 +472,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe: value,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences,
@@ -381,6 +497,78 @@ export default function UserUpdateForm(props) {
         {...getOverrideProps(overrides, "aboutMe")}
       ></TextField>
       <TextField
+        label="Job title"
+        isRequired={false}
+        isReadOnly={false}
+        value={jobTitle}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub,
+              username,
+              email,
+              firstName,
+              lastName,
+              farmName,
+              phone,
+              aboutMe,
+              jobTitle: value,
+              location,
+              profilePictureKey,
+              role,
+              preferences,
+            };
+            const result = onChange(modelFields);
+            value = result?.jobTitle ?? value;
+          }
+          if (errors.jobTitle?.hasError) {
+            runValidationTasks("jobTitle", value);
+          }
+          setJobTitle(value);
+        }}
+        onBlur={() => runValidationTasks("jobTitle", jobTitle)}
+        errorMessage={errors.jobTitle?.errorMessage}
+        hasError={errors.jobTitle?.hasError}
+        {...getOverrideProps(overrides, "jobTitle")}
+      ></TextField>
+      <TextField
+        label="Location"
+        isRequired={false}
+        isReadOnly={false}
+        value={location}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              sub,
+              username,
+              email,
+              firstName,
+              lastName,
+              farmName,
+              phone,
+              aboutMe,
+              jobTitle,
+              location: value,
+              profilePictureKey,
+              role,
+              preferences,
+            };
+            const result = onChange(modelFields);
+            value = result?.location ?? value;
+          }
+          if (errors.location?.hasError) {
+            runValidationTasks("location", value);
+          }
+          setLocation(value);
+        }}
+        onBlur={() => runValidationTasks("location", location)}
+        errorMessage={errors.location?.errorMessage}
+        hasError={errors.location?.hasError}
+        {...getOverrideProps(overrides, "location")}
+      ></TextField>
+      <TextField
         label="Profile picture key"
         isRequired={false}
         isReadOnly={false}
@@ -392,9 +580,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey: value,
               role,
               preferences,
@@ -426,9 +618,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role: value,
               preferences,
@@ -458,9 +654,13 @@ export default function UserUpdateForm(props) {
               sub,
               username,
               email,
+              firstName,
+              lastName,
               farmName,
               phone,
               aboutMe,
+              jobTitle,
+              location,
               profilePictureKey,
               role,
               preferences: value,

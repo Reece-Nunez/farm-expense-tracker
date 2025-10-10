@@ -1,4 +1,4 @@
-import { fetchAuthSession } from "@aws-amplify/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import { getUser } from "../graphql/queries.js";
 import { createUser } from "../graphql/mutations.js";

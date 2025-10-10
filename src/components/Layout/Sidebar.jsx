@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "@aws-amplify/auth";
+import { signOut } from "aws-amplify/auth";
 import { onUpdateUser } from "@/graphql/subscriptions";
 import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
@@ -16,17 +16,23 @@ import {
   PlusIcon,
   ChevronRightIcon,
   ChevronDownIcon,
+  DocumentTextIcon,
+  UsersIcon,
 } from "@heroicons/react/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxesStacked, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../assets/Favicon.png";
 import { getCurrentUser } from "../../utils/getCurrentUser";
+import ThemeToggle from "../ui/ThemeToggle";
+import FarmSelector from "../team/FarmSelector";
+import { useFarm } from "../../context/FarmContext";
 
 const defaultProfileImage =
   "https://farmexpensetrackerreceipts94813-main.s3.amazonaws.com/profile-pictures/default.jpg";
 
 export default function Sidebar({ onCloseSidebar = () => {} }) {
   const navigate = useNavigate();
+  const { currentFarm } = useFarm();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(defaultProfileImage);
   const [username, setUsername] = useState("User");
@@ -121,6 +127,17 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           route: "/dashboard/add-expense",
           color: "text-blue-600",
         },
+        {
+          label: "Scan Receipt",
+          icon: () => (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          ),
+          route: "/dashboard/scan-receipt",
+          color: "text-purple-600",
+        },
       ],
     },
     {
@@ -137,6 +154,27 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           icon: PlusIcon,
           route: "/dashboard/add-income",
           color: "text-green-600",
+        },
+      ],
+    },
+    {
+      label: "Invoices & Customers",
+      items: [
+        {
+          label: "Invoices",
+          icon: DocumentTextIcon,
+          route: "/dashboard/invoices",
+          color: "text-purple-600",
+        },
+        {
+          label: "Customers",
+          icon: () => (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          ),
+          route: "/dashboard/customers",
+          color: "text-blue-600",
         },
       ],
     },
@@ -158,6 +196,27 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
       ],
     },
     {
+      label: "Team & Farms",
+      items: [
+        {
+          label: "Team Management",
+          icon: UsersIcon,
+          route: "/dashboard/team",
+          color: "text-indigo-600",
+        },
+        {
+          label: "Farm Settings",
+          icon: () => (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          ),
+          route: "/dashboard/farm-settings",
+          color: "text-green-600",
+        },
+      ],
+    },
+    {
       label: "Other",
       items: [
         {
@@ -167,7 +226,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           color: "text-yellow-600",
         },
         {
-          label: "Inventory (New)",
+          label: "Farm Inventory",
           icon: () => (
             <FontAwesomeIcon
               icon={faBoxesStacked}
@@ -183,7 +242,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
   const [expandedGroups, setExpandedGroups] = useState(() => {
     const initialState = {};
     groupedNavItems.forEach((group) => {
-      initialState[group.label] = true;
+      initialState[group.label] = false;
     });
     return initialState;
   });
@@ -198,7 +257,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
     <div className="flex flex-col min-h-screen max-h-screen overflow-hidden">
       <div className="flex-shrink-0">
         {/* Profile display */}
-        <div className="p-4 sm:p-2 border-b border-gray-200">
+        <div className="p-4 sm:p-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setProfileMenuOpen(!profileMenuOpen)}
             className="flex flex-col items-center w-full focus:outline-none"
@@ -208,9 +267,9 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
               alt="Profile"
               className="w-16 h-16 rounded-full object-cover mb-1"
             />
-            <p className="text-sm font-medium">Hi, {farmName}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Hi, {farmName}</p>
             <ChevronDownIcon
-              className={`w-4 h-4 mt-1 text-gray-500 transition-transform ${
+              className={`w-4 h-4 mt-1 text-gray-500 dark:text-gray-400 transition-transform ${
                 profileMenuOpen ? "rotate-180" : ""
               }`}
             />
@@ -237,10 +296,15 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
         </div>
 
         {/* App Name */}
-        <div className="p-4 border-b border-gray-200">
-          <a href="/" className="flex justify-center items-center">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <button onClick={() => handleNavClick("/dashboard")} className="flex justify-center items-center w-full">
             <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-14" />
-          </a>
+          </button>
+        </div>
+
+        {/* Farm Selector */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <FarmSelector showCreateOption={true} />
         </div>
       </div>
 
@@ -248,7 +312,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         <button
           onClick={() => handleNavClick("/dashboard")}
-          className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
           <FontAwesomeIcon
             icon={faChartLine}
@@ -269,14 +333,14 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
             <div key={group.label}>
               {/* Group Label */}
               <button
-                className="flex justify-between items-center w-full text-left text-sm font-semibold text-gray-600 mb-1"
+                className="flex justify-between items-center w-full text-left text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1"
                 onClick={toggleGroup}
               >
                 <span>{group.label}</span>
                 {isExpanded ? (
-                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+                  <ChevronDownIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 ) : (
-                  <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+                  <ChevronRightIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 )}
               </button>
 
@@ -288,7 +352,7 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
                       <button
                         key={idx}
                         onClick={() => handleNavClick(route)}
-                        className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="w-full flex items-center gap-2 p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <Icon className={`w-5 h-5 ${color}`} />
                         <span>{label}</span>
@@ -301,6 +365,11 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           );
         })}
       </nav>
+
+      {/* Theme toggle at the bottom */}
+      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
+        <ThemeToggle variant="toggle" size="sm" showLabel={false} />
+      </div>
     </div>
   );
 }

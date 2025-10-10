@@ -14,14 +14,19 @@ type User
   sub: String!
   username: String!
   email: String
+  firstName: String
+  lastName: String
   farmName: String
   phone: String
   aboutMe: String
+  jobTitle: String
+  location: String
   profilePictureKey: String
   role: String
   preferences: AWSJSON
   expenses: [Expense] @hasMany(indexName: "byUser", fields: ["id"])
   income: [Income] @hasMany(indexName: "byUser", fields: ["id"])
+  teamMemberships: [TeamMember] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
 type Expense
@@ -247,4 +252,252 @@ type InventoryItem
   location: String
   acquiredDate: AWSDate
   notes: String
+}
+
+type Customer
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "sub" }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  sub: String!
+  name: String!
+  email: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+  taxNumber: String
+  notes: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  invoices: [Invoice] @hasMany(indexName: "byCustomer", fields: ["id"])
+}
+
+type Invoice
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "sub" }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  sub: String!
+  customerID: ID! @index(name: "byCustomer")
+  customer: Customer @belongsTo(fields: ["customerID"])
+  invoiceNumber: String!
+  date: AWSDate!
+  dueDate: AWSDate
+  status: InvoiceStatus!
+  subtotal: Float!
+  taxRate: Float
+  taxAmount: Float
+  discountAmount: Float
+  total: Float!
+  notes: String
+  terms: String
+  paidDate: AWSDate
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  items: [InvoiceItem] @hasMany(indexName: "byInvoice", fields: ["id"])
+}
+
+type InvoiceItem
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "sub" }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  sub: String!
+  invoiceID: ID! @index(name: "byInvoice")
+  invoice: Invoice @belongsTo(fields: ["invoiceID"])
+  description: String!
+  quantity: Float!
+  unitPrice: Float!
+  total: Float!
+  category: String
+  unit: String
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+type Product
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "sub" }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  sub: String!
+  name: String!
+  description: String
+  category: String!
+  unitPrice: Float!
+  unit: String!
+  sku: String
+  barcode: String
+  stockQuantity: Int
+  minStockLevel: Int
+  isActive: Boolean!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Farm
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "ownerSub" }
+      { allow: private, operations: [read] }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  ownerSub: String!
+  name: String!
+  farmType: FarmType
+  description: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+  acres: Float
+  establishedYear: Int
+  website: String
+  businessRegistration: String
+  taxId: String
+  phoneNumber: String
+  email: String
+  isActive: Boolean!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  members: [TeamMember] @hasMany(indexName: "byFarm", fields: ["id"])
+  invitations: [TeamInvitation] @hasMany(indexName: "byFarm", fields: ["id"])
+}
+
+type TeamMember
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "userSub" }
+      { allow: private, operations: [read] }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  farmID: ID! @index(name: "byFarm")
+  farm: Farm @belongsTo(fields: ["farmID"])
+  userID: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userID"])
+  userSub: String!
+  role: TeamRole!
+  permissions: [String]
+  isActive: Boolean!
+  joinedAt: AWSDateTime
+  lastLoginAt: AWSDateTime
+  invitedBy: String
+  notes: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type TeamInvitation
+  @model
+  @auth(
+    rules: [
+      { allow: private, operations: [read, create, update] }
+      {
+        allow: groups
+        groups: ["Admins"]
+        operations: [create, read, update, delete]
+      }
+    ]
+  ) {
+  id: ID!
+  farmID: ID! @index(name: "byFarm")
+  farm: Farm @belongsTo(fields: ["farmID"])
+  email: String!
+  role: TeamRole!
+  status: InvitationStatus!
+  invitedByUserSub: String!
+  invitedByName: String!
+  message: String
+  expiresAt: AWSDateTime
+  acceptedAt: AWSDateTime
+  rejectedAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+enum FarmType {
+  LIVESTOCK
+  CROP
+  DAIRY
+  POULTRY
+  MIXED
+  AQUACULTURE
+  ORGANIC
+  GREENHOUSE
+  ORCHARD
+  VINEYARD
+  OTHER
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  VIEWER
+  CONTRACTOR
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
 }

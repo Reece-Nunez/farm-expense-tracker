@@ -26,6 +26,7 @@ import { toast } from "react-hot-toast";
 import { incomeSchema } from "@/schemas/incomeSchema";
 import { CalendarIcon } from "@heroicons/react/outline";
 import { updateField } from "../../graphql/mutations";
+import { haptics } from "../../utils/haptics";
 
 const paymentMethods = ["Venmo", "Checks", "Cash", "Other"];
 const itemsSold = ["Eggs", "Beef", "Pork", "Animal", "Other"];
@@ -252,12 +253,12 @@ const IncomeForm = forwardRef((props, ref) => {
   };
 
   return (
-    <Card className="w-full max-w-md md:max-w-4xl mx-auto p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-      <CardHeader className="text-2xl md:text-3xl font-bold text-center mb-4">
+    <Card className="w-full max-w-md md:max-w-4xl mx-auto p-3 sm:p-4 md:p-8 mb-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <CardHeader className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-3 sm:mb-4">
         Income Form
       </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit(onValid, onInvalid)} className="space-y-3 sm:space-y-4">
           <div>
             <label className="block font-medium mb-1">
               <CalendarIcon className="inline-block w-5 h-5 text-blue-500 mr-1" />
@@ -268,7 +269,7 @@ const IncomeForm = forwardRef((props, ref) => {
               onChange={handleDateChange}
               placeholderText="Select Date"
               dateFormat="yyyy-MM-dd"
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
+              className={`w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation ${
                 errors.date ? "border-red-500 animate-shake" : ""
               }`}
               isClearable
@@ -282,7 +283,7 @@ const IncomeForm = forwardRef((props, ref) => {
             <label className="block font-medium mb-1">Payment Method</label>
             <Select
               {...register("paymentMethod")}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+              className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
             >
               <option value="">Select Payment Method</option>
               {paymentMethods.map((method) => (
@@ -299,7 +300,7 @@ const IncomeForm = forwardRef((props, ref) => {
             </label>
             <Select
               {...register("item")}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 ${
+              className={`w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation ${
                 errors.item ? "border-red-500 animate-shake" : ""
               }`}
             >
@@ -321,7 +322,7 @@ const IncomeForm = forwardRef((props, ref) => {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className="w-full border rounded px-3 py-2"
+                      className="w-full border rounded px-3 py-3 text-base touch-manipulation"
                     >
                       <option value="">Select Animal</option>
                       {livestockOptions.map((animal) => (
@@ -348,7 +349,9 @@ const IncomeForm = forwardRef((props, ref) => {
                 step="any"
                 placeholder="e.g., 12 (dozens) or 50 (lbs)"
                 {...register("weightOrQuantity", { valueAsNumber: true })}
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+                className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
+                autoComplete="off"
+                inputMode="decimal"
               />
             </div>
             <div className="flex-1">
@@ -361,7 +364,8 @@ const IncomeForm = forwardRef((props, ref) => {
                 placeholder="Price per unit"
                 value={watchPricePerUnit}
                 onValueChange={handlePriceChange}
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+                className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
+                autoComplete="off"
               />
               {lastEditedField === "total" && (
                 <p className="text-xs text-gray-500 mt-1 italic">
@@ -381,7 +385,8 @@ const IncomeForm = forwardRef((props, ref) => {
               placeholder="Total amount"
               value={watch("total")}
               onValueChange={handleTotalChange}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+              className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
+              autoComplete="off"
             />
             {lastEditedField === "pricePerUnit" && (
               <p className="text-xs text-gray-500 mt-1 italic">
@@ -395,28 +400,35 @@ const IncomeForm = forwardRef((props, ref) => {
             <Textarea
               placeholder="Any extra details"
               {...register("notes")}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300"
+              className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
+              autoComplete="off"
             />
           </div>
 
           <div className="flex flex-col sm:flex-row justify-around gap-4 mt-6">
             <Button
               type="button"
-              onClick={() => reset()}
-              className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors"
+              onClick={() => {
+                haptics.light();
+                reset();
+              }}
+              className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors w-full sm:w-auto touch-manipulation"
             >
               Clear
             </Button>
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors w-full sm:w-auto touch-manipulation"
             >
               Submit
             </Button>
             <Button
               type="button"
-              onClick={() => navigate("/dashboard")}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
+              onClick={() => {
+                haptics.light();
+                navigate("/dashboard");
+              }}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors w-full sm:w-auto touch-manipulation"
             >
               Back to Dashboard
             </Button>

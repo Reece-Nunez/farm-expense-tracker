@@ -1,8 +1,7 @@
 {
   "AppSyncApiName": "farmexpensetracker",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
-  "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2025-04-09T14:42:31.302Z",
+  "CreateAPIKey": 0,
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
       "authfarmexpensetracker1da593af",

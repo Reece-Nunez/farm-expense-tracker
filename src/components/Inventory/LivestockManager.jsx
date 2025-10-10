@@ -17,8 +17,6 @@ import {
 import { generateClient } from "aws-amplify/api";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
-const client = generateClient();
-
 const LivestockManager = () => {
   const [livestock, setLivestock] = useState([]);
   const [fields, setFields] = useState([]);
@@ -57,6 +55,7 @@ const LivestockManager = () => {
   }, []);
 
   const fetchLivestock = async (sub) => {
+    const client = generateClient();
     const { data } = await client.graphql({
       query: listLivestocks,
       variables: {
@@ -75,6 +74,7 @@ const LivestockManager = () => {
   };
 
   const fetchFields = async (sub) => {
+    const client = generateClient();
     const { data } = await client.graphql({
       query: listFields,
       variables: { filter: { sub: { eq: sub } }, limit: 1000 },
@@ -83,6 +83,7 @@ const LivestockManager = () => {
   };
 
   const fetchFamilies = async (sub) => {
+    const client = generateClient();
     const { data } = await client.graphql({
       query: listLivestockFamilies,
       variables: { filter: { sub: { eq: sub } }, limit: 1000 },
@@ -95,6 +96,7 @@ const LivestockManager = () => {
   };
 
   const handleAddOrUpdateAnimal = async () => {
+    const client = generateClient();
     const { name, species, breed, birthdate, weight, gender, locationId } =
       newAnimal;
     const sub = user?.attributes?.sub || user?.sub;
@@ -228,6 +230,7 @@ const LivestockManager = () => {
   const handleDelete = async (animalId) => {
     if (!window.confirm("Are you sure you want to delete this animal?")) return;
     try {
+      const client = generateClient();
       const parentLinks = families.filter(
         (f) => f.childID === animalId || f.parentID === animalId
       );
