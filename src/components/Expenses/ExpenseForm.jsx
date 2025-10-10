@@ -246,14 +246,20 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Item <span className="text-red-500">*</span>
                     </label>
-                    <Input
-                      {...register(`lineItems.${idx}.item`)}
-                      className={errors.lineItems?.[idx]?.item ? "border-red-500 animate-shake" : ""}
-                      placeholder="Enter item name"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      autoCapitalize="off"
-                      spellCheck="false"
+                    <Controller
+                      name={`lineItems.${idx}.item`}
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          className={errors.lineItems?.[idx]?.item ? "border-red-500 animate-shake" : ""}
+                          placeholder="Enter item name"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck="false"
+                        />
+                      )}
                     />
                     {errors.lineItems?.[idx]?.item && (
                       <p className="text-red-500 text-sm">
@@ -315,14 +321,20 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Quantity <span className="text-red-500">*</span>
                       </label>
-                      <Input
-                        type="number"
-                        {...register(`lineItems.${idx}.quantity`)}
-                        className={errors.lineItems?.[idx]?.quantity ? "border-red-500 animate-shake" : ""}
-                        placeholder="0"
-                        autoComplete="off"
-                        inputMode="decimal"
-                        pattern="[0-9]*"
+                      <Controller
+                        name={`lineItems.${idx}.quantity`}
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            type="number"
+                            className={errors.lineItems?.[idx]?.quantity ? "border-red-500 animate-shake" : ""}
+                            placeholder="0"
+                            autoComplete="off"
+                            inputMode="decimal"
+                            pattern="[0-9]*"
+                          />
+                        )}
                       />
                       {errors.lineItems?.[idx]?.quantity && (
                         <p className="text-red-500 text-sm">

@@ -344,14 +344,21 @@ const IncomeForm = forwardRef((props, ref) => {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block font-medium mb-1">Weight/Quantity</label>
-              <Input
-                type="number"
-                step="any"
-                placeholder="e.g., 12 (dozens) or 50 (lbs)"
-                {...register("weightOrQuantity", { valueAsNumber: true })}
-                className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
-                autoComplete="off"
-                inputMode="decimal"
+              <Controller
+                name="weightOrQuantity"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    step="any"
+                    placeholder="e.g., 12 (dozens) or 50 (lbs)"
+                    className="w-full border rounded px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-300 touch-manipulation"
+                    autoComplete="off"
+                    inputMode="decimal"
+                    onChange={(e) => field.onChange(e.target.valueAsNumber || e.target.value)}
+                  />
+                )}
               />
             </div>
             <div className="flex-1">
