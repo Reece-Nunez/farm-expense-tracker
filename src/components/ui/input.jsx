@@ -69,7 +69,7 @@ export const Input = React.forwardRef(function InputWithRef({
     className
   );
 
-  const InputField = () => (
+  const inputElement = (
     <div className="relative">
       {leftIcon && (
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -91,7 +91,7 @@ export const Input = React.forwardRef(function InputWithRef({
   );
 
   if (!label && !helperText && !errorText) {
-    return <InputField />;
+    return inputElement;
   }
 
   return (
@@ -101,7 +101,7 @@ export const Input = React.forwardRef(function InputWithRef({
           {label}
         </label>
       )}
-      <InputField />
+      {inputElement}
       {(helperText || errorText) && (
         <p className={cn(
           "text-sm",
