@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-01-30T08:42:05.344Z",
+  "dryRun": false,
+  "sendResetEmails": false,
+  "results": {
+    "created": [
+      {
+        "email": "cwvap12@gmail.com",
+        "userId": "592ee094-240b-4bd9-94b4-265f983d7a21",
+        "tempPassword": "paX0#5vNF121edFM"
+      },
+      {
+        "email": "ammonelzinga@gmail.com",
+        "userId": "a3ee3e61-7857-48e9-91e3-2546827199b3",
+        "tempPassword": "NXLLn0i4vyza%Jrb"
+      },
+      {
+        "email": "mark.amyhuster@yahoo.com",
+        "userId": "bef701d8-5389-4502-bb81-e55e0dc3e969",
+        "tempPassword": "l9$Tb85Mb6gyi$%4"
+      },
+      {
+        "email": "rowe3r@yahoo.com",
+        "userId": "95ab6293-1239-4578-95dc-4667844e9e8d",
+        "tempPassword": "KuSg38CkIKW486CP"
+      },
+      {
+        "email": "kbess28@gmail.com",
+        "userId": "f57dad7e-0dd8-4f35-8867-6c530b0fd3f0",
+        "tempPassword": "NrnYiEAuu7bwQh9E"
+      },
+      {
+        "email": "reecenunez20@gmail.com",
+        "userId": "bac78776-e881-44ad-ab5f-d34d13e8592d",
+        "tempPassword": "3#f7bYoMt3oAE9Ps"
+      },
+      {
+        "email": "wyatt.c.devlin@gmail.com",
+        "userId": "3fd380cd-0963-40d4-9fe8-b5488cf687a1",
+        "tempPassword": "Iw@LbEFzXY@fogJZ"
+      },
+      {
+        "email": "starriewhittle4@gmail.com",
+        "userId": "397714a6-5157-4b26-9148-ceb373741e63",
+        "tempPassword": "E24LnEKqZTSHnLYh"
+      },
+      {
+        "email": "reece@nunezdev.com",
+        "userId": "82bfb7cb-7830-4929-b21b-97600d69590e",
+        "tempPassword": "PVyFOpM5XoDpomX!"
+      },
+      {
+        "email": "joshmckeachnie@gmail.com",
+        "userId": "985ada17-b1e9-4962-adbe-dfb0d408a55b",
+        "tempPassword": "2py@2A95%6dZPCcl"
+      }
+    ],
+    "skipped": [
+      {
+        "username": "nunezfamily",
+        "email": "reecenunez20@gmail.com",
+        "email_verified": true,
+        "sub": "d4b8b488-0011-70d5-8c47-1bd59d319354",
+        "created": "2025-04-09T10:43:18.141000-05:00",
+        "status": "CONFIRMED",
+        "enabled": true,
+        "reason": "already_exists"
+      }
+    ],
+    "errors": []
+  }
+}

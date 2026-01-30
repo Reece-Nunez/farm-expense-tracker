@@ -1,0 +1,32 @@
+[
+  {
+    "__typename": "Field",
+    "updatedAt": "2025-05-20T00:19:27.651Z",
+    "notes": "Back 4 acres with house, shop, and other animals",
+    "acres": 4,
+    "createdAt": "2025-05-20T00:19:27.651Z",
+    "id": "53890b26-f017-49eb-ac0f-8fe68c2b2d26",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "name": "Back 4"
+  },
+  {
+    "__typename": "Field",
+    "updatedAt": "2025-06-12T00:58:32.775Z",
+    "notes": "",
+    "acres": 0.33,
+    "createdAt": "2025-06-12T00:58:32.775Z",
+    "id": "aaa415aa-470e-4c3c-ac73-d6c62ed6ef4a",
+    "sub": "84f87458-a011-7025-d9eb-5149a3502b8f",
+    "name": "Backyard"
+  },
+  {
+    "__typename": "Field",
+    "updatedAt": "2025-04-11T13:18:35.292Z",
+    "notes": "Front cow pasture, has pond, and electric fence, gate on north end and south west end.",
+    "acres": 6,
+    "createdAt": "2025-04-11T13:18:35.292Z",
+    "id": "239f2cf1-c986-46d7-9115-c22df05e1ee9",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "name": "Front Pasture"
+  }
+]

@@ -1,0 +1,97 @@
+{
+  "exportDate": "2026-01-30T08:28:03.078Z",
+  "region": "us-east-1",
+  "tables": [
+    {
+      "tableName": "ChickenFlock-hziuk4texngnpdushazijd3p5q-main",
+      "count": 4,
+      "success": true
+    },
+    {
+      "tableName": "Customer-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "EggLog-hziuk4texngnpdushazijd3p5q-main",
+      "count": 42,
+      "success": true
+    },
+    {
+      "tableName": "Expense-hziuk4texngnpdushazijd3p5q-main",
+      "count": 124,
+      "success": true
+    },
+    {
+      "tableName": "Farm-hziuk4texngnpdushazijd3p5q-main",
+      "count": 2,
+      "success": true
+    },
+    {
+      "tableName": "Field-hziuk4texngnpdushazijd3p5q-main",
+      "count": 3,
+      "success": true
+    },
+    {
+      "tableName": "Income-hziuk4texngnpdushazijd3p5q-main",
+      "count": 19,
+      "success": true
+    },
+    {
+      "tableName": "InventoryItem-hziuk4texngnpdushazijd3p5q-main",
+      "count": 3,
+      "success": true
+    },
+    {
+      "tableName": "Invoice-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "InvoiceItem-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "LineItem-hziuk4texngnpdushazijd3p5q-main",
+      "count": 167,
+      "success": true
+    },
+    {
+      "tableName": "Livestock-hziuk4texngnpdushazijd3p5q-main",
+      "count": 6,
+      "success": true
+    },
+    {
+      "tableName": "LivestockFamily-hziuk4texngnpdushazijd3p5q-main",
+      "count": 5,
+      "success": true
+    },
+    {
+      "tableName": "MedicalRecord-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "Product-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "TeamInvitation-hziuk4texngnpdushazijd3p5q-main",
+      "count": 0,
+      "success": true
+    },
+    {
+      "tableName": "TeamMember-hziuk4texngnpdushazijd3p5q-main",
+      "count": 1,
+      "success": true
+    },
+    {
+      "tableName": "User-hziuk4texngnpdushazijd3p5q-main",
+      "count": 5,
+      "success": true
+    }
+  ],
+  "totalRecords": 381
+}

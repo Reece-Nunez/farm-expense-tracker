@@ -1,0 +1,422 @@
+[
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-19",
+    "updatedAt": "2025-06-26T00:46:45.665Z",
+    "createdAt": "2025-06-26T00:46:45.665Z",
+    "eggsCollected": 3,
+    "id": "629a764a-4f4d-4deb-9b24-381ad8c14499",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-02",
+    "updatedAt": "2025-07-03T16:36:36.286Z",
+    "createdAt": "2025-07-03T16:36:36.286Z",
+    "eggsCollected": 3,
+    "id": "0695c550-f104-4598-ae7a-cf357c14db31",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-04",
+    "updatedAt": "2025-06-04T18:38:21.055Z",
+    "createdAt": "2025-06-04T18:38:21.055Z",
+    "eggsCollected": 8,
+    "id": "eedb5fc8-0b50-499e-9ca8-5efec824be9c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-03",
+    "updatedAt": "2025-07-03T16:36:13.077Z",
+    "createdAt": "2025-07-03T16:36:13.077Z",
+    "eggsCollected": 5,
+    "id": "e5acc2ae-79c5-4b01-94ae-fba879dd0b0c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-20",
+    "updatedAt": "2025-04-22T17:10:09.210Z",
+    "createdAt": "2025-04-22T17:10:09.210Z",
+    "eggsCollected": 5,
+    "id": "e7fe47b1-1cfb-4177-80b8-89febf7a1ead",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-17",
+    "updatedAt": "2025-04-17T21:38:28.553Z",
+    "createdAt": "2025-04-17T21:38:28.553Z",
+    "eggsCollected": 17,
+    "id": "831fb896-6415-4f63-ad58-069fc5b167b7",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-20",
+    "updatedAt": "2025-06-26T00:47:02.821Z",
+    "createdAt": "2025-06-26T00:47:02.821Z",
+    "eggsCollected": 8,
+    "id": "0b12a2f9-c7a4-4e45-8fda-c730f05b47ef",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-11",
+    "updatedAt": "2025-06-26T00:45:46.253Z",
+    "createdAt": "2025-06-26T00:45:46.253Z",
+    "eggsCollected": 20,
+    "id": "d8817330-c47a-48c8-96cc-3439e60e8a6c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-11",
+    "updatedAt": "2025-04-11T21:11:14.386Z",
+    "createdAt": "2025-04-11T21:11:14.386Z",
+    "eggsCollected": 7,
+    "id": "78c05d07-d4a7-4889-877d-53949eba6533",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-21",
+    "updatedAt": "2025-05-21T15:37:36.833Z",
+    "createdAt": "2025-05-21T15:37:36.833Z",
+    "eggsCollected": 20,
+    "id": "02e989d4-b56e-468c-bb25-e1c1803cd01a",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-02",
+    "updatedAt": "2025-06-03T18:25:07.738Z",
+    "createdAt": "2025-06-03T18:25:07.738Z",
+    "eggsCollected": 5,
+    "id": "f58c3a61-3ddd-4ea3-bcfa-ab25f07d23d0",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-28",
+    "updatedAt": "2025-05-30T14:35:41.113Z",
+    "createdAt": "2025-05-30T14:35:41.113Z",
+    "eggsCollected": 10,
+    "id": "e73a74bd-967a-4853-b96c-8da3e0d721fa",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-30",
+    "updatedAt": "2025-05-30T14:35:24.322Z",
+    "createdAt": "2025-05-30T14:35:24.322Z",
+    "eggsCollected": 10,
+    "id": "2de37d37-1658-4014-8bf9-ab38ac0826e2",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-01",
+    "updatedAt": "2025-05-02T01:43:35.146Z",
+    "createdAt": "2025-05-02T01:43:35.146Z",
+    "eggsCollected": 5,
+    "id": "862b946e-42e2-432d-a913-868e147bbc2b",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-28",
+    "updatedAt": "2025-04-29T03:24:30.912Z",
+    "createdAt": "2025-04-29T03:24:30.912Z",
+    "eggsCollected": 10,
+    "id": "189ae9db-ba4b-4140-935e-a1411493e814",
+    "sub": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "chickenFlockID": "ccca8434-df75-4c69-8697-33914d82e350"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-28",
+    "updatedAt": "2025-04-29T15:48:07.933Z",
+    "createdAt": "2025-04-29T15:48:07.933Z",
+    "eggsCollected": 4,
+    "id": "19d51ef4-bbed-4a6a-ac3b-defe6d07fa6b",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-05",
+    "updatedAt": "2025-06-05T19:22:57.925Z",
+    "createdAt": "2025-06-05T19:22:57.925Z",
+    "eggsCollected": 7,
+    "id": "8a120ecb-49e2-468b-bf3d-26a22dd9dfce",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-24",
+    "updatedAt": "2025-04-24T21:35:50.677Z",
+    "createdAt": "2025-04-24T21:35:50.677Z",
+    "eggsCollected": 3,
+    "id": "940ce714-9c15-427e-abb9-08e0d1768a84",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-06",
+    "updatedAt": "2025-07-07T13:48:30.812Z",
+    "createdAt": "2025-07-07T13:48:30.812Z",
+    "eggsCollected": 5,
+    "id": "7078cad8-e970-4ce9-9496-508043ca2bad",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-26",
+    "updatedAt": "2025-05-30T14:35:59.880Z",
+    "createdAt": "2025-05-30T14:35:59.880Z",
+    "eggsCollected": 23,
+    "id": "7efc7a3f-63c3-463a-8dde-9f5996d47960",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-10",
+    "updatedAt": "2025-04-11T21:11:46.830Z",
+    "createdAt": "2025-04-11T21:11:46.830Z",
+    "eggsCollected": 21,
+    "id": "bf5fe045-0f84-43f3-a327-8d53c688cb20",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-12",
+    "updatedAt": "2025-04-13T21:52:52.701Z",
+    "createdAt": "2025-04-13T21:52:52.701Z",
+    "eggsCollected": 10,
+    "id": "433d8b24-3a71-4ea9-9d46-16b3bac63968",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-08",
+    "updatedAt": "2025-05-08T21:29:31.439Z",
+    "createdAt": "2025-05-08T21:29:31.439Z",
+    "eggsCollected": 8,
+    "id": "7abf3f55-12d3-4742-b786-380e8f717958",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-13",
+    "updatedAt": "2025-04-13T21:52:59.496Z",
+    "createdAt": "2025-04-13T21:52:59.496Z",
+    "eggsCollected": 7,
+    "id": "6857dd12-2840-48e2-9853-8c7b6b9fa035",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-15",
+    "updatedAt": "2025-05-15T20:27:29.894Z",
+    "createdAt": "2025-05-15T20:27:29.894Z",
+    "eggsCollected": 6,
+    "id": "2ffa5655-4a16-436d-9dbb-5c3911adf521",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-30",
+    "updatedAt": "2025-05-01T01:04:32.214Z",
+    "createdAt": "2025-05-01T01:04:32.214Z",
+    "eggsCollected": 17,
+    "id": "fb9df3d5-d995-4cc4-a0d9-7c05ffa78376",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-08",
+    "updatedAt": "2025-04-10T21:31:24.354Z",
+    "createdAt": "2025-04-10T21:31:24.354Z",
+    "eggsCollected": 50,
+    "id": "d0bec760-d0d7-4d90-a8ff-057fdec565ff",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-08",
+    "updatedAt": "2025-07-08T15:31:19.529Z",
+    "createdAt": "2025-07-08T15:31:19.529Z",
+    "eggsCollected": 9,
+    "id": "64e9f2b7-9c18-4ce6-ad8c-180a5f895d8a",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-25",
+    "updatedAt": "2025-07-03T16:39:07.670Z",
+    "createdAt": "2025-07-03T16:39:07.670Z",
+    "eggsCollected": 15,
+    "id": "21c7711d-7cbf-42f1-887b-eab72a106ab5",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-19",
+    "updatedAt": "2025-04-22T17:09:57.108Z",
+    "createdAt": "2025-04-22T17:09:57.108Z",
+    "eggsCollected": 5,
+    "id": "f231bf46-10eb-46fe-b067-36909d1f4f6c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-18",
+    "updatedAt": "2025-04-22T17:09:47.567Z",
+    "createdAt": "2025-04-22T17:09:47.567Z",
+    "eggsCollected": 5,
+    "id": "68db3802-d55e-4eef-9a20-19fe2f88f73b",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-02",
+    "updatedAt": "2025-07-03T16:36:43.948Z",
+    "createdAt": "2025-07-03T16:36:43.948Z",
+    "eggsCollected": 4,
+    "id": "bfeb2f29-71f9-4cd6-bd83-40c36b4a607d",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-25",
+    "updatedAt": "2025-04-29T15:47:58.394Z",
+    "createdAt": "2025-04-29T15:47:58.394Z",
+    "eggsCollected": 5,
+    "id": "aa09e3e0-4c7a-495a-9408-92e5988a75ef",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-07-01",
+    "updatedAt": "2025-07-03T16:39:38.483Z",
+    "createdAt": "2025-07-03T16:39:38.483Z",
+    "eggsCollected": 8,
+    "id": "fc0c95d1-bbfa-4a7a-861b-03720a3fddb8",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-04-21",
+    "updatedAt": "2025-04-22T17:10:18.955Z",
+    "createdAt": "2025-04-22T17:10:18.955Z",
+    "eggsCollected": 6,
+    "id": "f4d468b0-ff43-401c-bf58-3347cad08dd5",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-14",
+    "updatedAt": "2025-05-15T01:53:02.185Z",
+    "createdAt": "2025-05-15T01:53:02.185Z",
+    "eggsCollected": 12,
+    "id": "15d46019-728b-4972-8a0f-cefb83daa917",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-06",
+    "updatedAt": "2025-06-26T00:45:25.815Z",
+    "createdAt": "2025-06-26T00:45:25.815Z",
+    "eggsCollected": 4,
+    "id": "b5b03444-3bd0-4319-8906-f7349ffbadfb",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-22",
+    "updatedAt": "2025-05-22T17:36:28.031Z",
+    "createdAt": "2025-05-22T17:36:28.031Z",
+    "eggsCollected": 9,
+    "id": "381ea063-c3f0-44c3-bb15-9f22afbb8ffd",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-06",
+    "updatedAt": "2025-05-08T21:30:11.581Z",
+    "createdAt": "2025-05-08T21:30:11.581Z",
+    "eggsCollected": 6,
+    "id": "fa7fcf75-6e35-48cd-b184-87c1fea816d0",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-05",
+    "updatedAt": "2025-05-05T21:01:48.913Z",
+    "createdAt": "2025-05-05T21:01:48.913Z",
+    "eggsCollected": 10,
+    "id": "83830517-419a-4255-800d-38753bac7d29",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-05-18",
+    "updatedAt": "2025-05-19T04:48:02.479Z",
+    "createdAt": "2025-05-19T04:48:02.479Z",
+    "eggsCollected": 5,
+    "id": "c6983bb7-3a15-4e05-8f09-f69853aee527",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  },
+  {
+    "__typename": "EggLog",
+    "date": "2025-06-18",
+    "updatedAt": "2025-06-26T00:46:12.172Z",
+    "createdAt": "2025-06-26T00:46:12.172Z",
+    "eggsCollected": 28,
+    "id": "35a79c0f-1da3-4da5-8870-1352bd198241",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "chickenFlockID": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4"
+  }
+]

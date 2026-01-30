@@ -1,0 +1,70 @@
+[
+  {
+    "__typename": "User",
+    "_lastChangedAt": 1743796275893,
+    "profilePictureKey": null,
+    "farmName": "",
+    "createdAt": "2025-04-04T19:51:15.859Z",
+    "email": "",
+    "aboutMe": "",
+    "_version": 1,
+    "role": "User",
+    "updatedAt": "2025-04-04T19:51:15.859Z",
+    "owner": "4478d468-1031-7052-72c4-d4de87113072::guest1",
+    "username": "guest1",
+    "id": "5515c23a-6f92-42d6-b783-f3686c917291",
+    "sub": "4478d468-1031-7052-72c4-d4de87113072",
+    "phone": ""
+  },
+  {
+    "__typename": "User",
+    "profilePictureKey": "profile-pictures/1744862716348_74c88408-2041-70a6-c023-9dfcbd1495a6_Reece.jpg",
+    "farmName": "Nunez Farms",
+    "role": "User",
+    "updatedAt": "2025-04-17T04:05:22.411Z",
+    "createdAt": "2025-04-09T17:05:45.991Z",
+    "username": "nunezfam",
+    "email": "reecenunez20@gmail.com",
+    "id": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "phone": "",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "aboutMe": ""
+  },
+  {
+    "__typename": "User",
+    "role": "User",
+    "updatedAt": "2025-06-12T00:56:25.484Z",
+    "createdAt": "2025-06-12T00:56:25.484Z",
+    "username": "wdevlin",
+    "id": "84f87458-a011-7025-d9eb-5149a3502b8f",
+    "email": "wyatt.c.devlin@gmail.com",
+    "sub": "84f87458-a011-7025-d9eb-5149a3502b8f"
+  },
+  {
+    "__typename": "User",
+    "_lastChangedAt": 1741719445018,
+    "profilePictureKey": "profile-pictures/1741719441114_84b83468-90f1-7065-1ba0-60b8cdd6dce2_IMG_4465.jpeg",
+    "farmName": "McKeachnie Farms",
+    "createdAt": "2025-03-11T18:51:49.727Z",
+    "email": "joshmckeachnie@gmail.com",
+    "aboutMe": "",
+    "_version": 2,
+    "role": "User",
+    "updatedAt": "2025-03-11T18:57:24.974Z",
+    "owner": "84b83468-90f1-7065-1ba0-60b8cdd6dce2::mckeachniefarm",
+    "username": "mckeachniefarm",
+    "id": "96e8b424-adae-4038-95d3-6e32484f1f42",
+    "phone": "",
+    "sub": "84b83468-90f1-7065-1ba0-60b8cdd6dce2"
+  },
+  {
+    "__typename": "User",
+    "role": "User",
+    "updatedAt": "2025-04-29T03:18:59.855Z",
+    "createdAt": "2025-04-29T03:18:59.855Z",
+    "username": "mckeachniefarm",
+    "id": "84b83468-90f1-7065-1ba0-60b8cdd6dce2",
+    "email": "joshmckeachnie@gmail.com",
+    "sub": "84b83468-90f1-7065-1ba0-60b8cdd6dce2"
+  }
+]

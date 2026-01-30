@@ -1,0 +1,47 @@
+[
+  {
+    "__typename": "LivestockFamily",
+    "updatedAt": "2025-05-19T04:21:34.606Z",
+    "createdAt": "2025-05-19T04:21:34.606Z",
+    "parentID": "dd93fa72-1ce8-4915-a092-fd7536c99869",
+    "childID": "fb58db5c-8099-44c2-9168-ceb20c924f07",
+    "id": "de705802-894d-41e6-9c3a-e169ad0913e3",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "LivestockFamily",
+    "updatedAt": "2025-05-19T03:53:36.752Z",
+    "createdAt": "2025-05-19T03:53:36.752Z",
+    "parentID": "d0850c59-a969-4225-8241-7d8023a6d688",
+    "childID": "e275f0a7-dd7d-441f-b6fd-a2fba7713c4b",
+    "id": "ea810b3e-3fb3-42d8-9d26-4d03d0863183",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "LivestockFamily",
+    "updatedAt": "2025-05-19T03:53:51.049Z",
+    "createdAt": "2025-05-19T03:53:51.049Z",
+    "parentID": "d0850c59-a969-4225-8241-7d8023a6d688",
+    "childID": "9d74bf44-a869-42b8-bafd-ecf5dfca1190",
+    "id": "dd6375aa-119b-48a1-a3ee-362b43dcaf56",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "LivestockFamily",
+    "updatedAt": "2025-05-19T04:21:39.412Z",
+    "createdAt": "2025-05-19T04:21:39.412Z",
+    "parentID": "dd93fa72-1ce8-4915-a092-fd7536c99869",
+    "childID": "cbb3ca47-9018-43d6-a3da-774a326baa96",
+    "id": "d8e90555-a4b2-46e1-86de-9368a615590c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "LivestockFamily",
+    "updatedAt": "2025-05-19T04:21:28.619Z",
+    "createdAt": "2025-05-19T04:21:28.619Z",
+    "parentID": "dd93fa72-1ce8-4915-a092-fd7536c99869",
+    "childID": "d0850c59-a969-4225-8241-7d8023a6d688",
+    "id": "beb1f794-1670-49a9-8054-28739dca3b38",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  }
+]

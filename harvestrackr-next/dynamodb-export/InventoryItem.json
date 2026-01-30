@@ -1,0 +1,35 @@
+[
+  {
+    "quantity": 1,
+    "__typename": "InventoryItem",
+    "updatedAt": "2025-04-22T02:39:44.778Z",
+    "notes": "48 HP Tractor, lift is 2800lbs",
+    "createdAt": "2025-04-22T02:39:44.778Z",
+    "id": "70172c17-864c-4f8b-93f5-b8eb98630df8",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "name": "Mahindra 4550",
+    "type": "Equipment"
+  },
+  {
+    "quantity": 1,
+    "__typename": "InventoryItem",
+    "updatedAt": "2025-04-22T03:19:48.032Z",
+    "notes": "Mahindra implement",
+    "createdAt": "2025-04-22T03:19:48.032Z",
+    "id": "fa7e0f88-3d6c-4785-93f2-cf72c026016d",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "name": "Box Blade",
+    "type": "Tractor Implement"
+  },
+  {
+    "quantity": 1,
+    "__typename": "InventoryItem",
+    "updatedAt": "2025-04-22T03:14:52.724Z",
+    "notes": "Mahindra implement",
+    "createdAt": "2025-04-22T03:14:52.724Z",
+    "id": "6c1e865d-9b10-4623-9be4-f4a9bf76897c",
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "name": "Post Hole Digger",
+    "type": "Tractor Implement"
+  }
+]

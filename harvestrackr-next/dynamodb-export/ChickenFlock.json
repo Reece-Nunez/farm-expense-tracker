@@ -1,0 +1,46 @@
+[
+  {
+    "__typename": "ChickenFlock",
+    "count": 7,
+    "updatedAt": "2025-08-14T02:53:49.907Z",
+    "notes": "Bardrock, American Bresse, Blue Laced Gold Wyandotte",
+    "createdAt": "2025-04-10T20:53:33.381Z",
+    "breed": "Barnyard Mix",
+    "id": "e25cbb70-2956-49e4-8fe5-0c6ff95cb4f4",
+    "hasRooster": false,
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "ChickenFlock",
+    "count": 7,
+    "updatedAt": "2025-06-12T00:57:45.206Z",
+    "notes": "",
+    "createdAt": "2025-06-12T00:56:59.913Z",
+    "breed": "Chickens",
+    "id": "88f5fd94-6d7c-4359-ac0a-fac7f2cb82ae",
+    "hasRooster": false,
+    "sub": "84f87458-a011-7025-d9eb-5149a3502b8f"
+  },
+  {
+    "__typename": "ChickenFlock",
+    "count": 4,
+    "updatedAt": "2025-08-14T02:51:02.389Z",
+    "notes": "",
+    "createdAt": "2025-08-14T02:51:02.389Z",
+    "id": "e80c0d55-d19e-4157-90ab-114b41752062",
+    "breed": "Chocolate Orpington",
+    "hasRooster": false,
+    "sub": "74c88408-2041-70a6-c023-9dfcbd1495a6"
+  },
+  {
+    "__typename": "ChickenFlock",
+    "count": 23,
+    "updatedAt": "2025-04-29T03:24:23.404Z",
+    "notes": "",
+    "createdAt": "2025-04-29T03:24:23.404Z",
+    "id": "ccca8434-df75-4c69-8697-33914d82e350",
+    "breed": "Mixed",
+    "hasRooster": true,
+    "sub": "84b83468-90f1-7065-1ba0-60b8cdd6dce2"
+  }
+]

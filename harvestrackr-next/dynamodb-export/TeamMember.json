@@ -1,0 +1,20 @@
+[
+  {
+    "__typename": "TeamMember",
+    "joinedAt": "2025-09-03T20:09:36.054Z",
+    "lastLoginAt": "2025-09-03T20:09:36.054Z",
+    "permissions": [
+      "ALL"
+    ],
+    "createdAt": "2025-09-03T20:09:36.767Z",
+    "invitedBy": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "userSub": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "isActive": true,
+    "farmID": "600de129-c4c5-4694-a243-ff88daccef87",
+    "role": "OWNER",
+    "userID": "74c88408-2041-70a6-c023-9dfcbd1495a6",
+    "updatedAt": "2025-09-03T20:09:36.767Z",
+    "notes": "Farm Owner",
+    "id": "a8b1722e-6781-4a06-a6fd-96f5d14d9a58"
+  }
+]
