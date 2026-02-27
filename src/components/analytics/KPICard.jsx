@@ -33,11 +33,11 @@ const KPICard = ({ title, value, change, trend, icon, color = 'blue' }) => {
   const getTrendIcon = (trend) => {
     switch (trend) {
       case 'up':
-        return '↗️';
+        return 'up';
       case 'down':
-        return '↘️';
+        return 'down';
       default:
-        return '➡️';
+        return 'flat';
     }
   };
 

@@ -11,18 +11,18 @@ const InvoiceFormTemp = ({ onCancel }) => {
         </h2>
 
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">🚧</div>
+          <div className="text-2xl mb-4 font-semibold text-gray-500">Under Construction</div>
           <h3 className="text-xl font-semibold mb-2">Invoice Form Ready</h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             The invoice form components have been created but require the GraphQL schema to be deployed to AWS Amplify.
           </p>
           
           <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-            <p>✅ InvoiceForm.jsx component created</p>
-            <p>✅ Complete form with line items</p>
-            <p>✅ Customer selection and product integration</p>
-            <p>✅ Dynamic calculations and validation</p>
-            <p>⏳ Requires: amplify push to deploy GraphQL schema</p>
+            <p>InvoiceForm.jsx component created</p>
+            <p>Complete form with line items</p>
+            <p>Customer selection and product integration</p>
+            <p>Dynamic calculations and validation</p>
+            <p>Pending: amplify push to deploy GraphQL schema</p>
           </div>
 
           <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg text-left max-w-md mx-auto">

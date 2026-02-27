@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { PlusIcon, HomeIcon } from "@heroicons/react/outline";
+import { PlusIcon, HomeIcon, CreditCardIcon, CurrencyDollarIcon, CollectionIcon } from "@heroicons/react/outline";
 import { useTheme } from "../../context/ThemeContext";
 import { Button } from "../ui/button";
 import ThemeToggle from "../ui/ThemeToggle";
@@ -16,7 +16,6 @@ export default function DashboardLayout() {
   const location = useLocation();
   const { isDarkMode } = useTheme();
 
-  // Hide/show bottom nav on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -28,13 +27,11 @@ export default function DashboardLayout() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Close sidebar when route changes
   useEffect(() => {
     setShowSidebar(false);
     setShowFABMenu(false);
   }, [location.pathname]);
 
-  // Close FAB menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showFABMenu && !event.target.closest('[data-fab-menu]')) {
@@ -51,7 +48,6 @@ export default function DashboardLayout() {
   }, [showFABMenu]);
 
   const handleAddExpense = (event) => {
-    console.log("Add Expense clicked");
     event?.stopPropagation();
     setShowFABMenu(false);
     setShowSidebar(false);
@@ -59,7 +55,6 @@ export default function DashboardLayout() {
   };
 
   const handleAddIncome = (event) => {
-    console.log("Add Income clicked");
     event?.stopPropagation();
     setShowFABMenu(false);
     setShowSidebar(false);
@@ -82,7 +77,6 @@ export default function DashboardLayout() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Enhanced Mobile Header */}
       <header className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <button 
@@ -90,7 +84,7 @@ export default function DashboardLayout() {
             className="flex items-center gap-2"
           >
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">🌾</span>
+              <span className="text-white text-sm font-bold">H</span>
             </div>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {getPageTitle()}
@@ -111,9 +105,7 @@ export default function DashboardLayout() {
         </div>
       </header>
 
-      {/* Main container */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Overlay (click to close sidebar on mobile) */}
         {showSidebar && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -121,7 +113,6 @@ export default function DashboardLayout() {
           />
         )}
 
-        {/* SIDEBAR */}
         <aside
           className={`
             fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700
@@ -130,11 +121,10 @@ export default function DashboardLayout() {
             lg:static lg:translate-x-0 lg:border-r lg:border-l-0 lg:w-64
           `}
         >
-          {/* Mobile-only top bar inside sidebar */}
           <div className="lg:hidden flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">🌾</span>
+                <span className="text-white text-sm font-bold">H</span>
               </div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">HarvesTrackr</h2>
             </div>
@@ -148,13 +138,10 @@ export default function DashboardLayout() {
             </button>
           </div>
 
-          {/* The actual sidebar nav items */}
           <Sidebar onCloseSidebar={() => setShowSidebar(false)} />
         </aside>
 
-        {/* MAIN CONTENT */}
         <main className="flex-1 overflow-y-auto pb-24 lg:pb-0 mobile-scroll">
-          {/* Desktop quick action buttons */}
           <div className="hidden lg:block sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-end gap-3">
               <Button variant="outline" size="sm" onClick={handleAddExpense}>
@@ -168,12 +155,10 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          {/* Where nested routes render */}
           <Outlet />
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
       <nav className={`
         lg:hidden fixed bottom-0 left-0 right-0 z-30
         bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700
@@ -187,16 +172,14 @@ export default function DashboardLayout() {
             onClick={() => navigate('/dashboard')}
             active={location.pathname === '/dashboard'}
           />
-          <NavButton 
-            icon="💸" 
-            label="Expenses" 
+          <NavButton
+            icon={CreditCardIcon}
+            label="Expenses"
             onClick={() => navigate('/dashboard/expenses')}
             active={location.pathname.includes('/expenses')}
           />
           
-          {/* Central FAB */}
           <div className="relative flex items-center justify-center" data-fab-menu>
-            {/* FAB Menu Options */}
             {showFABMenu && (
               <div className="absolute -top-80 flex flex-col gap-3" data-fab-menu>
                 <div className="flex flex-col items-center gap-1" data-fab-menu>
@@ -257,7 +240,7 @@ export default function DashboardLayout() {
                     type="button"
                     data-fab-menu
                   >
-                    <span className="text-white text-lg">💸</span>
+                    <CreditCardIcon className="w-6 h-6 text-white" />
                   </button>
                   <span className="text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm border border-gray-200 dark:border-gray-600 whitespace-nowrap" data-fab-menu>
                     Add Expense
@@ -288,7 +271,7 @@ export default function DashboardLayout() {
                     type="button"
                     data-fab-menu
                   >
-                    <span className="text-white text-lg">💰</span>
+                    <CurrencyDollarIcon className="w-6 h-6 text-white" />
                   </button>
                   <span className="text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm border border-gray-200 dark:border-gray-600 whitespace-nowrap" data-fab-menu>
                     Add Income
@@ -326,15 +309,15 @@ export default function DashboardLayout() {
             </button>
           </div>
 
-          <NavButton 
-            icon="💰" 
-            label="Income" 
+          <NavButton
+            icon={CurrencyDollarIcon}
+            label="Income"
             onClick={() => navigate('/dashboard/income')}
             active={location.pathname.includes('/income')}
           />
-          <NavButton 
-            icon="📦" 
-            label="Inventory" 
+          <NavButton
+            icon={CollectionIcon}
+            label="Inventory"
             onClick={() => navigate('/dashboard/inventory')}
             active={location.pathname.includes('/inventory')}
           />
@@ -344,7 +327,6 @@ export default function DashboardLayout() {
   );
 }
 
-// Mobile Navigation Button Component
 const NavButton = ({ icon: Icon, label, onClick, active = false }) => {
   const handleClick = () => {
     haptics.light();

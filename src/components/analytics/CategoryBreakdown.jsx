@@ -21,14 +21,14 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
     return colors[index % colors.length];
   };
 
-  const getTrendEmoji = (trend) => {
+  const getTrendIndicator = (trend) => {
     switch (trend) {
       case 'UP':
-        return '↗️';
+        return 'up';
       case 'DOWN':
-        return '↘️';
+        return 'down';
       default:
-        return '➡️';
+        return 'flat';
     }
   };
 
@@ -58,7 +58,7 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
                   <span className="font-medium truncate">{categoryName}</span>
                   {trend && (
                     <span className="text-gray-500 flex-shrink-0">
-                      {getTrendEmoji(trend)}
+                      {getTrendIndicator(trend)}
                     </span>
                   )}
                 </div>
@@ -79,7 +79,7 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
         })}
       </div>
 
-      {/* Show truncated indicator if there are more items */}
+
       {data.length > 5 && (
         <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-500 text-center">
@@ -88,7 +88,7 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
         </div>
       )}
 
-      {/* Summary stats */}
+
       <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -104,12 +104,12 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
         </div>
       </div>
 
-      {/* Insights */}
+
       <div className="mt-4">
         {data[0]?.percentage > 50 && (
           <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs">
             <span className="text-yellow-800 dark:text-yellow-300">
-              ⚠️ High concentration: {data[0].category || data[0].source} represents {data[0].percentage.toFixed(1)}% of total
+              Warning: High concentration - {data[0].category || data[0].source} represents {data[0].percentage.toFixed(1)}% of total
             </span>
           </div>
         )}
@@ -117,7 +117,7 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
         {type === 'expense' && data.filter(item => item.trend === 'UP').length >= 2 && (
           <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs mt-2">
             <span className="text-red-800 dark:text-red-300">
-              📈 Multiple expense categories trending upward
+              Multiple expense categories trending upward
             </span>
           </div>
         )}
@@ -125,7 +125,7 @@ const CategoryBreakdown = ({ title, data, type = 'expense' }) => {
         {type === 'income' && data.filter(item => item.trend === 'UP').length >= 2 && (
           <div className="p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs mt-2">
             <span className="text-green-800 dark:text-green-300">
-              📈 Multiple income sources showing growth
+              Multiple income sources showing growth
             </span>
           </div>
         )}

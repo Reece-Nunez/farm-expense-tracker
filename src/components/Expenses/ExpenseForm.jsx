@@ -43,7 +43,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
 ) {
   const navigate = useNavigate();
 
-  // merge defaults
   const merged = useMemo(() => ({
     ...blankExpense,
     ...defaultValues,
@@ -70,7 +69,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
     defaultValues: merged,
   });
 
-  // reset when defaultValues prop changes (memoize to prevent unnecessary resets)
   const defaultValuesString = JSON.stringify(defaultValues);
   useEffect(() => {
     reset(merged);
@@ -86,7 +84,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
     name: "lineItems",
   });
 
-  // compute grand total (memoized to prevent recalculation on every render)
   const watchedItems = watch("lineItems") || [];
   const grandTotal = useMemo(() => {
     return watchedItems.reduce((sum, li) => {
@@ -152,7 +149,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
           style={{ minHeight: 'auto' }}
           noValidate
         >
-          {/* Date */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
               <CalendarIcon className="w-4 h-4 text-blue-500" /> Date{" "}
@@ -180,7 +176,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
           )}
           </div>
 
-          {/* Vendor */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Vendor/Supplier <span className="text-red-500">*</span>
@@ -199,7 +194,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
             )}
           </div>
 
-          {/* Description */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (Optional)</label>
             <Textarea
@@ -212,7 +206,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
             />
           </div>
 
-          {/* Receipt */}
           <div className="mb-6">
             <label className="block font-medium mb-2">
               Receipt Image (Optional)
@@ -231,7 +224,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
             />
           </div>
 
-          {/* Line Items */}
           <div className="mb-6">
             <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-gray-100">Line Items</h2>
             {fields.map((field, idx) => {
@@ -241,7 +233,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
 
               return (
                 <div key={field.id} className="p-3 sm:p-4 mb-3 sm:mb-4 border rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800">
-                  {/* Item */}
                   <div className="mb-3">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Item <span className="text-red-500">*</span>
@@ -268,7 +259,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                     )}
                   </div>
 
-                  {/* Category */}
                   <div className="mb-3">
                     <label className="block font-medium mb-1">
                       Category <span className="text-red-500">*</span>
@@ -291,7 +281,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                     )}
                   </div>
 
-                  {/* Unit Cost & Quantity */}
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3">
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
@@ -344,7 +333,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
                     </div>
                   </div>
 
-                  {/* Line Total & Remove */}
                   <div className="flex justify-between items-center">
                     <Input
                       readOnly
@@ -373,7 +361,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
             </Button>
           </div>
 
-          {/* Grand Total */}
           <div className="mb-8">
             <label className="block font-medium mb-1">Grand Total</label>
             <Input
@@ -383,7 +370,6 @@ const ExpenseForm = forwardRef(function ExpenseForm(
             />
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button
               type="button"

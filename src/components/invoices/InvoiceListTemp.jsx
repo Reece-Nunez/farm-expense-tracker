@@ -23,16 +23,16 @@ const InvoiceListTemp = ({ onCreate }) => {
 
       {/* Placeholder Content */}
       <Card className="p-12 text-center">
-        <div className="text-6xl mb-4">📄</div>
+        <div className="text-2xl mb-4 font-semibold text-gray-500">Invoices</div>
         <h3 className="text-xl font-semibold mb-2">Invoice System Ready</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           The invoice navigation is now working! The GraphQL schema needs to be deployed to AWS before invoice data can be managed.
         </p>
         <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-          <p>✅ Navigation working</p>
-          <p>✅ UI components created</p>
-          <p>⏳ GraphQL schema deployment needed</p>
-          <p>⏳ AWS Amplify push required</p>
+          <p>Navigation working</p>
+          <p>UI components created</p>
+          <p>Pending: GraphQL schema deployment needed</p>
+          <p>Pending: AWS Amplify push required</p>
         </div>
         <Button variant="primary" onClick={onCreate} className="mt-6">
           Test Invoice Form

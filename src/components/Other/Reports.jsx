@@ -54,7 +54,7 @@ export default function Reports() {
           }).then(res => res.data.listIncomes.items),
         ]);
 
-        // 🧠 Fetch and attach line items to each expense
+        // Fetch and attach line items to each expense
         const enrichedExpenses = await Promise.all(
           expenseRes.map(async (expense) => {
             const lineItemRes = await client.graphql({

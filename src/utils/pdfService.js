@@ -40,7 +40,7 @@ export class InvoicePDFGenerator {
     
     this.doc.setTextColor(255, 255, 255);
     this.doc.setFontSize(16);
-    this.doc.text('🌾', centerX - 4, this.currentY + 20);
+    this.doc.text('HT', centerX - 6, this.currentY + 20);
 
     // Farm Name
     this.doc.setTextColor(0, 0, 0);

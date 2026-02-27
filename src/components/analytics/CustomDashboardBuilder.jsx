@@ -24,7 +24,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Revenue KPI',
       description: 'Total revenue with trend indicator',
       category: 'KPIs',
-      icon: '💰',
+      icon: '$',
       size: 'small'
     },
     {
@@ -32,7 +32,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Expense KPI',
       description: 'Total expenses with trend indicator',
       category: 'KPIs',
-      icon: '💸',
+      icon: '-$',
       size: 'small'
     },
     {
@@ -40,7 +40,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Profit KPI',
       description: 'Net profit with margin percentage',
       category: 'KPIs',
-      icon: '📈',
+      icon: '+/-',
       size: 'small'
     },
     {
@@ -48,7 +48,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Profit Margin KPI',
       description: 'Profit margin percentage',
       category: 'KPIs',
-      icon: '🎯',
+      icon: '%',
       size: 'small'
     },
     {
@@ -56,7 +56,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Expense Breakdown',
       description: 'Pie chart of expense categories',
       category: 'Charts',
-      icon: '📊',
+      icon: '[=]',
       size: 'medium'
     },
     {
@@ -64,7 +64,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Income Sources',
       description: 'Bar chart of income sources',
       category: 'Charts',
-      icon: '💹',
+      icon: '[+]',
       size: 'medium'
     },
     {
@@ -72,7 +72,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Profitability Trend',
       description: 'Line chart showing profit over time',
       category: 'Charts',
-      icon: '📈',
+      icon: '[~]',
       size: 'large'
     },
     {
@@ -80,7 +80,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Cash Flow Chart',
       description: 'Monthly cash flow visualization',
       category: 'Charts',
-      icon: '💵',
+      icon: '[$]',
       size: 'large'
     },
     {
@@ -88,7 +88,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Quick Statistics',
       description: 'Overview of key metrics',
       category: 'Stats',
-      icon: '📋',
+      icon: '[#]',
       size: 'medium'
     },
     {
@@ -96,7 +96,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Inventory Status',
       description: 'Current inventory levels and alerts',
       category: 'Inventory',
-      icon: '📦',
+      icon: '[i]',
       size: 'medium'
     },
     {
@@ -104,7 +104,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Low Stock Alerts',
       description: 'Items requiring attention',
       category: 'Alerts',
-      icon: '⚠️',
+      icon: '[!]',
       size: 'small'
     },
     {
@@ -112,7 +112,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       name: 'Recent Transactions',
       description: 'Latest income and expense entries',
       category: 'Lists',
-      icon: '🔄',
+      icon: '[*]',
       size: 'large'
     }
   ];
@@ -201,7 +201,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Selector */}
+
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Custom Dashboard Builder</h2>
@@ -269,7 +269,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Current Dashboard Widgets */}
+
         <div className="lg:col-span-2">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -285,7 +285,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
 
             {currentDashboard?.widgets.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                <span className="text-4xl block mb-3">📊</span>
+                <span className="text-4xl block mb-3">--</span>
                 <p className="text-lg font-medium mb-2">No widgets added yet</p>
                 <p className="text-sm">
                   {isEditing 
@@ -320,12 +320,12 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
                             onClick={() => removeWidget(widgetId)}
                             className="text-red-500 hover:text-red-700 p-1"
                           >
-                            ✕
+                            X
                           </button>
                         )}
                       </div>
                       
-                      {/* Widget Preview */}
+
                       <div className="bg-gray-50 dark:bg-gray-800 rounded p-3 text-center text-sm text-gray-500">
                         Widget Preview ({widget.category})
                       </div>
@@ -337,7 +337,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
           </Card>
         </div>
 
-        {/* Available Widgets */}
+
         {isEditing && (
           <div>
             <Card className="p-6">
@@ -394,21 +394,21 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
               </div>
             </Card>
 
-            {/* Dashboard Actions */}
+
             <Card className="p-6 mt-6">
               <h3 className="text-lg font-semibold mb-4">Dashboard Actions</h3>
               
               <div className="space-y-3">
                 <Button variant="outline" fullWidth size="sm">
-                  📤 Export Dashboard
+                  Export Dashboard
                 </Button>
                 
                 <Button variant="outline" fullWidth size="sm">
-                  📋 Duplicate Dashboard
+                  Duplicate Dashboard
                 </Button>
                 
                 <Button variant="outline" fullWidth size="sm">
-                  🔗 Share Dashboard
+                  Share Dashboard
                 </Button>
                 
                 {!currentDashboard?.isDefault && (
@@ -419,7 +419,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
                     onClick={() => deleteDashboard(currentDashboard.id)}
                     className="text-red-600 border-red-300 hover:bg-red-50"
                   >
-                    🗑️ Delete Dashboard
+                    Delete Dashboard
                   </Button>
                 )}
               </div>
@@ -428,7 +428,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
         )}
       </div>
 
-      {/* Quick Templates */}
+
       {!isEditing && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Dashboard Templates</h3>
@@ -436,7 +436,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">💼</span>
+                <span className="text-lg font-bold">E</span>
                 <h4 className="font-medium">Executive Summary</h4>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -449,7 +449,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
 
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">📊</span>
+                <span className="text-lg font-bold">F</span>
                 <h4 className="font-medium">Financial Analysis</h4>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -462,7 +462,7 @@ const CustomDashboardBuilder = ({ farmId, analyticsData }) => {
 
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">📦</span>
+                <span className="text-lg font-bold">O</span>
                 <h4 className="font-medium">Operations Focus</h4>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">

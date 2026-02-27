@@ -26,17 +26,17 @@ const FarmSettingsPage = () => {
   const [loading, setLoading] = useState(false);
 
   const farmTypes = [
-    { value: 'LIVESTOCK', label: 'Livestock', icon: '🐄' },
-    { value: 'CROP', label: 'Crop', icon: '🌾' },
-    { value: 'DAIRY', label: 'Dairy', icon: '🥛' },
-    { value: 'POULTRY', label: 'Poultry', icon: '🐔' },
-    { value: 'MIXED', label: 'Mixed', icon: '🚜' },
-    { value: 'AQUACULTURE', label: 'Aquaculture', icon: '🐟' },
-    { value: 'ORGANIC', label: 'Organic', icon: '🌱' },
-    { value: 'GREENHOUSE', label: 'Greenhouse', icon: '🏠' },
-    { value: 'ORCHARD', label: 'Orchard', icon: '🍎' },
-    { value: 'VINEYARD', label: 'Vineyard', icon: '🍇' },
-    { value: 'OTHER', label: 'Other', icon: '🏡' }
+    { value: 'LIVESTOCK', label: 'Livestock', icon: null },
+    { value: 'CROP', label: 'Crop', icon: null },
+    { value: 'DAIRY', label: 'Dairy', icon: null },
+    { value: 'POULTRY', label: 'Poultry', icon: null },
+    { value: 'MIXED', label: 'Mixed', icon: null },
+    { value: 'AQUACULTURE', label: 'Aquaculture', icon: null },
+    { value: 'ORGANIC', label: 'Organic', icon: null },
+    { value: 'GREENHOUSE', label: 'Greenhouse', icon: null },
+    { value: 'ORCHARD', label: 'Orchard', icon: null },
+    { value: 'VINEYARD', label: 'Vineyard', icon: null },
+    { value: 'OTHER', label: 'Other', icon: null }
   ];
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const FarmSettingsPage = () => {
     return (
       <div className="p-6">
         <div className="text-center">
-          <div className="text-6xl mb-4">🏡</div>
+          <div className="text-2xl mb-4 font-semibold text-gray-500">No Farm</div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             No Farm Selected
           </h2>
@@ -100,7 +100,7 @@ const FarmSettingsPage = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          🚜 Farm Management
+          Farm Management
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Configure your farm operations, details, and business information
@@ -136,7 +136,7 @@ const FarmSettingsPage = () => {
             >
               {farmTypes.map((type) => (
                 <option key={type.value} value={type.value}>
-                  {type.icon} {type.label}
+                  {type.label}
                 </option>
               ))}
             </select>
@@ -203,7 +203,7 @@ const FarmSettingsPage = () => {
           {/* Farm Location */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-              📍 Farm Location
+              Farm Location
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,7 +278,7 @@ const FarmSettingsPage = () => {
           {/* Business Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-              🏢 Business Information
+              Business Information
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

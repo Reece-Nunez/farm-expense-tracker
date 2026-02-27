@@ -39,7 +39,6 @@ const ReceiptScanPage = () => {
         return;
       }
 
-      // Create the expense
       const expenseInput = {
         sub: user.sub,
         userId: user.id,
@@ -49,8 +48,6 @@ const ReceiptScanPage = () => {
         notes: expenseData.notes,
       };
 
-      console.log('Creating expense from receipt:', expenseInput);
-
       const expenseResult = await client.graphql({
         query: createExpense,
         variables: {
@@ -59,9 +56,8 @@ const ReceiptScanPage = () => {
       });
 
       const createdExpense = expenseResult.data.createExpense;
-      console.log('Expense created:', createdExpense);
 
-      // Create line items if provided
+      if
       if (expenseData.lineItems && expenseData.lineItems.length > 0) {
         for (const lineItem of expenseData.lineItems) {
           const lineItemInput = {
@@ -78,7 +74,6 @@ const ReceiptScanPage = () => {
             }
           });
         }
-        console.log(`Created ${expenseData.lineItems.length} line items`);
       }
 
       toast.success('Expense created successfully from receipt!');
@@ -115,13 +110,12 @@ const ReceiptScanPage = () => {
     setCurrentStep('scan');
   };
 
-  // Success screen
   if (currentStep === 'complete') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
-            <div className="text-6xl mb-4">✅</div>
+            <div className="text-6xl mb-4 font-bold text-green-600">Done</div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Expense Created!
             </h1>
@@ -157,7 +151,6 @@ const ReceiptScanPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -171,7 +164,7 @@ const ReceiptScanPage = () => {
             </button>
             <div>
               <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                🧾 Receipt Scanner
+                Receipt Scanner
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {currentStep === 'scan' ? 'Capture your receipt' : 'Review extracted data'}
@@ -179,7 +172,6 @@ const ReceiptScanPage = () => {
             </div>
           </div>
           
-          {/* Progress Steps */}
           <div className="hidden md:flex items-center gap-2">
             <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
               currentStep === 'scan' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
@@ -206,7 +198,6 @@ const ReceiptScanPage = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       {currentStep === 'scan' && (
         <ReceiptScanner
           onCapture={handleReceiptCapture}
@@ -228,7 +219,7 @@ const ReceiptScanPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <div className="text-center">
-              <div className="text-6xl mb-4">❌</div>
+              <div className="text-6xl mb-4 font-bold text-red-600">Error</div>
               <h3 className="text-lg font-semibold mb-2">Processing Failed</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 {processingError}

@@ -14,56 +14,48 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
       id: 'expense_summary',
       name: 'Expense Summary',
       description: 'Comprehensive breakdown of all expenses by category and time period',
-      icon: '💸',
       estimatedTime: '2-3 minutes'
     },
     {
       id: 'income_analysis',
       name: 'Income Analysis',
       description: 'Detailed analysis of income sources and revenue trends',
-      icon: '💰',
       estimatedTime: '2-3 minutes'
     },
     {
       id: 'profitability',
       name: 'Profitability Report',
       description: 'Profit margins, ROI analysis, and financial performance metrics',
-      icon: '📈',
       estimatedTime: '3-4 minutes'
     },
     {
       id: 'cash_flow',
       name: 'Cash Flow Statement',
       description: 'Monthly cash flow analysis with projections',
-      icon: '💹',
       estimatedTime: '4-5 minutes'
     },
     {
       id: 'inventory_analysis',
       name: 'Inventory Analysis',
       description: 'Stock levels, turnover rates, and inventory optimization',
-      icon: '📦',
       estimatedTime: '3-4 minutes'
     },
     {
       id: 'tax_summary',
       name: 'Tax Summary',
       description: 'Tax-ready financial summary with deductible expenses',
-      icon: '📄',
       estimatedTime: '5-6 minutes'
     },
     {
       id: 'budget_variance',
       name: 'Budget vs Actual',
       description: 'Compare planned budget against actual spending',
-      icon: '🎯',
       estimatedTime: '3-4 minutes'
     },
     {
       id: 'custom_dashboard',
       name: 'Custom Dashboard',
       description: 'Personalized report with selected metrics and charts',
-      icon: '⚙️',
       estimatedTime: '4-5 minutes'
     }
   ];
@@ -79,10 +71,10 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
   ];
 
   const formatOptions = [
-    { value: 'PDF', label: 'PDF Document', icon: '📄' },
-    { value: 'EXCEL', label: 'Excel Spreadsheet', icon: '📊' },
-    { value: 'CSV', label: 'CSV Data', icon: '📋' },
-    { value: 'JSON', label: 'JSON Data', icon: '🔧' }
+    { value: 'PDF', label: 'PDF Document' },
+    { value: 'EXCEL', label: 'Excel Spreadsheet' },
+    { value: 'CSV', label: 'CSV Data' },
+    { value: 'JSON', label: 'JSON Data' }
   ];
 
   const handleReportToggle = (reportId) => {
@@ -110,29 +102,24 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
     setGenerating(true);
     
     try {
-      // Simulate report generation
       for (const reportId of selectedReports) {
         const report = reportTypes.find(r => r.id === reportId);
         toast.loading(`Generating ${report.name}...`);
         
-        // Simulate processing time
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         toast.success(`${report.name} completed`);
       }
 
-      // Simulate final export
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success(`All ${selectedReports.length} reports generated successfully!`);
       
-      // Call the export callback
       if (onExport) {
         onExport(`Combined Report (${selectedReports.length} reports)`);
       }
 
     } catch (error) {
-      console.error('Error generating reports:', error);
       toast.error('Failed to generate reports');
     } finally {
       setGenerating(false);
@@ -153,7 +140,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Report Generator</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -161,7 +148,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Date Range */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Date Range
@@ -179,7 +166,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
             </select>
           </div>
 
-          {/* Format */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Export Format
@@ -191,13 +178,13 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
             >
               {formatOptions.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.icon} {option.label}
+                  {option.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Quick Actions */}
+
           <div className="flex items-end gap-2">
             <Button variant="outline" size="sm" onClick={selectAllReports}>
               Select All
@@ -209,7 +196,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
         </div>
       </Card>
 
-      {/* Report Types Selection */}
+
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Select Report Types</h3>
@@ -230,16 +217,13 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
               onClick={() => handleReportToggle(report.id)}
             >
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <span className="text-2xl">{report.icon}</span>
-                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-medium text-gray-900 dark:text-white">
                       {report.name}
                     </h4>
                     {selectedReports.includes(report.id) && (
-                      <span className="text-indigo-600">✓</span>
+                      <span className="text-indigo-600">(selected)</span>
                     )}
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -255,7 +239,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
         </div>
       </Card>
 
-      {/* Generation Summary */}
+
       {selectedReports.length > 0 && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Generation Summary</h3>
@@ -288,15 +272,15 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
         </Card>
       )}
 
-      {/* Recent Reports */}
+
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Recent Reports</h3>
         
         <div className="space-y-3">
-          {/* Mock recent reports */}
+
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="flex items-center gap-3">
-              <span className="text-lg">📊</span>
+              <span className="text-lg font-bold">[R]</span>
               <div>
                 <div className="font-medium">Monthly Financial Summary</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -311,7 +295,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
 
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="flex items-center gap-3">
-              <span className="text-lg">📄</span>
+              <span className="text-lg font-bold">[T]</span>
               <div>
                 <div className="font-medium">Tax Summary 2024</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -326,7 +310,7 @@ const ReportGenerator = ({ farmId, analyticsData, onExport }) => {
 
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="flex items-center gap-3">
-              <span className="text-lg">📈</span>
+              <span className="text-lg font-bold">[A]</span>
               <div>
                 <div className="font-medium">Inventory Analysis Q3</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">

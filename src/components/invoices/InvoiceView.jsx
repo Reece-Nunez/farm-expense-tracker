@@ -92,7 +92,7 @@ const InvoiceView = ({ invoiceId, onEdit, onClose, onGeneratePDF }) => {
   if (!invoice) {
     return (
       <Card className="p-12 text-center">
-        <div className="text-6xl mb-4">❌</div>
+        <div className="text-6xl mb-4 font-bold text-red-600">Not Found</div>
         <h3 className="text-xl font-semibold mb-2">Invoice not found</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           The invoice you're looking for doesn't exist or has been deleted.

@@ -13,28 +13,23 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check for saved theme preference or default to light mode
     const saved = localStorage.getItem('harvesTrackr-theme');
     if (saved) {
       return saved === 'dark';
     }
-    // Default to light mode instead of system preference
     return false;
   });
 
   const [currentTheme, setCurrentTheme] = useState(isDarkMode ? darkTheme : theme);
 
-  // Update theme when dark mode changes
   useEffect(() => {
     setCurrentTheme(isDarkMode ? darkTheme : theme);
     localStorage.setItem('harvesTrackr-theme', isDarkMode ? 'dark' : 'light');
-    
-    // Update CSS custom properties for global theming
+
     const root = document.documentElement;
-    
+
     if (isDarkMode) {
       root.classList.add('dark');
-      // Set dark theme CSS variables
       root.style.setProperty('--color-bg-primary', darkTheme.colors.background.primary);
       root.style.setProperty('--color-bg-secondary', darkTheme.colors.background.secondary);
       root.style.setProperty('--color-text-primary', darkTheme.colors.text.primary);
@@ -42,7 +37,6 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--color-border', darkTheme.colors.border.primary);
     } else {
       root.classList.remove('dark');
-      // Set light theme CSS variables
       root.style.setProperty('--color-bg-primary', theme.colors.gray[50]);
       root.style.setProperty('--color-bg-secondary', '#ffffff');
       root.style.setProperty('--color-text-primary', theme.colors.gray[900]);
@@ -51,11 +45,9 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [isDarkMode]);
 
-  // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e) => {
-      // Only auto-switch if user hasn't manually set a preference
       const savedTheme = localStorage.getItem('harvesTrackr-theme');
       if (!savedTheme) {
         setIsDarkMode(e.matches);

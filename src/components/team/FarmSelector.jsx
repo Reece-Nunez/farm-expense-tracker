@@ -32,20 +32,7 @@ const FarmSelector = ({ showCreateOption = true }) => {
   };
 
   const getFarmTypeIcon = (farmType) => {
-    const iconMap = {
-      LIVESTOCK: '🐄',
-      CROP: '🌾', 
-      DAIRY: '🥛',
-      POULTRY: '🐔',
-      MIXED: '🚜',
-      AQUACULTURE: '🐟',
-      ORGANIC: '🌱',
-      GREENHOUSE: '🏠',
-      ORCHARD: '🍎',
-      VINEYARD: '🍇',
-      OTHER: '🏡'
-    };
-    return iconMap[farmType] || '🏡';
+    return null;
   };
 
   const getRoleBadgeColor = (role) => {
@@ -68,9 +55,11 @@ const FarmSelector = ({ showCreateOption = true }) => {
         className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px]"
       >
         <div className="flex items-center gap-2 flex-1">
-          <span className="text-lg">
-            {currentFarm ? getFarmTypeIcon(currentFarm.farmType) : '🏡'}
-          </span>
+          {currentFarm && getFarmTypeIcon(currentFarm.farmType) && (
+            <span className="text-lg">
+              {getFarmTypeIcon(currentFarm.farmType)}
+            </span>
+          )}
           <div className="text-left">
             <p className="font-medium text-gray-900 dark:text-white text-sm">
               {currentFarm?.name || 'Select Farm'}
@@ -110,7 +99,7 @@ const FarmSelector = ({ showCreateOption = true }) => {
                       onClick={() => handleFarmSelect(farm)}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <span className="text-lg">{getFarmTypeIcon(farm.farmType)}</span>
+                      {getFarmTypeIcon(farm.farmType) && <span className="text-lg">{getFarmTypeIcon(farm.farmType)}</span>}
                       <div className="flex-1 text-left">
                         <p className="font-medium text-gray-900 dark:text-white text-sm">
                           {farm.name}
@@ -132,7 +121,7 @@ const FarmSelector = ({ showCreateOption = true }) => {
                 </div>
               ) : (
                 <div className="p-4 text-center">
-                  <span className="text-4xl text-gray-400 block mb-2">🏡</span>
+                  <span className="text-xl text-gray-400 block mb-2 font-semibold">No Farms</span>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                     No farms available
                   </p>
@@ -167,7 +156,7 @@ const FarmSelector = ({ showCreateOption = true }) => {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                 >
-                  <span className="text-lg">⚙️</span>
+                  <span className="text-sm">Settings</span>
                   <span className="text-sm">Manage Farms</span>
                 </button>
               </div>
@@ -205,17 +194,17 @@ const CreateFarmModal = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
 
   const farmTypes = [
-    { value: 'LIVESTOCK', label: 'Livestock', icon: '🐄' },
-    { value: 'CROP', label: 'Crop', icon: '🌾' },
-    { value: 'DAIRY', label: 'Dairy', icon: '🥛' },
-    { value: 'POULTRY', label: 'Poultry', icon: '🐔' },
-    { value: 'MIXED', label: 'Mixed', icon: '🚜' },
-    { value: 'AQUACULTURE', label: 'Aquaculture', icon: '🐟' },
-    { value: 'ORGANIC', label: 'Organic', icon: '🌱' },
-    { value: 'GREENHOUSE', label: 'Greenhouse', icon: '🏠' },
-    { value: 'ORCHARD', label: 'Orchard', icon: '🍎' },
-    { value: 'VINEYARD', label: 'Vineyard', icon: '🍇' },
-    { value: 'OTHER', label: 'Other', icon: '🏡' }
+    { value: 'LIVESTOCK', label: 'Livestock', icon: null },
+    { value: 'CROP', label: 'Crop', icon: null },
+    { value: 'DAIRY', label: 'Dairy', icon: null },
+    { value: 'POULTRY', label: 'Poultry', icon: null },
+    { value: 'MIXED', label: 'Mixed', icon: null },
+    { value: 'AQUACULTURE', label: 'Aquaculture', icon: null },
+    { value: 'ORGANIC', label: 'Organic', icon: null },
+    { value: 'GREENHOUSE', label: 'Greenhouse', icon: null },
+    { value: 'ORCHARD', label: 'Orchard', icon: null },
+    { value: 'VINEYARD', label: 'Vineyard', icon: null },
+    { value: 'OTHER', label: 'Other', icon: null }
   ];
 
   const handleSubmit = async (e) => {
@@ -277,7 +266,7 @@ const CreateFarmModal = ({ onClose, onSuccess }) => {
               >
                 {farmTypes.map((type) => (
                   <option key={type.value} value={type.value}>
-                    {type.icon} {type.label}
+                    {type.label}
                   </option>
                 ))}
               </select>

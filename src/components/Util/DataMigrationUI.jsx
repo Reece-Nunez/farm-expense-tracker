@@ -7,7 +7,7 @@ export default function DataMigrationUI() {
 
   const handleRun = async () => {
     setStatus("running");
-    setLog(["🚀 Starting batch creation..."]);
+    setLog(["Starting batch creation..."]);
 
     try {
       const logBuffer = [];
@@ -19,12 +19,12 @@ export default function DataMigrationUI() {
         },
       });
 
-      logBuffer.push("✅ All mutations complete!");
+      logBuffer.push("All mutations complete!");
       setLog([...logBuffer]);
       setStatus("done");
     } catch (error) {
       console.error("Mutation batch failed:", error);
-      setLog((prev) => [...prev, `❌ Error: ${error.message}`]);
+      setLog((prev) => [...prev, `Error: ${error.message}`]);
       setStatus("error");
     }
   };

@@ -16,8 +16,8 @@ import { updateLivestockStatus } from "../../graphql/customMutations";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Controller } from "react-hook-form";
-import { createIncome } from "@/graphql/mutations"; // full version with livestock
-import { createIncomeWithLivestock } from "@/graphql/customMutations"; // trimmed version
+import { createIncome } from "@/graphql/mutations";
+import { createIncomeWithLivestock } from "@/graphql/customMutations";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -101,12 +101,9 @@ const IncomeForm = forwardRef((props, ref) => {
           },
         });
 
-        console.log("[Available Livestock]", data.listLivestocks.items); // 🔍 Log results\
-        console.log("Raw livestock data:", data.listLivestocks.items);
-
         setLivestockOptions(data.listLivestocks.items);
       } catch (err) {
-        console.error("❌ Error fetching available livestock:", err);
+        console.error("Error fetching available livestock:", err);
       }
     };
 
@@ -188,10 +185,6 @@ const IncomeForm = forwardRef((props, ref) => {
       userId: currentUser.id,
     };
 
-    console.log("📦 Form livestockID:", data.livestockID);
-    console.log("[🧾 Submitting Income]:", finalObj);
-    console.log("🐮 Raw form data:", data);
-
     try {
       const mutation = finalObj.livestockID
         ? createIncomeWithLivestock
@@ -202,9 +195,6 @@ const IncomeForm = forwardRef((props, ref) => {
         variables: { input: finalObj },
       });
 
-      console.log("✅ Income created:", result);
-
-      // 🐄 Update livestock status if linked
       if (finalObj.livestockID) {
         try {
           await client.graphql({
@@ -219,7 +209,7 @@ const IncomeForm = forwardRef((props, ref) => {
           });
           toast.success("Animal status updated to Sold.");
         } catch (livestockErr) {
-          console.error("❌ Failed to update livestock status:", livestockErr);
+          console.error("Failed to update livestock status:", livestockErr);
           toast.error("Income saved, but failed to mark animal as Sold.");
         }
       }
@@ -228,13 +218,12 @@ const IncomeForm = forwardRef((props, ref) => {
       reset();
       setLastEditedField(null);
     } catch (err) {
-      console.error("❌ Error creating income:", err);
+      console.error("Error creating income:", err);
       toast.error("Failed to log income. Check the console for details.");
     }
   };
 
-  const onInvalid = (formErrors) => {
-    console.log("[IncomeForm] Validation errors:", formErrors);
+  const onInvalid = () => {
     toast.error("Please fix errors before submitting.");
   };
 

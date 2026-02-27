@@ -271,7 +271,6 @@ const InventoryDashboard = () => {
       setEggForm({ flockId: "", date: "", eggsCollected: "" });
       setShowEggModal(false);
 
-      // 👇 Refresh dashboard analytics after submission
       fetchAnalytics();
     } catch (err) {
       console.error("Failed to log egg:", err);
@@ -302,7 +301,6 @@ const InventoryDashboard = () => {
 
       const savedId = data.createLivestock.id;
 
-      // 🔗 Create parent links if any were selected
       await Promise.all(
         parentIDs.map((parentId) =>
           client.graphql({
@@ -318,7 +316,6 @@ const InventoryDashboard = () => {
         )
       );
 
-      // 🧼 Reset state
       setParentIDs([]);
       setLivestockForm({
         name: "",
@@ -528,7 +525,7 @@ const InventoryDashboard = () => {
       opacity-100
       transition-all duration-300 hover:bg-amber-50 dark:hover:bg-amber-800 active:scale-95 touch-manipulation"
           >
-            ➕ Add Animal
+            Add Animal
           </button>
         </div>
 
@@ -564,7 +561,7 @@ const InventoryDashboard = () => {
        opacity-100
        transition-all duration-300 hover:bg-yellow-50 dark:hover:bg-yellow-800 active:scale-95 touch-manipulation"
           >
-            🥚 Log Egg
+            Log Egg
           </button>
         </div>
 
@@ -607,7 +604,7 @@ const InventoryDashboard = () => {
        opacity-100
        transition-all duration-300 hover:bg-purple-50 dark:hover:bg-purple-800 active:scale-95 touch-manipulation"
           >
-            📦 Add Supply
+            Add Supply
           </button>
         </div>
 
@@ -704,7 +701,7 @@ const InventoryDashboard = () => {
                 }}
                 className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105"
               >
-                🐄 Add Livestock
+                Add Livestock
               </Button>
             </div>
 
@@ -863,7 +860,7 @@ const InventoryDashboard = () => {
                   onClick={() => setShowSuppliesModal(true)}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all duration-300 hover:scale-105"
                 >
-                  <span>📦</span> Add Supply
+                  Add Supply
                 </Button>
               </div>
             </div>
@@ -880,7 +877,7 @@ const InventoryDashboard = () => {
               
               <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl text-center border border-green-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="bg-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-white text-xl">💰</span>
+                  <span className="text-white text-xl">$</span>
                 </div>
                 <div className="text-3xl font-bold text-green-600 mb-1">
                   ${analytics.items.reduce((sum, item) => sum + (item.quantity * (item.unitCost || 0)), 0).toFixed(0)}
@@ -890,7 +887,7 @@ const InventoryDashboard = () => {
               
               <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 rounded-xl text-center border border-yellow-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="bg-yellow-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-white text-xl">⚠️</span>
+                  <span className="text-white text-xl">!</span>
                 </div>
                 <div className="text-3xl font-bold text-yellow-600 mb-1">
                   {analytics.items.filter(item => (item.quantity || 0) <= (item.minStock || 0)).length}
@@ -900,7 +897,7 @@ const InventoryDashboard = () => {
               
               <div className="bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-xl text-center border border-red-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="bg-red-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-white text-xl">❌</span>
+                  <span className="text-white text-xl">X</span>
                 </div>
                 <div className="text-3xl font-bold text-red-600 mb-1">
                   {analytics.items.filter(item => (item.quantity || 0) === 0).length}
@@ -979,7 +976,7 @@ const InventoryDashboard = () => {
             onClick={handleSubmitEggLog}
             className="bg-green-600 hover:bg-green-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            🥚 Submit Log
+            Submit Log
           </Button>
         </div>
       </Modal>
@@ -1008,10 +1005,10 @@ const InventoryDashboard = () => {
             className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-700 dark:text-white touch-manipulation"
           >
             <option value="">Select Species</option>
-            <option value="Cow">🐄 Cow</option>
-            <option value="Pig">🐷 Pig</option>
-            <option value="Goat">🐐 Goat</option>
-            <option value="Sheep">🐑 Sheep</option>
+            <option value="Cow">Cow</option>
+            <option value="Pig">Pig</option>
+            <option value="Goat">Goat</option>
+            <option value="Sheep">Sheep</option>
           </select>
 
           <input
@@ -1053,7 +1050,7 @@ const InventoryDashboard = () => {
             <option value="">Select Gender</option>
             <option value="Male">♂️ Male</option>
             <option value="Female">♀️ Female</option>
-            <option value="Unknown">❓ Unknown</option>
+            <option value="Unknown">Unknown</option>
           </select>
 
           <select
@@ -1066,7 +1063,7 @@ const InventoryDashboard = () => {
             <option value="">Select Field (Optional)</option>
             {analytics.fieldAcreage.map((f) => (
               <option key={f.name} value={f.name}>
-                🌾 {f.name}
+                {f.name}
               </option>
             ))}
           </select>
@@ -1083,7 +1080,7 @@ const InventoryDashboard = () => {
                 }
                 className="w-4 h-4"
               />
-              <span className="text-sm font-medium">💰 Sold</span>
+              <span className="text-sm font-medium">Sold</span>
             </label>
             <label className="flex flex-col items-center gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation">
               <input
@@ -1096,7 +1093,7 @@ const InventoryDashboard = () => {
                 }
                 className="w-4 h-4"
               />
-              <span className="text-sm font-medium">🥩 Butchered</span>
+              <span className="text-sm font-medium">Butchered</span>
             </label>
             <label className="flex flex-col items-center gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 touch-manipulation">
               <input
@@ -1109,7 +1106,7 @@ const InventoryDashboard = () => {
                 }
                 className="w-4 h-4"
               />
-              <span className="text-sm font-medium">✅ Active</span>
+              <span className="text-sm font-medium">Active</span>
             </label>
           </div>
 
@@ -1150,7 +1147,7 @@ const InventoryDashboard = () => {
             onClick={handleSubmitLivestock}
             className="bg-green-600 hover:bg-green-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            🐄 Add Animal
+            Add Animal
           </Button>
         </div>
       </Modal>
@@ -1183,12 +1180,12 @@ const InventoryDashboard = () => {
               onChange={(e) => setSuppliesForm({ ...suppliesForm, category: e.target.value })}
               className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
             >
-              <option value="FEED_NUTRITION">🌾 Feed & Nutrition</option>
-              <option value="TOOLS_EQUIPMENT">🔧 Tools & Equipment</option>
-              <option value="FERTILIZERS">🧪 Fertilizers</option>
-              <option value="SEEDS_PLANTS">🌱 Seeds & Plants</option>
-              <option value="PESTICIDES">🦟 Pesticides</option>
-              <option value="SUPPLIES">📦 General Supplies</option>
+              <option value="FEED_NUTRITION">Feed & Nutrition</option>
+              <option value="TOOLS_EQUIPMENT">Tools & Equipment</option>
+              <option value="FERTILIZERS">Fertilizers</option>
+              <option value="SEEDS_PLANTS">Seeds & Plants</option>
+              <option value="PESTICIDES">Pesticides</option>
+              <option value="SUPPLIES">General Supplies</option>
             </select>
 
             <select
@@ -1196,11 +1193,11 @@ const InventoryDashboard = () => {
               onChange={(e) => setSuppliesForm({ ...suppliesForm, location: e.target.value })}
               className="border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white touch-manipulation"
             >
-              <option value="MAIN_STORAGE">🏢 Main Storage</option>
-              <option value="BARN">🏠 Barn</option>
-              <option value="GREENHOUSE">🌿 Greenhouse</option>
-              <option value="FIELD_SHED">🏚️ Field Shed</option>
-              <option value="OUTDOOR">🌤️ Outdoor Storage</option>
+              <option value="MAIN_STORAGE">Main Storage</option>
+              <option value="BARN">Barn</option>
+              <option value="GREENHOUSE">Greenhouse</option>
+              <option value="FIELD_SHED">Field Shed</option>
+              <option value="OUTDOOR">Outdoor Storage</option>
             </select>
           </div>
 
@@ -1249,8 +1246,6 @@ const InventoryDashboard = () => {
           <Button
             onClick={() => {
               haptics.medium();
-              // TODO: Implement add supply functionality
-              console.log('Add supply:', suppliesForm);
               setShowSuppliesModal(false);
               // Reset form
               setSuppliesForm({
@@ -1267,7 +1262,7 @@ const InventoryDashboard = () => {
             }}
             className="bg-purple-600 hover:bg-purple-700 text-white w-full py-3 text-lg font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation"
           >
-            📦 Add Supply Item
+            Add Supply Item
           </Button>
         </div>
       </Modal>
@@ -1301,16 +1296,16 @@ const InventoryItemGroup = ({ type, items }) => {
 
   const getCategoryIcon = (type) => {
     const icons = {
-      'Feed': '🌾',
-      'Tools': '🔧',
-      'Seeds': '🌱',
-      'Equipment': '🚜',
-      'Supplies': '📦',
-      'Hay': '🌿',
-      'Fertilizer': '🧪',
-      'Pesticides': '🦟',
+      'Feed': null,
+      'Tools': null,
+      'Seeds': null,
+      'Equipment': null,
+      'Supplies': null,
+      'Hay': null,
+      'Fertilizer': null,
+      'Pesticides': null,
     };
-    return icons[type] || '📦';
+    return icons[type] || null;
   };
 
   if (items.length === 0) return null;
@@ -1336,7 +1331,7 @@ const InventoryItemGroup = ({ type, items }) => {
           </div>
           {isLowStock() && (
             <span className="text-red-600 text-xs bg-red-100 dark:bg-red-900 px-2 sm:px-3 py-1 rounded-full font-medium border border-red-200 dark:border-red-700 animate-pulse flex-shrink-0">
-              ⚠️ <span className="hidden sm:inline ml-1">Low Stock</span>
+              ! <span className="hidden sm:inline ml-1">Low Stock</span>
             </span>
           )}
         </div>

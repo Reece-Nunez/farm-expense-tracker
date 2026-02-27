@@ -60,7 +60,6 @@ export default function Dashboard() {
   const client = generateClient();
   const navigate = useNavigate();
 
-  // Pull to refresh functionality
   const refreshData = async () => {
     const user = await getCurrentUser();
     if (!user) return;
@@ -78,7 +77,6 @@ export default function Dashboard() {
   const pullToRefreshHook = usePullToRefresh(refreshData, 80);
   const { onTouchStart, onTouchMove, onTouchEnd, isRefreshing, isPulling } = pullToRefreshHook;
 
-  // Add swipe navigation
   const handleSwipe = (direction) => {
     haptics.light();
     if (direction === 'left') {
@@ -101,7 +99,6 @@ export default function Dashboard() {
       }
 
       try {
-        // Pass both id and sub
         await fetchDashboardData(
           user.id,
           user.sub,
@@ -126,63 +123,52 @@ export default function Dashboard() {
     setRecentExpenses,
     setRecentIncomes,
   ) => {
-    try {
-      const expenseRes = await client.graphql({
-        query: LIST_EXPENSES_WITH_LINE_ITEMS,
-        variables: {
-          filter: {
-            and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
-          },
-          limit: 1000,
+    const expenseRes = await client.graphql({
+      query: LIST_EXPENSES_WITH_LINE_ITEMS,
+      variables: {
+        filter: {
+          and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
         },
-      });
+        limit: 1000,
+      },
+    });
 
-
-      const incomeRes = await client.graphql({
-        query: listIncomes,
-        variables: {
-          filter: {
-            and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
-          },
-          limit: 1000,
+    const incomeRes = await client.graphql({
+      query: listIncomes,
+      variables: {
+        filter: {
+          and: [{ userId: { eq: userId } }, { sub: { eq: userSub } }],
         },
-      });
+        limit: 1000,
+      },
+    });
 
-      const allExpenses = expenseRes.data.listExpenses.items || [];
-      const allIncomes = incomeRes.data.listIncomes.items || [];
+    const allExpenses = expenseRes.data.listExpenses.items || [];
+    const allIncomes = incomeRes.data.listIncomes.items || [];
 
-      const parsedExpenses = allExpenses.map((exp) => ({
-        ...exp,
-        lineItems:
-          exp.lineItems?.items?.map((li) => ({
-            item: li.item ?? "",
-            category: li.category ?? "Uncategorized",
-            quantity: parseFloat(li.quantity ?? 0),
-            unitCost: parseFloat(li.unitCost ?? 0),
-            lineTotal: parseFloat(li.lineTotal ?? 0),
-          })) ?? [],
-      }));
+    const parsedExpenses = allExpenses.map((exp) => ({
+      ...exp,
+      lineItems:
+        exp.lineItems?.items?.map((li) => ({
+          item: li.item ?? "",
+          category: li.category ?? "Uncategorized",
+          quantity: parseFloat(li.quantity ?? 0),
+          unitCost: parseFloat(li.unitCost ?? 0),
+          lineTotal: parseFloat(li.lineTotal ?? 0),
+        })) ?? [],
+    }));
 
-      const sortedExpenses = [...parsedExpenses].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-      const sortedIncomes = [...allIncomes].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+    const sortedExpenses = [...parsedExpenses].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+    const sortedIncomes = [...allIncomes].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
 
-      setExpenses(parsedExpenses);
-      setIncomes(allIncomes);
-      setRecentExpenses(sortedExpenses.slice(0, 5));
-      setRecentIncomes(sortedIncomes.slice(0, 5));
-    } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-    } finally {
-    }
-  };
-
-  const colorClassMap = {
-    red: "text-red-500",
-    green: "text-green-500",
+    setExpenses(parsedExpenses);
+    setIncomes(allIncomes);
+    setRecentExpenses(sortedExpenses.slice(0, 5));
+    setRecentIncomes(sortedIncomes.slice(0, 5));
   };
 
   const totalExpense = expenses.reduce(
@@ -203,11 +189,9 @@ export default function Dashboard() {
   );
   const incomeItemData = getIncomeItemData(incomes);
 
-  // Handle click outside to close quick add menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showQuickAdd && !event.target.closest('.quick-add-container')) {
-        console.log("Clicking outside, closing menu");
         setShowQuickAdd(false);
       }
     };
@@ -225,13 +209,12 @@ export default function Dashboard() {
 
   const handleExportReport = async () => {
     try {
-      // Simple CSV export functionality
       const csvData = [
         ['Type', 'Date', 'Description', 'Amount'],
         ...expenses.map(expense => ['Expense', expense.date, expense.vendor, expense.grandTotal]),
         ...incomes.map(income => ['Income', income.date, income.item, income.amount])
       ];
-      
+
       const csvContent = csvData.map(row => row.join(',')).join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
@@ -261,43 +244,40 @@ export default function Dashboard() {
         onSwipeEnd(e);
       }}
     >
-      {/* Pull to refresh indicator */}
       {isPulling && (
         <div className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-4">
           <div className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-            {isRefreshing ? '🔄 Refreshing...' : '⬇️ Pull to refresh'}
+            {isRefreshing ? 'Refreshing...' : 'Pull to refresh'}
           </div>
         </div>
       )}
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8">
-        {/* Header - Mobile Optimized */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">
-              🌾 Farm Dashboard
+              Farm Dashboard
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               Track your farm's financial performance
             </p>
           </div>
-          
-          {/* Desktop Quick Actions */}
+
           <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={handleExportReport}
             >
-              📊 Export Report
+              Export Report
             </Button>
             <div className="relative quick-add-container">
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 size="sm"
                 onClick={() => setShowQuickAdd(!showQuickAdd)}
               >
-                ➕ Quick Add
+                Quick Add
               </Button>
               {showQuickAdd && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
@@ -312,7 +292,7 @@ export default function Dashboard() {
                         setShowQuickAdd(false);
                       }}
                     >
-                      💸 Add Expense
+                      Add Expense
                     </Button>
                     <Button
                       variant="ghost"
@@ -324,7 +304,7 @@ export default function Dashboard() {
                         setShowQuickAdd(false);
                       }}
                     >
-                      💰 Add Income
+                      Add Income
                     </Button>
                     <Button
                       variant="ghost"
@@ -336,23 +316,22 @@ export default function Dashboard() {
                         setShowQuickAdd(false);
                       }}
                     >
-                      📦 Manage Inventory
+                      Manage Inventory
                     </Button>
                   </div>
                 </div>
               )}
             </div>
           </div>
-          
-          {/* Mobile Quick Actions */}
+
           <div className="flex lg:hidden items-center gap-2 relative quick-add-container">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleExportReport}
               className="flex-1"
             >
-              📊 Export
+              Export
             </Button>
             <Button
               variant="primary"
@@ -363,7 +342,7 @@ export default function Dashboard() {
               }}
               className="flex-1"
             >
-              ➕ Add
+              Add
             </Button>
             {showQuickAdd && (
               <div className="absolute -right-2 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
@@ -378,7 +357,7 @@ export default function Dashboard() {
                       navigate('/dashboard/add-expense');
                     }}
                   >
-                    💸 Add Expense
+                    Add Expense
                   </Button>
                   <Button
                     variant="ghost"
@@ -390,7 +369,7 @@ export default function Dashboard() {
                       navigate('/dashboard/add-income');
                     }}
                   >
-                    💰 Add Income
+                    Add Income
                   </Button>
                   <Button
                     variant="ghost"
@@ -402,7 +381,7 @@ export default function Dashboard() {
                       navigate('/dashboard/inventory');
                     }}
                   >
-                    📦 Inventory
+                    Inventory
                   </Button>
                 </div>
               </div>
@@ -410,7 +389,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Summary Cards */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8 px-3 sm:px-0">
             <SkeletonCard />
@@ -425,7 +403,6 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Main Charts Grid - Mobile Optimized */}
         {isLoading ? (
           <div className="space-y-4 sm:space-y-6">
             <div className="mx-3 sm:mx-0">
@@ -458,7 +435,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Recent Activity - Full Width on Mobile */}
         {isLoading ? (
           <div className="mx-3 sm:mx-0">
             <SkeletonCard />
@@ -539,58 +515,30 @@ const getIncomeItemData = (incomes = []) => {
 
 const SummaryCards = ({ totalExpense, totalIncome, net }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8 px-3 sm:px-0">
-    <SummaryCard 
-      title="Total Expenses" 
-      value={totalExpense} 
-      color="red"
-      icon="💸"
-      trend={-5.2}
-    />
-    <SummaryCard 
-      title="Total Income" 
-      value={totalIncome} 
-      color="green"
-      icon="💰"
-      trend={12.8}
-    />
+    <SummaryCard title="Total Expenses" value={totalExpense} color="red" />
+    <SummaryCard title="Total Income" value={totalIncome} color="green" />
     <SummaryCard
       title="Net (Income - Expenses)"
       value={net}
       color={net >= 0 ? "green" : "red"}
-      icon={net >= 0 ? "📈" : "📉"}
-      trend={net >= 0 ? 8.3 : -2.1}
     />
   </div>
 );
 
-const SummaryCard = ({ title, value, color, icon, trend }) => {
+const SummaryCard = ({ title, value, color }) => {
   const colorClassMap = {
     red: "text-red-600 dark:text-red-400",
     green: "text-green-600 dark:text-green-400",
-  };
-
-  const bgColorMap = {
-    red: "bg-red-50 dark:bg-red-900/10",
-    green: "bg-green-50 dark:bg-green-900/10",
   };
 
   return (
     <Card variant="elevated" className="hover:shadow-lg transition-shadow duration-200" padding="sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl sm:text-2xl">{icon}</span>
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 leading-tight">{title}</p>
-          </div>
-          <h2 className={`text-2xl sm:text-3xl font-bold ${colorClassMap[color]} mb-2 leading-tight`}>
+          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 leading-tight mb-2">{title}</p>
+          <h2 className={`text-2xl sm:text-3xl font-bold ${colorClassMap[color]} leading-tight`}>
             ${Math.abs(value).toFixed(2)}
           </h2>
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className={`text-xs px-2 py-1 rounded-full ${bgColorMap[color]} ${colorClassMap[color]} font-medium`}>
-              {trend > 0 ? '+' : ''}{trend}%
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
-          </div>
         </div>
       </div>
     </Card>
@@ -600,7 +548,7 @@ const SummaryCard = ({ title, value, color, icon, trend }) => {
 const LineChartCard = ({ timeRange, setTimeRange, data }) => (
   <Card variant="elevated" className="h-full mx-3 sm:mx-0">
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-      <CardHeader size="default" className="mb-0">📊 Expenses vs. Income Over Time</CardHeader>
+      <CardHeader size="default" className="mb-0">Expenses vs. Income Over Time</CardHeader>
       <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 self-start sm:self-auto">
         {["day", "week", "month"].map((range) => (
           <Button
@@ -620,20 +568,20 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis 
-            dataKey="period" 
+          <XAxis
+            dataKey="period"
             stroke="#6b7280"
             fontSize={12}
             tickLine={false}
           />
-          <YAxis 
+          <YAxis
             tickCount={6}
             stroke="#6b7280"
             fontSize={12}
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip 
+          <Tooltip
             contentStyle={{
               backgroundColor: '#ffffff',
               border: '1px solid #e5e7eb',
@@ -669,8 +617,8 @@ const LineChartCard = ({ timeRange, setTimeRange, data }) => (
 const PieChartCard = ({ data, total }) => {
   return (
     <Card variant="elevated" className="h-full mx-3 sm:mx-0">
-      <CardHeader size="default">🏷️ Expenses by Category</CardHeader>
-      
+      <CardHeader size="default">Expenses by Category</CardHeader>
+
       {data.length > 0 ? (
         <>
           <div className="h-48 sm:h-64 mb-4 sm:mb-6">
@@ -708,14 +656,13 @@ const PieChartCard = ({ data, total }) => {
             </ResponsiveContainer>
           </div>
 
-          {/* Category Legend */}
           <div className="space-y-3">
             {data.slice(0, 6).map((item, index) => {
               const percent = total > 0 ? (item.total / total) * 100 : 0;
               return (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
@@ -745,7 +692,6 @@ const PieChartCard = ({ data, total }) => {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-          <div className="text-4xl mb-4">📊</div>
           <p className="text-sm">No expense data available</p>
         </div>
       )}
@@ -755,8 +701,8 @@ const PieChartCard = ({ data, total }) => {
 
 const IncomeItemPieChart = ({ data }) => (
   <Card variant="elevated" className="h-full mx-3 sm:mx-0">
-    <CardHeader size="default">💰 Income by Source</CardHeader>
-    
+    <CardHeader size="default">Income by Source</CardHeader>
+
     {data.length > 0 ? (
       <>
         <div className="h-48 sm:h-64 mb-4 sm:mb-6">
@@ -794,7 +740,6 @@ const IncomeItemPieChart = ({ data }) => (
           </ResponsiveContainer>
         </div>
 
-        {/* Income Legend */}
         <div className="space-y-3">
           {data.slice(0, 6).map((item, index) => {
             const totalIncome = data.reduce((sum, d) => sum + d.total, 0);
@@ -802,7 +747,7 @@ const IncomeItemPieChart = ({ data }) => (
             return (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div 
+                  <div
                     className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
@@ -825,7 +770,6 @@ const IncomeItemPieChart = ({ data }) => (
       </>
     ) : (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-        <div className="text-4xl mb-4">💰</div>
         <p className="text-sm">No income records found</p>
       </div>
     )}
@@ -839,14 +783,12 @@ const RecentActivity = ({ recentExpenses, recentIncomes }) => {
     ...recentExpenses.map(item => ({
       ...item,
       type: 'expense',
-      icon: '💸',
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-50 dark:bg-red-900/10',
     })),
     ...recentIncomes.map(item => ({
       ...item,
       type: 'income',
-      icon: '💰',
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-50 dark:bg-green-900/10',
     }))
@@ -855,12 +797,12 @@ const RecentActivity = ({ recentExpenses, recentIncomes }) => {
   return (
     <Card variant="elevated" className="h-full mx-3 sm:mx-0">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <CardHeader size="default" className="mb-0">⚡ Recent Activity</CardHeader>
+        <CardHeader size="default" className="mb-0">Recent Activity</CardHeader>
         <Button variant="ghost" size="sm" className="text-xs">
           View All
         </Button>
       </div>
-      
+
       {allActivity.length > 0 ? (
         <div className="space-y-2 sm:space-y-3">
           {allActivity.map((item, index) => (
@@ -869,8 +811,8 @@ const RecentActivity = ({ recentExpenses, recentIncomes }) => {
               className="flex items-center gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer active:scale-[0.98] touch-manipulation"
               onClick={() => navigate(item.type === 'expense' ? '/dashboard/expenses' : '/dashboard/income')}
             >
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${item.bgColor} flex items-center justify-center text-base sm:text-lg flex-shrink-0`}>
-                {item.icon}
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${item.bgColor} flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 ${item.color}`}>
+                {item.type === 'expense' ? 'E' : 'I'}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -902,24 +844,23 @@ const RecentActivity = ({ recentExpenses, recentIncomes }) => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-          <div className="text-4xl mb-4">⚡</div>
           <p className="text-sm">No recent activity</p>
         </div>
       )}
-      
+
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             fullWidth
             onClick={() => navigate('/dashboard/expenses')}
           >
             View Expenses
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             fullWidth
             onClick={() => navigate('/dashboard/income')}
           >

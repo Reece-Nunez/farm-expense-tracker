@@ -128,39 +128,39 @@ export default function IncomeTable({ onEdit, onDelete }) {
                 >
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="col-span-2">
-                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">📅 Date</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">Date</p>
                       <p className="font-semibold text-gray-800 dark:text-gray-200 text-base">{dateDisplay}</p>
                     </div>
 
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">🛒 Item</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">Item</p>
                       <p className="font-semibold text-gray-800 dark:text-gray-200 break-words">{inc.item}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">💰 Total</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium text-xs">Total</p>
                       <p className="font-bold text-green-600 text-lg">
                         ${amount.toFixed(2)}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-gray-500 font-medium text-xs">📦 Qty</p>
+                      <p className="text-gray-500 font-medium text-xs">Qty</p>
                       <p className="text-sm">{qty}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 font-medium text-xs">💲/Unit</p>
+                      <p className="text-gray-500 font-medium text-xs">Price/Unit</p>
                       <p className="text-sm">${price.toFixed(2)}</p>
                     </div>
 
                     <div>
-                      <p className="text-gray-500 font-medium text-xs">💳 Payment</p>
+                      <p className="text-gray-500 font-medium text-xs">Payment</p>
                       <p className="text-sm">{inc.paymentMethod || "-"}</p>
                     </div>
                     <div></div>
 
                     {inc.livestock && (
                       <div className="col-span-2">
-                        <p className="text-gray-500 font-medium text-xs">🐮 Animal Sold</p>
+                        <p className="text-gray-500 font-medium text-xs">Animal Sold</p>
                         <p className="text-purple-700 font-semibold">
                           {inc.livestock.name} ({inc.livestock.species})
                         </p>
@@ -168,7 +168,7 @@ export default function IncomeTable({ onEdit, onDelete }) {
                     )}
 
                     <div className="col-span-2">
-                      <p className="text-gray-500 font-medium text-xs">📝 Notes</p>
+                      <p className="text-gray-500 font-medium text-xs">Notes</p>
                       <p className="text-gray-700 text-sm whitespace-pre-wrap">
                         {inc.notes || "-"}
                       </p>

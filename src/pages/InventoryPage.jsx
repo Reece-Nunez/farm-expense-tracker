@@ -128,12 +128,12 @@ const InventoryPage = () => {
 
   const loadCategories = async (user) => {
     return [
-      { id: '1', name: 'Feed & Nutrition', color: '#10B981', icon: '🌾' },
-      { id: '2', name: 'Tools & Equipment', color: '#F59E0B', icon: '🔧' },
-      { id: '3', name: 'Fertilizers', color: '#8B5CF6', icon: '🧪' },
-      { id: '4', name: 'Seeds & Plants', color: '#EC4899', icon: '🌱' },
-      { id: '5', name: 'Pesticides', color: '#EF4444', icon: '🦟' },
-      { id: '6', name: 'Supplies', color: '#6B7280', icon: '📦' }
+      { id: '1', name: 'Feed & Nutrition', color: '#10B981', icon: null },
+      { id: '2', name: 'Tools & Equipment', color: '#F59E0B', icon: null },
+      { id: '3', name: 'Fertilizers', color: '#8B5CF6', icon: null },
+      { id: '4', name: 'Seeds & Plants', color: '#EC4899', icon: null },
+      { id: '5', name: 'Pesticides', color: '#EF4444', icon: null },
+      { id: '6', name: 'Supplies', color: '#6B7280', icon: null }
     ];
   };
 
@@ -183,7 +183,6 @@ const InventoryPage = () => {
   const handleAddItem = async (itemData) => {
     try {
       // TODO: Implement GraphQL mutation to add inventory item
-      console.log('Adding inventory item:', itemData);
       toast.success('Inventory item added successfully');
       setShowAddModal(false);
       loadInventoryData(); // Refresh data
@@ -194,9 +193,6 @@ const InventoryPage = () => {
   };
 
   const handleBarcodeScanned = (barcode) => {
-    console.log('Barcode scanned:', barcode);
-    
-    // Search for existing inventory item with this barcode
     const existingItem = inventory.find(item => item.barcode === barcode);
     
     if (existingItem) {
@@ -324,8 +320,8 @@ const InventoryPage = () => {
             <InventoryList
               items={filteredInventory}
               view={selectedView}
-              onItemClick={(item) => console.log('Item clicked:', item)}
-              onStockUpdate={(itemId, newStock) => console.log('Stock update:', itemId, newStock)}
+              onItemClick={(item) => {}}
+              onStockUpdate={(itemId, newStock) => {}}
             />
           </div>
 
@@ -334,8 +330,8 @@ const InventoryPage = () => {
             {/* Low Stock Alerts */}
             <LowStockAlerts
               alerts={alerts}
-              onAlertClick={(alert) => console.log('Alert clicked:', alert)}
-              onMarkAsRead={(alertId) => console.log('Mark as read:', alertId)}
+              onAlertClick={(alert) => {}}
+              onMarkAsRead={(alertId) => {}}
             />
 
             {/* Quick Actions */}
@@ -361,7 +357,7 @@ const InventoryPage = () => {
                   Create Purchase Order
                 </Button>
                 <Button variant="outline" fullWidth>
-                  📊 Export Inventory
+                  Export Inventory
                 </Button>
               </div>
             </Card>

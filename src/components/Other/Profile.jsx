@@ -238,7 +238,7 @@ export default function Profile() {
         {/* Personal Information Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-            👤 Personal Information
+            Personal Information
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -290,7 +290,7 @@ export default function Profile() {
         {/* Contact Information Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-            📞 Contact Information
+            Contact Information
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,7 +320,7 @@ export default function Profile() {
         {/* Bio Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-            📝 About Me
+            About Me
           </h3>
           
           <div>
@@ -338,7 +338,7 @@ export default function Profile() {
         {/* Profile Picture Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
-            📸 Profile Picture
+            Profile Picture
           </h3>
           
           <div>
@@ -358,7 +358,7 @@ export default function Profile() {
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            💾 Save Profile
+            Save Profile
           </button>
         </div>
       </form>

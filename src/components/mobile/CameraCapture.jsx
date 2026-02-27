@@ -97,7 +97,7 @@ const CameraCapture = ({ onCapture, onClose, mode = 'receipt' }) => {
       <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <div className="text-center p-6">
-            <div className="text-4xl mb-4">📷</div>
+            <div className="text-xl mb-4 font-semibold text-gray-500">Camera</div>
             <h3 className="text-lg font-semibold mb-2">Camera Error</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
             <div className="flex gap-2">

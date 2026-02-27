@@ -57,7 +57,6 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
       await new Promise((resolve, reject) => {
         Quagga.init(config, (err) => {
           if (err) {
-            console.error("Quagga initialization failed:", err);
             reject(err);
             return;
           }
@@ -74,8 +73,6 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
         const barcode = result.codeResult.code;
         const confidence = result.codeResult.confidence || 0;
         
-        console.log('Barcode detected:', barcode, 'Confidence:', confidence);
-        
         // Only accept high confidence scans to reduce false positives
         if (confidence > 75) {
           handleBarcodeDetected(barcode, confidence);
@@ -84,7 +81,6 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
 
       toast.success('Barcode scanner initialized! Point camera at barcode');
     } catch (err) {
-      console.error('Scanner initialization error:', err);
       let errorMessage = 'Failed to initialize barcode scanner';
       
       if (err.name === 'NotAllowedError') {
@@ -107,7 +103,7 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
         setIsScanning(false);
         toast.info('Scanner stopped');
       } catch (err) {
-        console.error('Error stopping scanner:', err);
+        // Scanner stop error
       }
     }
   };
@@ -121,7 +117,6 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
     setLastScan(barcode);
     setScanConfidence(Date.now());
     
-    console.log('Processing barcode:', barcode);
     setScanResults(prev => {
       const newResults = [
         { barcode, confidence, timestamp: new Date() },
@@ -139,9 +134,7 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
       checkInventoryItem(barcode);
     }
 
-    toast.success(`Barcode scanned: ${barcode}`, {
-      icon: '📄'
-    });
+    toast.success(`Barcode scanned: ${barcode}`);
   };
 
   const checkInventoryItem = async (barcode) => {
@@ -168,20 +161,17 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
         
         if (foundItem) {
           toast.success(`Found: ${foundItem.name}`, {
-            duration: 4000,
-            icon: '✅'
+            duration: 4000
           });
           onItemFound(foundItem);
         } else {
           toast.info('Item not found in inventory. Add new item?', {
-            duration: 4000,
-            icon: '❓'
+            duration: 4000
           });
           onItemFound({ barcode, isNew: true });
         }
       }, 500);
     } catch (error) {
-      console.error('Error checking inventory item:', error);
       toast.error('Failed to check inventory item');
     }
   };
@@ -326,7 +316,7 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
                       {/* Scanner Info */}
                       <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
                         <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-300 mb-2">
-                          🔍 Supported Formats
+                          Supported Formats
                         </h4>
                         <div className="grid grid-cols-2 gap-2 text-xs text-indigo-700 dark:text-indigo-400">
                           <div>• Code 128</div>
@@ -439,13 +429,13 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
                 </h4>
                 <div className="space-y-2">
                   <Button variant="outline" size="sm" fullWidth>
-                    🔍 Look up item
+                    Look up item
                   </Button>
                   <Button variant="outline" size="sm" fullWidth>
-                    ➕ Add to inventory
+                    Add to inventory
                   </Button>
                   <Button variant="outline" size="sm" fullWidth>
-                    📝 Update stock
+                    Update stock
                   </Button>
                 </div>
               </Card>
@@ -453,7 +443,7 @@ const QuaggaBarcodeScanner = ({ onScan, onClose, onItemFound = null }) => {
               {/* Tips */}
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
-                  📱 Scanning Tips
+                  Scanning Tips
                 </h4>
                 <ul className="text-xs text-green-700 dark:text-green-400 space-y-1">
                   <li>• Hold device 6-12 inches from barcode</li>

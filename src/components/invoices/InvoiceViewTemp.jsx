@@ -25,18 +25,18 @@ const InvoiceViewTemp = ({ onEdit, onClose, onGeneratePDF }) => {
 
       {/* Placeholder Content */}
       <Card className="p-12 text-center">
-        <div className="text-6xl mb-4">👁️</div>
+        <div className="text-2xl mb-4 font-semibold text-gray-500">Preview</div>
         <h3 className="text-xl font-semibold mb-2">Invoice View Ready</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           The invoice view component has been created and will display detailed invoice information once the GraphQL schema is deployed.
         </p>
         
         <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <p>✅ InvoiceView.jsx component created</p>
-          <p>✅ Status management functionality</p>
-          <p>✅ Customer and line item display</p>
-          <p>✅ PDF generation integration ready</p>
-          <p>⏳ Requires: GraphQL schema deployment</p>
+          <p>InvoiceView.jsx component created</p>
+          <p>Status management functionality</p>
+          <p>Customer and line item display</p>
+          <p>PDF generation integration ready</p>
+          <p>Pending: GraphQL schema deployment</p>
         </div>
       </Card>
     </div>

@@ -148,7 +148,7 @@ const AnalyticsPage = () => {
     return (
       <div className="p-6">
         <Card className="p-8 text-center">
-          <span className="text-4xl mb-4 block">🔒</span>
+          <span className="text-4xl mb-4 block font-bold text-gray-500">Restricted</span>
           <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
           <p className="text-gray-600 dark:text-gray-400">
             You don't have permission to view analytics for this farm.
@@ -162,7 +162,7 @@ const AnalyticsPage = () => {
     return (
       <div className="p-6">
         <Card className="p-8 text-center">
-          <span className="text-4xl mb-4 block">🏡</span>
+          <span className="text-4xl mb-4 block font-bold text-gray-500">No Farm</span>
           <h2 className="text-xl font-semibold mb-2">No Farm Selected</h2>
           <p className="text-gray-600 dark:text-gray-400">
             Please select a farm to view analytics data.
@@ -173,9 +173,9 @@ const AnalyticsPage = () => {
   }
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'reports', label: 'Reports', icon: '📋' },
-    { id: 'custom', label: 'Custom Dashboard', icon: '⚙️' }
+    { id: 'dashboard', label: 'Dashboard', icon: null },
+    { id: 'reports', label: 'Reports', icon: null },
+    { id: 'custom', label: 'Custom Dashboard', icon: null }
   ];
 
   return (
@@ -207,11 +207,11 @@ const AnalyticsPage = () => {
           </select>
 
           <Button variant="outline" onClick={refreshData}>
-            🔄 Refresh
+            Refresh
           </Button>
 
           <Button onClick={() => exportReport('Summary')}>
-            📥 Export
+            Export
           </Button>
         </div>
       </div>
@@ -228,7 +228,7 @@ const AnalyticsPage = () => {
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            <span>{tab.icon}</span>
+            {tab.icon && <span>{tab.icon}</span>}
             {tab.label}
           </button>
         ))}

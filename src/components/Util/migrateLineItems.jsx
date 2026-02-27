@@ -666,7 +666,7 @@ const lineItemsToCreate = [
 // Client will be created when needed to avoid Amplify configuration race condition
 
 export const runLineItemMutations = async ({ log = console.log } = {}) => {
-  log("🚀 Running batch createLineItem mutations...");
+  log("Running batch createLineItem mutations...");
 
   // Create client at runtime when Amplify is configured
   const client = generateClient();
@@ -682,9 +682,9 @@ export const runLineItemMutations = async ({ log = console.log } = {}) => {
           input: item
         },
       });
-      log(`✅ Created LineItem with ID: ${res.data.createLineItem.id} for expense: ${item.expenseID}`);
+      log(`Created LineItem with ID: ${res.data.createLineItem.id} for expense: ${item.expenseID}`);
     } catch (err) {
-      log("❌ Failed to create LineItem:");
+      log("Failed to create LineItem:");
       log(`   ExpenseID: ${item.expenseID}`);
       log(`   Item: ${item.item}`);
       log(`   Category: ${item.category}`);
@@ -695,8 +695,8 @@ export const runLineItemMutations = async ({ log = console.log } = {}) => {
     }
   }
 
-  log("🏁 Done!");
-  log("✅ All mutations complete!");
+  log("Done!");
+  log("All mutations complete!");
 };
 
 

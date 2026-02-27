@@ -39,7 +39,6 @@ const InvoiceList = ({ onEdit, onView, onCreate, onGeneratePDF }) => {
       );
       
       setInvoices(userInvoices);
-      console.log(`Loaded ${userInvoices.length} invoices from database`);
       
     } catch (error) {
       console.error('Error loading invoices:', error);
@@ -275,7 +274,7 @@ const InvoiceList = ({ onEdit, onView, onCreate, onGeneratePDF }) => {
       <div className="space-y-4">
         {filteredAndSortedInvoices.length === 0 ? (
           <Card className="p-12 text-center">
-            <div className="text-6xl mb-4">📄</div>
+            <div className="text-2xl mb-4 font-semibold text-gray-500">No Invoices</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No invoices found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {searchTerm || filter !== 'all'

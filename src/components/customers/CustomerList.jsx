@@ -38,7 +38,6 @@ const CustomerList = ({ onEdit, onView, onCreate }) => {
       );
       
       setCustomers(userCustomers);
-      console.log(`Loaded ${userCustomers.length} customers from database`);
       
     } catch (error) {
       console.error('Error loading customers:', error);
@@ -236,7 +235,7 @@ const CustomerList = ({ onEdit, onView, onCreate }) => {
       <div className="space-y-4">
         {filteredAndSortedCustomers.length === 0 ? (
           <Card className="p-12 text-center">
-            <div className="text-6xl mb-4">👥</div>
+            <div className="text-2xl mb-4 font-semibold text-gray-500">No Customers</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {searchTerm ? 'No customers found' : 'No customers yet'}
             </h3>

@@ -87,7 +87,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
             error: (err) => console.error("Subscription error:", err),
           });
 
-        // Store `subscription` somewhere so you can unsubscribe on cleanup
       } catch (err) {
         console.error("Error in sidebar init:", err);
       }
@@ -247,16 +246,14 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
     return initialState;
   });
 
-  // Helper for nav clicks
   const handleNavClick = (route) => {
     navigate(route);
-    onCloseSidebar(); // call the prop if provided
+    onCloseSidebar();
   };
 
   return (
     <div className="flex flex-col min-h-screen max-h-screen overflow-hidden">
       <div className="flex-shrink-0">
-        {/* Profile display */}
         <div className="p-4 sm:p-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setProfileMenuOpen(!profileMenuOpen)}
@@ -295,20 +292,17 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
           )}
         </div>
 
-        {/* App Name */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <button onClick={() => handleNavClick("/dashboard")} className="flex justify-center items-center w-full">
             <img src={Logo} alt="AgTrackr Logo" className="h-12 sm:h-14" />
           </button>
         </div>
 
-        {/* Farm Selector */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <FarmSelector showCreateOption={true} />
         </div>
       </div>
 
-      {/* Nav Links */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         <button
           onClick={() => handleNavClick("/dashboard")}
@@ -331,7 +325,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
 
           return (
             <div key={group.label}>
-              {/* Group Label */}
               <button
                 className="flex justify-between items-center w-full text-left text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1"
                 onClick={toggleGroup}
@@ -344,7 +337,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
                 )}
               </button>
 
-              {/* Group Items */}
               {isExpanded && (
                 <div className="space-y-1 ml-2">
                   {group.items.map(
@@ -366,7 +358,6 @@ export default function Sidebar({ onCloseSidebar = () => {} }) {
         })}
       </nav>
 
-      {/* Theme toggle at the bottom */}
       <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
         <ThemeToggle variant="toggle" size="sm" showLabel={false} />
       </div>

@@ -14,7 +14,6 @@ import "@aws-amplify/ui-react/styles.css";
 import "../AuthOverides.css";
 import DataMigrationUI from "./components/Util/DataMigrationUI";
 import { getCurrentUser } from "./utils/getCurrentUser";
-// Amplify configuration moved to main.jsx
 import { toast } from "react-hot-toast";
 import Modal from "react-modal";
 import { signOut } from "aws-amplify/auth";
@@ -24,11 +23,8 @@ import { FarmProvider } from "./context/FarmContext";
 import { deleteIncomeSafe } from "./graphql/customMutations";
 import GlobalLoadingSpinner from "./components/Util/GlobalLoadingSpinner";
 import {
-  deleteExpense,
-  deleteIncome,
   createIncome,
   updateIncome,
-  deleteLineItem,
 } from "./graphql/mutations";
 import {
   listExpenses as listExpensesQuery,
@@ -73,7 +69,6 @@ import TeamPage from "./pages/TeamPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import FarmSettingsPage from "./pages/FarmSettingsPage";
 
-// Amplify configuration moved to main.jsx
 Modal.setAppElement("#root");
 
 export default function App() {

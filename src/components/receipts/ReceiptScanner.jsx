@@ -187,7 +187,7 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            📸 Scan Receipt
+            Scan Receipt
           </h2>
           <Button variant="outline" size="sm" onClick={onClose}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,7 +200,7 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
         <div className="p-4">
           {error ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">📷</div>
+              <div className="text-2xl mb-4 font-semibold text-gray-500">Camera</div>
               <h3 className="text-lg font-semibold mb-2 text-red-600">Camera Error</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
               
@@ -230,13 +230,13 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
                   className="w-full h-auto max-h-96 object-contain"
                 />
                 <div className="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
-                  ✓ Captured
+                  Captured
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" onClick={retakePhoto} fullWidth>
-                  🔄 Retake
+                  Retake
                 </Button>
                 <Button 
                   variant="primary" 
@@ -244,7 +244,7 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
                   loading={processing}
                   fullWidth
                 >
-                  {processing ? '🔍 Processing...' : '✨ Process Receipt'}
+                  {processing ? 'Processing...' : 'Process Receipt'}
                 </Button>
               </div>
             </div>
@@ -273,7 +273,7 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                   <div className="flex items-center gap-4">
                     <Button variant="outline" size="sm" onClick={toggleCamera}>
-                      🔄
+                      Flip
                     </Button>
                     
                     <button
@@ -282,14 +282,13 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
                       className="w-16 h-16 bg-white rounded-full border-4 border-gray-300 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
-                        📷
                       </div>
                     </button>
                     
                     <label className="cursor-pointer">
                       <span className="sr-only">Upload image</span>
                       <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors">
-                        📁
+                        Upload
                       </div>
                       <input
                         type="file"
@@ -315,7 +314,7 @@ const ReceiptScanner = ({ onCapture, onClose, onProcessReceipt }) => {
                   </p>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">
-                  💡 <strong>Tips:</strong> Hold steady, ensure good lighting, and capture the entire receipt
+                  <strong>Tips:</strong> Hold steady, ensure good lighting, and capture the entire receipt
                 </p>
               </div>
             </div>

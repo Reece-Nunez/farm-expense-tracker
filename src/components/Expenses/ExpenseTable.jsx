@@ -54,14 +54,12 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         const { data } = await client.graphql({ query: listLineItems });
         const allLineItems = data.listLineItems.items;
 
-        // Group line items by expenseID
         const grouped = allLineItems.reduce((acc, item) => {
           if (!acc[item.expenseID]) acc[item.expenseID] = [];
           acc[item.expenseID].push(item);
           return acc;
         }, {});
 
-        // Merge line items into each expense
         const enriched = expenses.map((exp) => ({
           ...exp,
           lineItems: { items: grouped[exp.id] || [] },
@@ -76,7 +74,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
     fetchLineItemsAndMerge();
   }, [expenses]);
 
-  // 🖼️ Fetch Receipt Images
   React.useEffect(() => {
     let isMounted = true;
 
@@ -107,7 +104,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
   const handleDelete = async (expenseId) => {
     try {
-      // Step 1: Delete related line items first
       const { data } = await client.graphql({
         query: listLineItems,
         variables: {
@@ -135,7 +131,6 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         )
       );
 
-      // Step 2: Delete the expense itself (avoid selecting user)
       await client.graphql({
         query: /* GraphQL */ `
           mutation DeleteExpense($input: DeleteExpenseInput!) {
@@ -182,11 +177,11 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
               {expense.vendor || "Unknown Vendor"}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
-              📅 {new Date(expense.date).toLocaleDateString()}
+              {new Date(expense.date).toLocaleDateString()}
             </p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-gray-700 dark:text-gray-300 font-semibold text-sm">💰 Grand Total:</p>
+            <p className="text-gray-700 dark:text-gray-300 font-semibold text-sm">Grand Total:</p>
             <p className="text-xl sm:text-2xl text-green-600 font-bold">
               ${(expense.grandTotal ?? 0).toFixed(2)}
             </p>
@@ -195,7 +190,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
         {expense.description && (
           <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-xs mb-1">📝 Notes</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-xs mb-1">Notes</p>
             <p className="text-gray-600 dark:text-gray-300 text-sm italic">
               {expense.description}
             </p>
@@ -204,7 +199,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
 
         {expense.receiptImageKey && (
           <div className="mb-4">
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-xs mb-2">🧾 Receipt</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-xs mb-2">Receipt</p>
             {receiptUrl ? (
               <img
                 src={receiptUrl}
@@ -219,7 +214,7 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
         )}
 
         <div className="mt-4">
-          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 text-sm sm:text-base">📝 Line Items:</h4>
+          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 text-sm sm:text-base">Line Items</h4>
           <div className="space-y-2 sm:space-y-3">
             {[
               ...new Map(
@@ -232,23 +227,23 @@ export default function ExpenseTable({ expenses = [], onDelete }) {
               >
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-700 dark:text-gray-300">
                   <div className="col-span-2">
-                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">🛒 Item</p>
+                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">Item</p>
                     <p className="font-semibold text-sm">{li.item}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">📂 Category</p>
+                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">Category</p>
                     <p className="text-sm">{li.category}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">💰 Total</p>
+                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">Total</p>
                     <p className="text-sm font-bold text-green-600">${parseFloat(li.lineTotal ?? 0).toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">📦 Qty</p>
+                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">Qty</p>
                     <p className="text-sm">{li.quantity}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">💲 Unit</p>
+                    <p className="font-medium text-gray-500 dark:text-gray-400 text-xs">Unit Cost</p>
                     <p className="text-sm">${parseFloat(li.unitCost ?? 0).toFixed(2)}</p>
                   </div>
                 </div>

@@ -13,16 +13,13 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
     );
   }
 
-  // Combine and sort data by month
   const combinedData = [];
   const monthMap = {};
 
-  // Map revenue data
   revenueData.forEach(item => {
     monthMap[item.month] = { revenue: item.amount, revenueChange: item.change };
   });
 
-  // Add expense data
   expenseData.forEach(item => {
     if (monthMap[item.month]) {
       monthMap[item.month].expenses = item.amount;
@@ -32,7 +29,6 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
     }
   });
 
-  // Convert to array and sort
   Object.keys(monthMap).forEach(month => {
     combinedData.push({
       month,
@@ -86,9 +82,9 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
                 </div>
               </div>
 
-              {/* Revenue and Expense Bars */}
+
               <div className="space-y-2">
-                {/* Revenue */}
+
                 <div className="flex items-center gap-2">
                   <div className="w-16 text-xs text-gray-500">Revenue</div>
                   <div className="flex-1">
@@ -110,7 +106,7 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
                   </div>
                 </div>
 
-                {/* Expenses */}
+
                 <div className="flex items-center gap-2">
                   <div className="w-16 text-xs text-gray-500">Expenses</div>
                   <div className="flex-1">
@@ -137,7 +133,7 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
         })}
       </div>
 
-      {/* Summary Stats */}
+
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -145,21 +141,18 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
             <div className="flex items-center gap-1">
               {revenueData[0]?.change > 0 ? (
                 <>
-                  <span className="text-green-600">↗️</span>
                   <span className="font-semibold text-green-600">
-                    +{revenueData[0].change.toFixed(1)}%
+                    +{revenueData[0].change.toFixed(1)}% up
                   </span>
                 </>
               ) : revenueData[0]?.change < 0 ? (
                 <>
-                  <span className="text-red-600">↘️</span>
                   <span className="font-semibold text-red-600">
-                    {revenueData[0].change.toFixed(1)}%
+                    {revenueData[0].change.toFixed(1)}% down
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="text-gray-600">➡️</span>
                   <span className="font-semibold text-gray-600">Stable</span>
                 </>
               )}
@@ -171,21 +164,18 @@ const TrendAnalysis = ({ revenueData, expenseData }) => {
             <div className="flex items-center gap-1">
               {expenseData[0]?.change > 0 ? (
                 <>
-                  <span className="text-red-600">↗️</span>
                   <span className="font-semibold text-red-600">
-                    +{expenseData[0].change.toFixed(1)}%
+                    +{expenseData[0].change.toFixed(1)}% up
                   </span>
                 </>
               ) : expenseData[0]?.change < 0 ? (
                 <>
-                  <span className="text-green-600">↘️</span>
                   <span className="font-semibold text-green-600">
-                    {expenseData[0].change.toFixed(1)}%
+                    {expenseData[0].change.toFixed(1)}% down
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="text-gray-600">➡️</span>
                   <span className="font-semibold text-gray-600">Stable</span>
                 </>
               )}

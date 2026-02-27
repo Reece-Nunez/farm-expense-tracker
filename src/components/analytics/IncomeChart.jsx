@@ -39,7 +39,7 @@ const IncomeChart = ({ data }) => {
                 <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`}></div>
                 <span className="font-medium">{item.source}</span>
                 <span className="text-gray-500">
-                  {item.trend === 'UP' ? '↗️' : item.trend === 'DOWN' ? '↘️' : '➡️'}
+                  {item.trend === 'UP' ? 'up' : item.trend === 'DOWN' ? 'down' : 'flat'}
                 </span>
               </div>
               <div className="text-right">
@@ -58,7 +58,7 @@ const IncomeChart = ({ data }) => {
         ))}
       </div>
 
-      {/* Summary */}
+
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

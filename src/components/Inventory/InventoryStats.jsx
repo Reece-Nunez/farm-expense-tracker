@@ -6,7 +6,7 @@ const InventoryStats = ({ stats }) => {
     {
       title: 'Total Items',
       value: stats.totalItems,
-      icon: '📦',
+      icon: null,
       color: 'blue',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
       iconColor: 'text-blue-600 dark:text-blue-400'
@@ -14,7 +14,7 @@ const InventoryStats = ({ stats }) => {
     {
       title: 'Total Value',
       value: `$${stats.totalValue.toFixed(2)}`,
-      icon: '💰',
+      icon: null,
       color: 'green',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
       iconColor: 'text-green-600 dark:text-green-400'
@@ -22,7 +22,7 @@ const InventoryStats = ({ stats }) => {
     {
       title: 'Low Stock Items',
       value: stats.lowStockItems,
-      icon: '⚠️',
+      icon: '!',
       color: 'orange',
       bgColor: 'bg-orange-50 dark:bg-orange-900/20',
       iconColor: 'text-orange-600 dark:text-orange-400',
@@ -31,7 +31,7 @@ const InventoryStats = ({ stats }) => {
     {
       title: 'Out of Stock',
       value: stats.outOfStockItems,
-      icon: '❌',
+      icon: null,
       color: 'red',
       bgColor: 'bg-red-50 dark:bg-red-900/20',
       iconColor: 'text-red-600 dark:text-red-400',

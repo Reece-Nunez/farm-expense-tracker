@@ -1,4 +1,3 @@
-// GenericModal.jsx
 import React from "react";
 import Modal from "react-modal";
 import { Button } from "@/components/ui/button";

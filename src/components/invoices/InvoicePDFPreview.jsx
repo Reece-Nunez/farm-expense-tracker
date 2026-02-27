@@ -122,7 +122,7 @@ ${farmInfo.farmName || 'HarvesTrackr Farm'}`;
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <Card className="p-8 max-w-md mx-4">
           <div className="text-center">
-            <div className="text-6xl mb-4">❌</div>
+            <div className="text-6xl mb-4 font-bold text-red-600">Error</div>
             <h3 className="text-lg font-semibold mb-2">PDF Generation Failed</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               {error}
@@ -200,7 +200,7 @@ ${farmInfo.farmName || 'HarvesTrackr Farm'}`;
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="text-4xl mb-4">📄</div>
+                <div className="text-xl mb-4 font-semibold text-gray-500">PDF</div>
                 <p className="text-gray-600 dark:text-gray-400">
                   PDF preview not available
                 </p>

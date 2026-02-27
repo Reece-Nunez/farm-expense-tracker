@@ -48,7 +48,7 @@ const CustomerView = ({ customerId, onEdit, onClose, onCreate }) => {
   if (!customer) {
     return (
       <Card className="p-12 text-center">
-        <div className="text-6xl mb-4">❌</div>
+        <div className="text-6xl mb-4 font-bold text-red-600">Not Found</div>
         <h3 className="text-xl font-semibold mb-2">Customer not found</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           The customer you're looking for doesn't exist or has been deleted.
@@ -264,7 +264,7 @@ const CustomerView = ({ customerId, onEdit, onClose, onCreate }) => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <div className="text-4xl mb-4">📄</div>
+            <div className="text-xl mb-4 font-semibold text-gray-500">No Invoices</div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               No invoices yet for this customer
             </p>

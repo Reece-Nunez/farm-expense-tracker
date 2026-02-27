@@ -12,7 +12,7 @@ const BarcodeScanner = ({ onScan, onClose, mode = 'scan' }) => {
   const [scanResults, setScanResults] = useState([]);
   const [error, setError] = useState(null);
   const [stream, setStream] = useState(null);
-  const [scanMode, setScanMode] = useState('camera'); // camera, manual
+  const [scanMode, setScanMode] = useState('camera');
 
   // Initialize camera for barcode scanning
   const startScanning = async () => {
@@ -38,7 +38,6 @@ const BarcodeScanner = ({ onScan, onClose, mode = 'scan' }) => {
         toast.success('Camera ready! Point at barcode to scan');
       }
     } catch (err) {
-      console.error('Error accessing camera:', err);
       let errorMessage = 'Could not access camera for barcode scanning';
       
       if (err.name === 'NotAllowedError') {
@@ -110,7 +109,6 @@ const BarcodeScanner = ({ onScan, onClose, mode = 'scan' }) => {
   };
 
   const handleBarcodeDetected = (barcode) => {
-    console.log('Barcode detected:', barcode);
     setScanResults(prev => {
       if (!prev.includes(barcode)) {
         const newResults = [barcode, ...prev].slice(0, 10); // Keep last 10 scans
@@ -314,7 +312,7 @@ const BarcodeScanner = ({ onScan, onClose, mode = 'scan' }) => {
               {/* Barcode Scanner Tips */}
               <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-300 mb-2">
-                  📱 Scanning Tips
+                  Scanning Tips
                 </h4>
                 <ul className="text-xs text-indigo-700 dark:text-indigo-400 space-y-1">
                   <li>• Hold device steady over barcode</li>

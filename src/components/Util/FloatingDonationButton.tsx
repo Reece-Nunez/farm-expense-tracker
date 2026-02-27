@@ -17,7 +17,7 @@ export default function FloatingDonationButton() {
       >
         <FaHeart className="text-white w-3 h-3 lg:w-4 lg:h-4" />
         <span className="hidden sm:inline">Donate</span>
-        <span className="sm:hidden">💝</span>
+        <FaHeart className="sm:hidden text-white w-3 h-3" />
       </a>
     </motion.div>
   );
